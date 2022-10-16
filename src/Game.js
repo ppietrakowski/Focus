@@ -10,6 +10,7 @@ export class Focus {
     static MOVED_FIELD = 'movedField'
     static VICTORY = 'victory'
     static ENEMY_HAS_POOL = 'enemyHasPool'
+    static NEXT_TURN = 'nextTurn'
 
     constructor() {
         this._gameBoard = new GameBoard()
@@ -80,7 +81,7 @@ export class Focus {
 
     nextTurn() {
         this._currentPlayer = this.getNextPlayer()
-        this.events.emit('nextTurn')
+        this.events.emit(Focus.NEXT_TURN)
     }
 
     checkForVictoryCondition() {
