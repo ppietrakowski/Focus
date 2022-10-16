@@ -38,6 +38,7 @@ export class Field {
         if (!cameFrom.isPlayable)
             return
 
+        // one move is just a changing of state
         const itemCountFromOldList = moveCount - 1
         const oldState = cameFrom.state
 
@@ -88,14 +89,10 @@ export class Field {
     }
 
     shiftElement(firstElements) {
-        const ele = this._top.shift() || null
+        const element = this._top.shift() || null
 
-        if (ele)
-            firstElements.push(ele)
-    }
-
-    get topOutmost() {
-        return this._top.at(-1)
+        if (element)
+            firstElements.push(element)
     }
 
     get isEmpty() {

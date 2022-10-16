@@ -12,17 +12,17 @@ export class Focus {
     static ENEMY_HAS_POOL = 'enemyHasPool'
 
     constructor() {
-        this.gameBoard = new GameBoard()
-        this.events = this.gameBoard.events
-        this.currentPlayer = PLAYER_A
+        this._gameBoard = new GameBoard()
+        this.events = this._gameBoard.events
+        this._currentPlayer = PLAYER_A
 
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
 
     moveToField(x, y, direction, howManyFieldWantMove) {
-        let from = this.gameBoard.getFieldAt(x, y)
+        let from = this._gameBoard.getFieldAt(x, y)
 
-        if (!from.belongsTo(this.currentPlayer))
+        if (!from.belongsTo(this._currentPlayer))
             return false
 
         let toField = this.getFieldBasedOnDirectionAndMoveCount(from, direction, howManyFieldWantMove)
@@ -43,18 +43,18 @@ export class Focus {
     popTopElementFromField(toField) {
         const field = toField._top.pop()
 
-        if (field.state & this.currentPlayer.state)
+        if (this._currentPlayer.doesOwnThisField(field))
             this.increaseCurrentPlayersPool()
     }
 
     increaseCurrentPlayersPool() {
-        this.currentPlayer.pooledFields++;
-        this.events.emit(Focus.ADDED_ITEM_TO_POOL, this.currentPlayer);
+        this._currentPlayer.pooledFields++;
+        this.events.emit(Focus.ADDED_ITEM_TO_POOL, this._currentPlayer);
     }
 
     getFieldBasedOnDirectionAndMoveCount(field, direction, howManyFieldWantMove) {
         const offset = this.getOffsetBasedOnDirection(field, direction, howManyFieldWantMove)
-        const foundField = this.gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
+        const foundField = this._gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
         
         return foundField
     }
@@ -72,20 +72,20 @@ export class Focus {
     }
 
     getNextPlayer() {
-        if (this.currentPlayer.state & FIELD_STATE_PLAYER_A)
+        if (this._currentPlayer.state & FIELD_STATE_PLAYER_A)
             return PLAYER_B
 
         return PLAYER_A
     }
 
     nextTurn() {
-        this.currentPlayer = this.getNextPlayer()
+        this._currentPlayer = this.getNextPlayer()
         this.events.emit('nextTurn')
     }
 
     checkForVictoryCondition() {
         const nextPlayer = this.getNextPlayer()
-        const countOfEnemyFields = this.gameBoard.countPlayersFields(nextPlayer)
+        const countOfEnemyFields = this._gameBoard.countPlayersFields(nextPlayer)
 
         if (countOfEnemyFields === 0)
             this.checkForPoolAvailability(nextPlayer)
@@ -93,7 +93,7 @@ export class Focus {
 
     checkForPoolAvailability(player) {
         if (player.pooledFields > 0)
-            this.events.emit(Focus.VICTORY, this.currentPlayer)
+            this.events.emit(Focus.VICTORY, this._currentPlayer)
         else
             this.events.emit(Focus.ENEMY_HAS_POOL, player)
     }

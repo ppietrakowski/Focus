@@ -9,12 +9,12 @@ export class GameBoard {
 
     constructor() {
         this.events = new EventEmitter()
-        this.grid = [new Field(FIELD_STATE_EMPTY, 0, 0)]
+        this._grid = [new Field(FIELD_STATE_EMPTY, 0, 0)]
 
         const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
 
         for (let i = 1; i < maxSize; i++) {
-            this.grid[i] = new Field(FIELD_STATE_EMPTY, i % 8, Math.floor(i / GameBoard.GAME_BOARD_WIDTH))
+            this._grid[i] = new Field(FIELD_STATE_EMPTY, i % 8, Math.floor(i / GameBoard.GAME_BOARD_WIDTH))
         }
     }
 
@@ -22,7 +22,7 @@ export class GameBoard {
         if (this.isOutOfBoundsInXAxis(x) || this.isOutOfBoundsInYAxis(y))
             throw new Error(`point (${x}, ${y}) is out of bounds`)
 
-        return this.grid[x + y * GameBoard.GAME_BOARD_WIDTH] || null
+        return this._grid[x + y * GameBoard.GAME_BOARD_WIDTH] || null
     }
 
     isOutOfBoundsInXAxis(x) {
@@ -40,6 +40,6 @@ export class GameBoard {
     }
 
     countPlayersFields(player) {
-        return this.grid.filter(v => v.belongsTo(player)).length
+        return this._grid.filter(v => v.belongsTo(player)).length
     }
 }
