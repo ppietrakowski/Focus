@@ -40,11 +40,6 @@ export class GameBoard {
     }
 
     countPlayersFields(player) {
-        return this.grid.reduce((accumulated, current) => {
-            if (current.belongsTo(player))
-                accumulated++
-            
-            return accumulated
-        }, 0)
+        return this.grid.filter(v => v.belongsTo(player)).length
     }
 }
