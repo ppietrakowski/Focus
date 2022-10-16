@@ -1,9 +1,9 @@
 import { EventEmitter } from "eventemitter3"
 
-export const FIELD_STATE_UNPLAYABLE = 1
-export const FIELD_STATE_EMPTY = 2
-export const FIELD_STATE_PLAYER_A = 4
-export const FIELD_STATE_PLAYER_B = 8
+export const FIELD_STATE_UNPLAYABLE = 2 << 0
+export const FIELD_STATE_EMPTY = 2 << 1
+export const FIELD_STATE_PLAYER_A = 2 << 2
+export const FIELD_STATE_PLAYER_B = 2 << 3
 
 export const DIRECTION_SOUTH = { x: 0, y: 1 }
 export const DIRECTION_NORTH = { x: 0, y: -1 }
