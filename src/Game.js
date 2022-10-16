@@ -1,4 +1,4 @@
-import { FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, FIELD_STATE_UNPLAYABLE } from "./Field";
+import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, FIELD_STATE_UNPLAYABLE } from "./Field";
 import { GameBoard } from "./GameBoard";
 import { Player } from "./Player";
 
@@ -6,32 +6,69 @@ const PLAYER_A = new Player(FIELD_STATE_PLAYER_A)
 const PLAYER_B = new Player(FIELD_STATE_PLAYER_B)
 
 export class Focus {
+    static ADDED_ITEM_TO_POOL = 'addedItemToPool'
+    static MOVED_FIELD = 'movedField'
+    static VICTORY = 'victory'
+    static ENEMY_HAS_POOL = 'enemyHasPool'
+
     constructor() {
         this.gameBoard = new GameBoard()
         this.events = this.gameBoard.events
         this.currentPlayer = PLAYER_A
+
+        this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
 
-    moveToField(x, y, direction) {
-        const field = this.gameBoard.getFieldAt(x, y)
+    moveToField(x, y, direction, howManyFieldWantMove) {
+        let from = this.gameBoard.getFieldAt(x, y)
 
-        if (!this.currentPlayer.doesOwnThisField(field))
+        if (!from.belongsTo(this.currentPlayer))
             return false
 
+        let toField = this.getFieldBasedOnDirectionAndMoveCount(from, direction, howManyFieldWantMove)
+        toField.makeAsNextField(from, howManyFieldWantMove)
 
-        const fieldToJump = this.getFieldToJump(field, direction, x, y)
+        if (toField.isOvergrown)
+            this.popElementsToCreateTower(toField)
 
-        if (this.isOutOfBounds(fieldToJump))
-            return false
-
-        if (fieldToJump.isOvergrown()) {
-            this.detectedOvergrowthElement(field, fieldToJump)
-        }
-
-        fieldToJump.makeAsNextField(field)
-        fieldToJump.state = this.currentPlayer.state
-        
+        this.events.emit(Focus.MOVED_FIELD, x, y, toField, from)
         return true
+    }
+
+    popElementsToCreateTower(toField) {
+        while (toField.height > 5)
+            this.popTopElementFromField(toField)
+    }
+
+    popTopElementFromField(toField) {
+        const field = toField._top.pop()
+
+        if (field.state & this.currentPlayer.state)
+            this.increaseCurrentPlayersPool()
+    }
+
+    increaseCurrentPlayersPool() {
+        this.currentPlayer.pooledFields++;
+        this.events.emit(Focus.ADDED_ITEM_TO_POOL, this.currentPlayer);
+    }
+
+    getFieldBasedOnDirectionAndMoveCount(field, direction, howManyFieldWantMove) {
+        const offset = this.getOffsetBasedOnDirection(field, direction, howManyFieldWantMove)
+        const foundField = this.gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
+        
+        return foundField
+    }
+
+    getOffsetBasedOnDirection(field, direction, howManyFieldWantMove) {
+        let mult = howManyFieldWantMove
+
+        if (howManyFieldWantMove < 1)
+            mult = 1    
+        
+        if (field.height < howManyFieldWantMove)
+            mult = field.height
+
+        return { x: direction.x * mult, y: direction.y * mult }
     }
 
     getNextPlayer() {
@@ -41,37 +78,23 @@ export class Focus {
         return PLAYER_A
     }
 
-    getOffsetBasedOnFieldHeight(field, direction) {
-        return { x: direction.x * field.height, y: direction.y * field.height }
-    }
-
-    isOutOfBounds(field) {
-        return !field || !!(field.state & FIELD_STATE_UNPLAYABLE)
-    }
-
-    getFieldToJump(field, direction, x, y) {
-        const offset = this.getOffsetBasedOnFieldHeight(field, direction)
-        const fieldToJump = this.gameBoard.getFieldAt(x + offset.x, y + offset.y)
-
-        return fieldToJump
-    }
-
-    detectedOvergrowthElement(field, fieldToJump) {
-        field.height = GameBoard.MAX_TOWER_HEIGHT - 1
-
-        // check is the hit on our field
-        if (fieldToJump.state & this.currentPlayer.state) {
-            this.jumpedOnOurField()
-        }
-    }
-
-    jumpedOnOurField() {
-        this.currentPlayer.pooledFields++
-        this.events.emit('newFieldInPool', this.currentPlayer)
-    }
-
     nextTurn() {
         this.currentPlayer = this.getNextPlayer()
         this.events.emit('nextTurn')
+    }
+
+    checkForVictoryCondition() {
+        const nextPlayer = this.getNextPlayer()
+        const countOfEnemyFields = this.gameBoard.countPlayersFields(nextPlayer)
+
+        if (countOfEnemyFields === 0)
+            this.checkForPoolAvailability(nextPlayer)
+    }
+
+    checkForPoolAvailability(player) {
+        if (player.pooledFields > 0)
+            this.events.emit(Focus.VICTORY, this.currentPlayer)
+        else
+            this.events.emit(Focus.ENEMY_HAS_POOL, player)
     }
 }

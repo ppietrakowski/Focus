@@ -14,45 +14,109 @@ export const FIELD_EVENTS = new EventEmitter()
 
 const MAX_TOWER_HEIGHT = 5
 
-function clearField(field) {
-    field.state = FIELD_STATE_EMPTY
-    field.height = 0
-    field.top = null
-}
-
 export class Field {
 
-    constructor(state, height = 0) {
-        this.state = state
-        this.height = height
-        this.top = null
+    static clearField(field) {
+        field.state = FIELD_STATE_EMPTY
+        field._top = []
     }
 
-    makeAsNextField(oldField) {
-        if (oldField.state & FIELD_STATE_UNPLAYABLE)
+    constructor(state, x, y) {
+        this.state = state
+        this._top = []
+        this.x = x
+        this.y = y
+    }
+
+    /**
+     * 
+     * @param {Field} cameFrom 
+     * @param {number} moveCount 
+     * @returns 
+     */
+    makeAsNextField(cameFrom, moveCount) {
+        if (!cameFrom.isPlayable)
             return
 
-        this.height = oldField.height + 1
-        this.top = {state: oldField.state, top: oldField.top}
+        const itemCountFromOldList = moveCount - 1
+        const oldState = cameFrom.state
+
+        const temp = cameFrom.shiftNFirstElements(itemCountFromOldList)
         
-        clearField(oldField)
+        if (!this.isEmpty)
+            this._top = this.getNewTopList(temp)
+        else
+            this._top = temp
+
+        this.state = oldState
     }
 
-    isOvergrown() {
-        return this.height === MAX_TOWER_HEIGHT
+    getNewTopList(shiftedElements) {
+        return shiftedElements.concat([{state: this.state}], this._top)
+    }
+
+    get height() {
+        return this._top.length + 1
+    }
+
+    get isOvergrown() {
+        return this.height >= MAX_TOWER_HEIGHT
+    }
+
+    shiftNFirstElements(n) {
+        let firstElements = []
+        
+        while (n-- > 0)
+            this.shiftElement(firstElements)
+
+        if (this._top.length === 0)
+            Field.clearField(this)
+        else if (this.isOnlyTopAvailable())
+            this.makeOnlyTopAsCurrentField()
+
+        return firstElements
+    }
+
+    isOnlyTopAvailable() {
+        return this._top.length === 1
+    }
+
+    makeOnlyTopAsCurrentField() {
+        const element = this._top.shift()
+
+        this.state = element.state
+    }
+
+    shiftElement(firstElements) {
+        const ele = this._top.shift() || null
+
+        if (ele)
+            firstElements.push(ele)
     }
 
     get topOutmost() {
-        const it = this.top
-
-        while (it && it.top) {
-            it = it.top
-        }
-
-        return it
+        return this._top.at(-1)
     }
 
-    doesOwnThisField(player) {
+    get isEmpty() {
+        return !!(this.state & FIELD_STATE_EMPTY)
+    }
+
+    get top() {
+        return this._top[0] || null
+    }
+
+    popOneField() {
+        this.height--
+
+        return this._top.pop()
+    }
+
+    belongsTo(player) {
         return !!(this.state & player.state)
+    }
+
+    get isPlayable() {
+        return !(this.state & FIELD_STATE_UNPLAYABLE)
     }
 }
