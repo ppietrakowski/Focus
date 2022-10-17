@@ -14,7 +14,7 @@ export class GameBoard {
         const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
 
         for (let i = 1; i < maxSize; i++) {
-            this._grid[i] = new Field(FIELD_STATE_EMPTY, i % 8, Math.floor(i / GameBoard.GAME_BOARD_WIDTH))
+            this._grid[i] = new Field(FIELD_STATE_EMPTY, i % GameBoard.GAME_BOARD_WIDTH, Math.floor(i / GameBoard.GAME_BOARD_WIDTH))
         }
     }
 
