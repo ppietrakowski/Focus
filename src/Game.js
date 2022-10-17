@@ -1,4 +1,4 @@
-import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, FIELD_STATE_UNPLAYABLE } from "./Field";
+import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, FIELD_STATE_UNPLAYABLE, MAX_TOWER_HEIGHT } from "./Field";
 import { GameBoard } from "./GameBoard";
 import { Player } from "./Player";
 
@@ -37,7 +37,7 @@ export class Focus {
     }
 
     popElementsToCreateTower(toField) {
-        while (toField.height > 5)
+        while (toField.height > MAX_TOWER_HEIGHT)
             this.popTopElementFromField(toField)
     }
 
@@ -73,7 +73,7 @@ export class Focus {
     }
 
     getNextPlayer() {
-        if (this._currentPlayer.state & FIELD_STATE_PLAYER_A)
+        if (this._currentPlayer.doesOwnThisField(FIELD_STATE_PLAYER_A))
             return PLAYER_B
 
         return PLAYER_A

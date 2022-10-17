@@ -12,7 +12,7 @@ export const DIRECTION_WEST = { x: -1, y: 0 }
 
 export const FIELD_EVENTS = new EventEmitter()
 
-const MAX_TOWER_HEIGHT = 5
+export const MAX_TOWER_HEIGHT = 5
 
 export class Field {
 
