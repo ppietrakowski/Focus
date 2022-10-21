@@ -1,7 +1,7 @@
 import { EventEmitter } from "eventemitter3";
 import { Field, FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, FIELD_STATE_UNPLAYABLE } from './Field'
 
-import board from "./assets/board.json"
+import board from "./board.json"
 
 function boardToStateMask(boardState) {
 
