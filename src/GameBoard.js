@@ -31,12 +31,10 @@ export class GameBoard {
 
         const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
 
-        /*
-        if (board.length < 64)
+        if (board.length < maxSize)
             throw new Error('Board should have at least 64 element')
-            */
         
-        for (let i = 1; i < board.length; i++) {
+        for (let i = 1; i < maxSize; i++) {
             const field = board.find(v => v.id === i) || null
 
             if (field === null)
@@ -44,8 +42,6 @@ export class GameBoard {
 
             this._grid[i] = new Field(boardToStateMask(board[i].state), (i % GameBoard.GAME_BOARD_WIDTH), Math.floor(i / GameBoard.GAME_BOARD_WIDTH))
         }
-
-        console.log(this._grid)
     }
 
 
