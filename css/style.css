@@ -1,0 +1,11 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+
+.gameBoard{
+    height: 800px;
+    width: 800px;
+    background-image:url(../img/focusEmptyBoard.svg);
+    background-repeat: no-repeat;
+}
