@@ -1,5 +1,3 @@
-import { EventEmitter } from "eventemitter3"
-
 export const FIELD_STATE_UNPLAYABLE = 2 << 0
 export const FIELD_STATE_EMPTY = 2 << 1
 export const FIELD_STATE_PLAYER_A = 2 << 2
@@ -10,20 +8,18 @@ export const DIRECTION_NORTH = { x: 0, y: -1 }
 export const DIRECTION_EAST = { x: 1, y: 0 }
 export const DIRECTION_WEST = { x: -1, y: 0 }
 
-export const FIELD_EVENTS = new EventEmitter()
-
 export const MAX_TOWER_HEIGHT = 5
 
 export class Field {
 
     static clearField(field) {
         field.state = FIELD_STATE_EMPTY
-        field._top = []
+        field.underThisField = []
     }
 
     constructor(state, x, y) {
         this.state = state
-        this._top = []
+        this.underThisField = []
         this.x = x
         this.y = y
     }
@@ -45,19 +41,19 @@ export class Field {
         const temp = cameFrom.shiftNFirstElements(itemCountFromOldList)
         
         if (!this.isEmpty)
-            this._top = this.getNewTopList(temp)
+            this.underThisField = this.getNewUnderElements(temp)
         else
-            this._top = temp
+            this.underThisField = temp
 
         this.state = oldState
     }
 
-    getNewTopList(shiftedElements) {
-        return shiftedElements.concat([{state: this.state}], this._top)
+    getNewUnderElements(shiftedElements) {
+        return shiftedElements.concat([{state: this.state}], this.underThisField)
     }
 
     get height() {
-        return this._top.length + 1
+        return this.underThisField.length + 1
     }
 
     get isOvergrown() {
@@ -70,26 +66,26 @@ export class Field {
         while (n-- > 0)
             this.shiftElement(firstElements)
 
-        if (this._top.length === 0)
+        if (this.underThisField.length === 0)
             Field.clearField(this)
         else if (this.isOnlyTopAvailable())
-            this.makeOnlyTopAsCurrentField()
+            this.makeOnlyUnderFieldAsCurrentField()
 
         return firstElements
     }
 
     isOnlyTopAvailable() {
-        return this._top.length === 1
+        return this.underThisField.length === 1
     }
 
-    makeOnlyTopAsCurrentField() {
-        const element = this._top.shift()
+    makeOnlyUnderFieldAsCurrentField() {
+        const element = this.underThisField.shift()
 
         this.state = element.state
     }
 
     shiftElement(firstElements) {
-        const element = this._top.shift() || null
+        const element = this.underThisField.shift() || null
 
         if (element)
             firstElements.push(element)
@@ -100,13 +96,13 @@ export class Field {
     }
 
     get top() {
-        return this._top[0] || null
+        return this.underThisField[0] || null
     }
 
     popOneField() {
         this.height--
 
-        return this._top.pop()
+        return this.underThisField.pop()
     }
 
     belongsTo(player) {
