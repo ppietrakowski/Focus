@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="70"
+   height="70"
+   viewBox="0 0 18.520833 18.520834"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   sodipodi:docname="focusPawnRed.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#4b4b4b"
+     inkscape:document-units="mm"
+     showgrid="false"
+     showguides="true"
+     inkscape:zoom="2.1089995"
+     inkscape:cx="204.12523"
+     inkscape:cy="74.442882"
+     inkscape:window-width="1920"
+     inkscape:window-height="1017"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid9"
+       originx="-0.11426067"
+       originy="-0.26458362" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient12083">
+      <stop
+         style="stop-color:#f90000;stop-opacity:1;"
+         offset="0"
+         id="stop12079" />
+      <stop
+         style="stop-color:#7a0707;stop-opacity:1;"
+         offset="1"
+         id="stop12081" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient9941"
+       inkscape:swatch="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop9939" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient12083"
+       id="radialGradient11956"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(4.6090869,0,0,4.6090869,-72.940747,-72.790415)"
+       cx="18.486647"
+       cy="17.232103"
+       fx="18.486647"
+       fy="17.232103"
+       r="1.984375" />
+  </defs>
+  <g
+     inkscape:label="PawnRed"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-0.11426067,-0.26458359)">
+    <circle
+       style="fill:url(#radialGradient11956);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.06363;stroke-dasharray:none;stroke-opacity:1"
+       id="circle11954"
+       cx="9.3746777"
+       cy="9.5250006"
+       r="9.1461563"
+       inkscape:label="pawn_red" />
+  </g>
+</svg>
