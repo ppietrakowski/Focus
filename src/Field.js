@@ -59,7 +59,7 @@ export class Field {
     get isOvergrown() {
         return this.height >= MAX_TOWER_HEIGHT
     }
-
+    
     shiftNFirstElements(n) {
         let firstElements = []
         
@@ -68,13 +68,13 @@ export class Field {
 
         if (this.underThisField.length === 0)
             Field.clearField(this)
-        else if (this.isOnlyTopAvailable())
+        else if (this.hasLastPawnRemain())
             this.makeOnlyUnderFieldAsCurrentField()
 
         return firstElements
     }
 
-    isOnlyTopAvailable() {
+    hasLastPawnRemain() {
         return this.underThisField.length === 1
     }
 
