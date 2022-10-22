@@ -1,11 +1,37 @@
-body{
+body {
     margin: 0;
     padding: 0;
 }
 
-.gameBoard{
+.gameBoard {
     height: 800px;
     width: 800px;
-    background-image:url(../img/focusEmptyBoard.svg);
+    background-image: url(../img/focusEmptyBoard.svg);
     background-repeat: no-repeat;
+}
+
+.playerRedField {
+    height: 100px;
+    width: 100px;
+    background-image: url(../img/focusPawnRed.svg);
+    background-repeat: no-repeat;
+    float: left;
+    z-index: 2;
+}
+
+.playerGreenField {
+    height: 100px;
+    width: 100px;
+    background-image: url(../img/focusPawnGreen.svg);
+    background-repeat: no-repeat;
+    float: left;
+    z-index: 2;
+}
+
+.emptyField {
+    height: 100px;
+    width: 100px;
+    background-repeat: no-repeat;
+    float: left;
+    z-index: 2;
 }

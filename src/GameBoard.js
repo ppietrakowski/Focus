@@ -2,12 +2,21 @@ import { EventEmitter } from "eventemitter3";
 import { Field, FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, FIELD_STATE_UNPLAYABLE } from './Field'
 
 import board from "./board.json"
+import { call } from "file-loader";
+
+
+/**
+ * @callback ForEachCallback
+ * @param {Field} element
+ * @param {number} x
+ * @param {number} y
+ */
 
 function boardToStateMask(boardState) {
 
     if (boardState === 0)
         return FIELD_STATE_UNPLAYABLE
-    
+
     else if (boardState === 1)
         return FIELD_STATE_EMPTY
 
@@ -33,7 +42,7 @@ export class GameBoard {
 
         if (board.length < maxSize)
             throw new Error('Board should have at least 64 element')
-        
+
         for (let i = 1; i < maxSize; i++) {
             const field = board.find(v => v.id === i) || null
 
@@ -44,7 +53,17 @@ export class GameBoard {
         }
     }
 
+    /**
+     * 
+     * @param {ForEachCallback} callback 
+     */
+    each(callback) {
+        const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
 
+        for (let i = 0; i < maxSize; i++) {
+            callback(this._grid[i], this._grid[i].x, this._grid[i].y)
+        }
+    }
 
     getFieldAt(x, y) {
         if (this.isOutOfBoundsInXAxis(x) || this.isOutOfBoundsInYAxis(y))
