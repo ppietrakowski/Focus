@@ -46,15 +46,15 @@ export class Focus {
     }
 
     popTopElementFromField(toField) {
-        const field = toField._top.pop()
+        const field = toField.underThisField.pop()
 
         if (this.currentPlayer.doesOwnThisField(field))
             this.increaseCurrentPlayersPool()
     }
 
     increaseCurrentPlayersPool() {
-        this.currentPlayer.pooledFields++;
-        this.events.emit(Focus.ADDED_ITEM_TO_POOL, this.currentPlayer);
+        this.currentPlayer.pooledFields++
+        this.events.emit(Focus.ADDED_ITEM_TO_POOL, this.currentPlayer)
     }
 
     getFieldBasedOnDirectionAndMoveCount(field, direction, howManyFieldWantMove) {
