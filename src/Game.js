@@ -89,15 +89,19 @@ export class Focus {
     }
 
     checkForVictoryCondition() {
-        const nextPlayer = this.getNextPlayer()
-        const countOfEnemyFields = this.gameBoard.countPlayersFields(nextPlayer)
+        const player = this.getNextPlayer()
+        const countOfEnemyFields = this.gameBoard.countPlayersFields(player)
+        const countOfCurrentPlayerFields = this.gameBoard.countPlayersFields(this.currentPlayer)
 
-        if (countOfEnemyFields === 0)
-            this.checkForPoolAvailability(nextPlayer)
+        if (countOfEnemyFields === 0) {
+            this.checkForPoolAvailability(player)
+        } else if (countOfCurrentPlayerFields === 0) {
+            this.checkForPoolAvailability(this.currentPlayer)
+        }
     }
 
     checkForPoolAvailability(player) {
-        if (player.pooledFields > 0)
+        if (player.pooledFields === 0)
             this.events.emit(Focus.VICTORY, this.currentPlayer)
         else
             this.events.emit(Focus.ENEMY_HAS_POOL, player)

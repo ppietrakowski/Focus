@@ -57,7 +57,6 @@ export class GameBoardView {
 
             this.move(direction, moveCount)
         }
-
     }
 
     renderPossibleMoves() {

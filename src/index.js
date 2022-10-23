@@ -10,3 +10,4 @@ const gameBoardView = new GameBoardView(gameFocus)
 
 gameBoardView.hookGuiMethods()
 gameFocus.events.on(Focus.ADDED_ITEM_TO_POOL, () => console.log("added to pool"))
+gameFocus.events.on(Focus.VICTORY, (p) => console.log(`${JSON.stringify(p)} won`))
