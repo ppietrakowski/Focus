@@ -5,7 +5,7 @@ const gameFocus = new Focus()
 
 const board = document.getElementsByClassName('gameBoard')[0]
 
-gameFocus._gameBoard.each(
+gameFocus.gameBoard.each(
     (element, x, y) => {
         const newElement = document.createElement('div')
         if (!(element.state & FIELD_STATE_EMPTY) && !(element.state & FIELD_STATE_UNPLAYABLE)) {
