@@ -38,6 +38,8 @@ export class Field {
         const itemCountFromOldList = moveCount - 1
         const oldState = cameFrom.state
 
+        console.log(itemCountFromOldList)
+
         const temp = cameFrom.shiftNFirstElements(itemCountFromOldList)
         
         if (!this.isEmpty)
@@ -45,6 +47,7 @@ export class Field {
         else
             this.underThisField = temp
 
+            
         this.state = oldState
     }
 
@@ -68,8 +71,8 @@ export class Field {
 
         if (this.underThisField.length === 0)
             Field.clearField(this)
-        else if (this.hasLastPawnRemain())
-            this.makeOnlyUnderFieldAsCurrentField()
+        else
+            this.state = this.underThisField.shift().state
 
         return firstElements
     }

@@ -56,6 +56,7 @@ export class GameBoardView {
             }
 
             this.move(direction, moveCount)
+            console.log(clickedField)
         }
 
     }
