@@ -10,7 +10,7 @@ const fieldsGui = []
 function renderInSameLine(selectedField, maxPossibleMoves, baseDirection) {
     for (let i = 1; i <= maxPossibleMoves; i++) {
         const offset = gameFocus.getOffsetBasedOnDirection(selectedField, baseDirection, i)
-        
+
         const elements = fieldsGui.filter(v => v.isInRange(selectedField, offset))
 
         elements.forEach(v => v.domElement.className = v.getHoveredClassName())
@@ -44,17 +44,20 @@ function reRenderBoard() {
 }
 
 function calculateMoveCount(clickedField) {
-    const v = {x: clickedField.field.x - selectedField.field.x, y: clickedField.field.y - selectedField.field.y}
-    
+    const v = { x: clickedField.field.x - selectedField.field.x, y: clickedField.field.y - selectedField.field.y }
+
     if (Math.abs(v.x) > 0)
         return Math.abs(v.x)
-    
+
     return Math.abs(v.y)
 }
 
 function calculateDirection(clickedField) {
-    const v = {x: clickedField.field.x - selectedField.field.x, y: clickedField.field.y - selectedField.field.y}
-    
+    const v = { x: clickedField.field.x - selectedField.field.x, y: clickedField.field.y - selectedField.field.y }
+
+    if (Math.abs(v.x) > 1 || Math.abs(v.y) > 1)
+        return false
+
     if (v.x > 0)
         return DIRECTION_EAST
     else if (v.x < 0)
@@ -67,6 +70,7 @@ function calculateDirection(clickedField) {
 }
 
 
+// TODO Add checking for is player don't click something out of it's possible moves
 function checkSelection(clickedField) {
 
     erasePossibleMoves()
@@ -81,11 +85,19 @@ function checkSelection(clickedField) {
             selectedField.className = selectedField.getUnhoveredClassName()
             selectedField = null
             erasePossibleMoves()
-            return 
+            return
         }
 
         let moveCount = calculateMoveCount(clickedField)
         let direction = calculateDirection(clickedField)
+
+        if (!direction) {
+            console.warn('Tried to move more than is available in this time')
+            selectedField.isSelected = false
+            selectedField.className = selectedField.getUnhoveredClassName()
+            reRenderBoard()
+            return
+        }
 
         gameFocus.moveToField(selectedField.field.x, selectedField.field.y, direction, moveCount)
         reRenderBoard()
