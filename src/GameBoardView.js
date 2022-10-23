@@ -17,6 +17,55 @@ export class GameBoardView {
         this.board = document.getElementsByClassName('gameBoard')[0]
 
         this.selectedField = null
+
+        this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
+    }
+
+    switchToFailedPlayerTurn(failedPlayer) {
+        console.log(JSON.stringify(failedPlayer))
+
+        this.game.currentPlayer = failedPlayer
+        console.log(`Place your ${failedPlayer.pooledFields} fields`)
+        this.fields.forEach(v => this.enterIntoPlaceState(v, failedPlayer))
+    }
+
+    /**
+     * 
+     * @param {FieldView} field 
+     */
+    enterIntoPlaceState(field, failedPlayer) {
+        field.events.off(FieldView.FIELD_CLICK)
+        field.isSelected = false
+
+        field.events.on(FieldView.FIELD_CLICK, () => {
+            if (failedPlayer.pooledFields <= 0) {
+                console.warn(`Tried to place item without any pool`)
+                return
+            }
+
+            if (!field.field.isPlayable)
+                return
+
+            failedPlayer.pooledFields--
+            let newUnderElements = field.field.underThisField
+
+            if (!field.field.isEmpty)
+                newUnderElements = [field.field.state].concat(newUnderElements)
+
+            field.field.state = failedPlayer.state
+            field.field.underThisField = newUnderElements
+
+            if (field.field.isOvergrown)
+                this.game.popElementsToCreateTower(field.field)
+
+            this.fields.forEach(v => v.events.off(FieldView.FIELD_CLICK))
+            this.fields.forEach(v => v.events.on(FieldView.FIELD_CLICK, () => this.checkSelection(v)))
+
+            this.reRenderBoard()
+
+            console.log(field.field.height)
+            this.game.currentPlayer = failedPlayer
+        })
     }
 
     hookGuiMethods() {
@@ -33,7 +82,7 @@ export class GameBoardView {
 
     checkSelection(clickedField) {
         this.erasePossibleMoves()
-        
+
         if (!this.selectedField) {
             this.clickedFirstTime(clickedField)
         } else {

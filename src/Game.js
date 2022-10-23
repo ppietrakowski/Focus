@@ -17,6 +17,8 @@ export class Focus {
         this.events = this.gameBoard.events
         this.currentPlayer = PLAYER_A
 
+        PLAYER_B.pooledFields = 1
+
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
 
@@ -38,6 +40,15 @@ export class Focus {
 
         this.events.emit(Focus.MOVED_FIELD, x, y, toField, from)
         return true
+    }
+
+    placeField(x, y, state) {
+        let field = this.gameBoard.getFieldAt(x, y)
+
+        
+        if (field.isOvergrown)
+            this.popElementsToCreateTower(field)
+
     }
 
     popElementsToCreateTower(toField) {
