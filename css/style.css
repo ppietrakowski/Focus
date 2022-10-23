@@ -9,6 +9,7 @@ body {
     border: 0;
     background-image: url(../img/focusEmptyBoard.svg);
     background-repeat: no-repeat;
+    
     padding: 80px;
 }
 
@@ -17,6 +18,7 @@ body {
     width: 80px;
     background-image: url(../img/focusPawnRed.svg);
     background-repeat: no-repeat;
+    background-position: center;
     float: left;
     z-index: 2;
 }
@@ -27,6 +29,7 @@ body {
     background-image: url(../img/focusPawnGreen.svg);
     background-repeat: no-repeat;
     float: left;
+    background-position: center;
     z-index: 2;
 }
 
@@ -34,6 +37,7 @@ body {
     height: 80px;
     width: 80px;
     background-repeat: no-repeat;
+    background-position: center;
     float: left;
     z-index: 2;
 }
