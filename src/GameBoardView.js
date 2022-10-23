@@ -167,7 +167,11 @@ export class GameBoardView {
     }
 
     move(direction, moveCount) {
-        this.game.moveToField(this.selectedField.field.x, this.selectedField.field.y, direction, moveCount)
+        if (!this.game.moveToField(this.selectedField.field.x, this.selectedField.field.y, direction, moveCount)) {
+            this.unSelectField()
+            return
+        }
+
         this.game.nextTurn()
         this.unSelectField()
     }
