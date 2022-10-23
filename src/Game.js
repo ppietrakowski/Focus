@@ -42,13 +42,24 @@ export class Focus {
         return true
     }
 
-    placeField(x, y, state) {
+    placeField(x, y, owner) {
         let field = this.gameBoard.getFieldAt(x, y)
 
-        
+        field.underThisField = this.makeNewUnderAfterPlacing(field, owner)
+
         if (field.isOvergrown)
             this.popElementsToCreateTower(field)
+    }
 
+    makeNewUnderAfterPlacing(field, owner) {
+        let newUnderElements = field.underThisField
+
+        if (!field.isEmpty)
+            newUnderElements = [field.state].concat(newUnderElements)
+
+        field.state = owner.state
+
+        return newUnderElements
     }
 
     popElementsToCreateTower(toField) {

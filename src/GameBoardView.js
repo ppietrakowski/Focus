@@ -50,10 +50,7 @@ export class GameBoardView {
             return
 
         failedPlayer.pooledFields--
-        field.field.underThisField = this.makeNewUnderAfterPlacing(field, failedPlayer)
-        
-        if (field.field.isOvergrown)
-            this.game.popElementsToCreateTower(field.field)
+        this.game.placeField(field.field.x, field.field.y, failedPlayer)
 
         this.resetToPlayState(failedPlayer)
     }
@@ -65,17 +62,6 @@ export class GameBoardView {
         this.reRenderBoard()
 
         this.game.currentPlayer = newNextPlayer
-    }
-
-    makeNewUnderAfterPlacing(field, failedPlayer) {
-        let newUnderElements = field.field.underThisField
-
-        if (!field.field.isEmpty)
-            newUnderElements = [field.field.state].concat(newUnderElements)
-
-        field.field.state = failedPlayer.state
-
-        return newUnderElements
     }
 
     hookGuiMethods() {
