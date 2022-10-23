@@ -55,7 +55,7 @@ function calculateMoveCount(clickedField) {
 function calculateDirection(clickedField) {
     const v = { x: clickedField.field.x - selectedField.field.x, y: clickedField.field.y - selectedField.field.y }
 
-    if (Math.abs(v.x) > 1 || Math.abs(v.y) > 1)
+    if (Math.abs(v.x) > clickedField.field.height || Math.abs(v.y) > clickedField.field.height)
         return false
 
     if (v.x > 0)
