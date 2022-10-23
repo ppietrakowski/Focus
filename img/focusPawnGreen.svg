@@ -26,9 +26,9 @@
      inkscape:document-units="mm"
      showgrid="false"
      showguides="true"
-     inkscape:zoom="2.1089995"
-     inkscape:cx="203.65106"
-     inkscape:cy="74.44288"
+     inkscape:zoom="11.930303"
+     inkscape:cx="-12.447295"
+     inkscape:cy="54.902211"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
      inkscape:window-x="1912"
@@ -68,7 +68,7 @@
        xlink:href="#linearGradient22268"
        id="radialGradient11960"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(4.6090869,0,0,4.6090869,-72.940777,-72.790415)"
+       gradientTransform="matrix(4.6666668,0,0,4.6666668,-73.969119,-73.818757)"
        cx="18.486647"
        cy="17.232103"
        fx="18.486647"
@@ -81,11 +81,11 @@
      id="layer1"
      transform="translate(-0.11426067,-0.26458359)">
     <circle
-       style="fill:url(#radialGradient11960);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.531818;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:url(#radialGradient11960);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.538462;stroke-dasharray:none;stroke-opacity:1"
        id="circle11958"
        cx="9.3746777"
        cy="9.5250006"
-       r="9.1461563"
+       r="9.260416"
        inkscape:label="pawn_green" />
   </g>
 </svg>

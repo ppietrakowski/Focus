@@ -24,11 +24,11 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#4b4b4b"
      inkscape:document-units="mm"
-     showgrid="false"
+     showgrid="true"
      showguides="true"
-     inkscape:zoom="0.74564394"
-     inkscape:cx="428.4887"
-     inkscape:cy="396.97231"
+     inkscape:zoom="1.4912879"
+     inkscape:cx="448.27026"
+     inkscape:cy="240.06096"
      inkscape:window-width="1920"
      inkscape:window-height="1017"
      inkscape:window-x="1912"
@@ -677,13 +677,13 @@
        fy="29.01231"
        r="16.007292"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(5.8507909,0,0,5.8507909,-90.805738,-65.348804)" />
+       gradientTransform="matrix(5.8674644,0,0,5.8674646,-91.335963,-65.806484)" />
     <radialGradient
        inkscape:collect="always"
        xlink:href="#linearGradient22262"
        id="radialGradient22254"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(7.3134889,0,0,7.3134889,-139.95799,-108.13682)"
+       gradientTransform="matrix(7.3343309,0,0,7.3343309,-140.62829,-108.71644)"
        cx="33.84433"
        cy="29.01231"
        fx="33.84433"
@@ -695,20 +695,20 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:url(#radialGradient22254);fill-opacity:1;stroke:none;stroke-width:26.5909;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
-       d="M 0.2706774,37.960882 37.960882,0.2706774 H 173.64564 l 37.6902,37.6902046 V 173.64564 l -37.6902,37.6902 H 37.960882 L 0.2706774,173.64564 Z"
+       style="fill:url(#radialGradient22254);fill-opacity:1;stroke:none;stroke-width:26.6667;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+       d="M 0,37.797616 37.797615,0 H 173.86905 l 37.79762,37.797616 V 173.86905 l -37.79762,37.79762 H 37.797615 L 0,173.86905 Z"
        id="path22252"
        sodipodi:nodetypes="ccccccccc"
        inkscape:label="board_bg0" />
     <path
-       style="fill:url(#radialGradient3350);fill-opacity:1;stroke:none;stroke-width:21.2727;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
-       d="M 21.377194,63.590227 63.590227,21.377194 h 84.426063 l 42.21303,42.213033 v 84.426063 l -42.21303,42.21303 H 63.590227 L 21.377194,148.01629 Z"
+       style="fill:url(#radialGradient3350);fill-opacity:1;stroke:none;stroke-width:21.3333;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+       d="M 21.166667,63.500001 63.5,21.166667 h 84.66667 l 42.33332,42.333334 v 84.666669 l -42.33332,42.33332 H 63.5 L 21.166667,148.16667 Z"
        id="path3298"
        inkscape:label="board_bg1" />
     <g
        id="g15949"
        inkscape:label="board_empties"
-       transform="matrix(5.3181773,0,0,5.3181773,-63.048873,-63.048873)">
+       transform="matrix(5.3333332,0,0,5.3333333,-63.500001,-63.500002)">
       <circle
          style="fill:url(#radialGradient1103-6);fill-opacity:1;fill-rule:evenodd;stroke-width:0.229305"
          id="path176-1"
