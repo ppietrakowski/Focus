@@ -22,10 +22,7 @@ export class GameBoardView {
     }
 
     switchToFailedPlayerTurn(failedPlayer) {
-        console.log(JSON.stringify(failedPlayer))
-
         this.game.currentPlayer = failedPlayer
-        console.log(`Place your ${failedPlayer.pooledFields} fields`)
         this.fields.forEach(v => this.enterIntoPlaceState(v, failedPlayer))
     }
 
@@ -33,26 +30,29 @@ export class GameBoardView {
      * 
      * @param {FieldView} field 
      */
-    enterIntoPlaceState(field, failedPlayer) {
+    enterIntoPlaceState(field, playerWhoPlace) {
         field.events.off(FieldView.FIELD_CLICK)
         field.isSelected = false
 
-        field.events.on(FieldView.FIELD_CLICK, () => this.onPlaceFieldClicked(field, failedPlayer))
+        field.events.on(FieldView.FIELD_CLICK, () => this.onPlaceFieldClicked(field, playerWhoPlace))
     }
 
-    onPlaceFieldClicked(field, failedPlayer) {
-        if (failedPlayer.pooledFields <= 0) {
+    onPlaceFieldClicked(field, playerWhoPlace) {
+        if (playerWhoPlace.pooledFields <= 0) {
             console.warn(`Tried to place item without any pool`)
+            this.resetToPlayState(playerWhoPlace)
             return
         }
 
-        if (!field.field.isPlayable)
+        if (!field.field.isPlayable) {
+            this.resetToPlayState(playerWhoPlace)
             return
+        }
 
-        failedPlayer.pooledFields--
-        this.game.placeField(field.field.x, field.field.y, failedPlayer)
+        playerWhoPlace.pooledFields--
+        this.game.placeField(field.field.x, field.field.y, playerWhoPlace)
 
-        this.resetToPlayState(failedPlayer)
+        this.resetToPlayState(playerWhoPlace)
     }
 
     resetToPlayState(newNextPlayer) {
