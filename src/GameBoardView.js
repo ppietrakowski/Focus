@@ -37,35 +37,45 @@ export class GameBoardView {
         field.events.off(FieldView.FIELD_CLICK)
         field.isSelected = false
 
-        field.events.on(FieldView.FIELD_CLICK, () => {
-            if (failedPlayer.pooledFields <= 0) {
-                console.warn(`Tried to place item without any pool`)
-                return
-            }
+        field.events.on(FieldView.FIELD_CLICK, () => this.onPlaceFieldClicked(field, failedPlayer))
+    }
 
-            if (!field.field.isPlayable)
-                return
+    onPlaceFieldClicked(field, failedPlayer) {
+        if (failedPlayer.pooledFields <= 0) {
+            console.warn(`Tried to place item without any pool`)
+            return
+        }
 
-            failedPlayer.pooledFields--
-            let newUnderElements = field.field.underThisField
+        if (!field.field.isPlayable)
+            return
 
-            if (!field.field.isEmpty)
-                newUnderElements = [field.field.state].concat(newUnderElements)
+        failedPlayer.pooledFields--
+        field.field.underThisField = this.makeNewUnderAfterPlacing(field, failedPlayer)
+        
+        if (field.field.isOvergrown)
+            this.game.popElementsToCreateTower(field.field)
 
-            field.field.state = failedPlayer.state
-            field.field.underThisField = newUnderElements
+        this.resetToPlayState(failedPlayer)
+    }
 
-            if (field.field.isOvergrown)
-                this.game.popElementsToCreateTower(field.field)
+    resetToPlayState(newNextPlayer) {
+        this.fields.forEach(v => v.events.off(FieldView.FIELD_CLICK))
+        this.fields.forEach(v => v.events.on(FieldView.FIELD_CLICK, () => this.checkSelection(v)))
 
-            this.fields.forEach(v => v.events.off(FieldView.FIELD_CLICK))
-            this.fields.forEach(v => v.events.on(FieldView.FIELD_CLICK, () => this.checkSelection(v)))
+        this.reRenderBoard()
 
-            this.reRenderBoard()
+        this.game.currentPlayer = newNextPlayer
+    }
 
-            console.log(field.field.height)
-            this.game.currentPlayer = failedPlayer
-        })
+    makeNewUnderAfterPlacing(field, failedPlayer) {
+        let newUnderElements = field.field.underThisField
+
+        if (!field.field.isEmpty)
+            newUnderElements = [field.field.state].concat(newUnderElements)
+
+        field.field.state = failedPlayer.state
+
+        return newUnderElements
     }
 
     hookGuiMethods() {
