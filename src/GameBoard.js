@@ -11,7 +11,6 @@ import board from "./board.json"
  */
 
 function boardToStateMask(boardState) {
-
     if (boardState === 0)
         return FIELD_STATE_UNPLAYABLE
 
@@ -39,7 +38,7 @@ export class GameBoard {
         const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
 
         if (board.length < maxSize)
-            throw new Error('Board should have at least 64 element')
+            throw new Error(`Board should have at least ${maxSize} element`)
 
         for (let i = 1; i < maxSize; i++) {
             const field = board.find(v => v.id === i) || null
@@ -75,13 +74,7 @@ export class GameBoard {
     isOutOfBoundsInYAxis(y) {
         return y < 0 || y >= GameBoard.GAME_BOARD_HEIGHT
     }
-
-    setFieldAt(x, y, state) {
-        const field = this.getFieldAt(x, y)
-
-        field.state = state
-    }
-
+    
     countPlayersFields(player) {
         return this._grid.filter(v => v.belongsTo(player)).length
     }
