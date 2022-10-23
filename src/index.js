@@ -14,6 +14,16 @@ gameFocus.gameBoard.each(
             newElement.className = 'emptyField'
         }
 
+        newElement.addEventListener('mouseover', e => {
+            if (gameFocus.currentPlayer.doesOwnThisField(element))
+                newElement.className = (element.state & FIELD_STATE_PLAYER_A) ? 'playerRedFieldHovered' : 'playerGreenFieldHovered'
+        })
+
+        newElement.addEventListener('mouseleave', e => {
+            if (gameFocus.currentPlayer.doesOwnThisField(element))
+                newElement.className = (element.state & FIELD_STATE_PLAYER_A) ? 'playerRedField' : 'playerGreenField'
+        })
+
         board.appendChild(newElement)
     }
 )
