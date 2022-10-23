@@ -50,18 +50,7 @@ export class FieldView {
     }
 
     onClick() {
-        if (this.game.currentPlayer.doesOwnThisField(this.field)) {
-            // dbl click mechanics
-            if (this.isSelected) {
-                this.domElement.className = this.getUnhoveredClassName()
-                this.events.emit(FieldView.FIELD_UNCLICK, this.field)
-            } else {
-                this.domElement.className = this.getHoveredClassName()
-                this.events.emit(FieldView.FIELD_CLICK, this.field)
-            }
-
-            this.isSelected = !this.isSelected
-        }
+        this.events.emit(FieldView.FIELD_CLICK, this.field)
     }
 
     /**

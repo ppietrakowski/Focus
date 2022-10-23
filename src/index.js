@@ -1,4 +1,4 @@
-import { DIRECTION_NORTH, DIRECTION_WEST, FIELD_STATE_PLAYER_A } from './Field'
+import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, FIELD_STATE_PLAYER_A } from './Field'
 import { FieldView } from './FieldView'
 import { Focus } from './Game'
 
@@ -17,6 +17,8 @@ function renderInSameLine(selectedField, maxPossibleMoves, baseDirection) {
     }
 }
 
+let selectedField = null
+
 /**
  * 
  * @param {Field} selectedField 
@@ -31,19 +33,77 @@ function renderPossibleMoves(selectedField) {
     renderInSameLine(selectedField, maxPossibleMoves, DIRECTION_WEST)
 }
 
+
+
 function erasePossibleMoves() {
     fieldsGui.forEach(v => v.domElement.className = v.getUnhoveredClassName())
 }
 
-gameFocus.events.on(Focus.MOVED_FIELD, () => fieldsGui[0].renderPossibleMoves())
+function reRenderBoard() {
+    erasePossibleMoves()
+}
+
+function calculateMoveCount(clickedField) {
+    const v = {x: clickedField.field.x - selectedField.field.x, y: clickedField.field.y - selectedField.field.y}
+    
+    if (Math.abs(v.x) > 0)
+        return Math.abs(v.x)
+    
+    return Math.abs(v.y)
+}
+
+function calculateDirection(clickedField) {
+    const v = {x: clickedField.field.x - selectedField.field.x, y: clickedField.field.y - selectedField.field.y}
+    
+    if (v.x > 0)
+        return DIRECTION_EAST
+    else if (v.x < 0)
+        return DIRECTION_WEST
+
+    else if (v.y > 0)
+        return DIRECTION_SOUTH
+
+    return DIRECTION_NORTH
+}
+
+
+function checkSelection(clickedField) {
+
+    erasePossibleMoves()
+    if (!selectedField) {
+        selectedField = clickedField
+        selectedField.isSelected = true
+        renderPossibleMoves(selectedField.field)
+        selectedField.domElement.className = selectedField.getHoveredClassName()
+    } else {
+        if (selectedField === clickedField) {
+            selectedField.isSelected = false
+            selectedField.className = selectedField.getUnhoveredClassName()
+            selectedField = null
+            erasePossibleMoves()
+            return 
+        }
+
+        let moveCount = calculateMoveCount(clickedField)
+        let direction = calculateDirection(clickedField)
+
+        gameFocus.moveToField(selectedField.field.x, selectedField.field.y, direction, moveCount)
+        reRenderBoard()
+        gameFocus.nextTurn()
+        selectedField.isSelected = false
+        selectedField.className = selectedField.getUnhoveredClassName()
+        selectedField = null
+    }
+
+}
+
 
 gameFocus.gameBoard.each(
     element => {
         const e = new FieldView(gameFocus, element, fieldsGui)
         board.appendChild(e.domElement)
-        e.events.on(FieldView.FIELD_CLICK, () => renderPossibleMoves(e.field))
-        e.events.on(FieldView.FIELD_UNCLICK, () => erasePossibleMoves())
-        
+        e.events.on(FieldView.FIELD_CLICK, () => checkSelection(e))
+
         fieldsGui.push(e)
     }
 )
