@@ -56,10 +56,8 @@ export class GameBoard {
      * @param {ForEachCallback} callback 
      */
     each(callback) {
-        const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
-
-        for (let i = 0; i < maxSize; i++) {
-            callback(this._grid[i], this._grid[i].x, this._grid[i].y)
+        for (let field of this._grid) {
+            callback(field, field.x, field.y)
         }
     }
 
