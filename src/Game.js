@@ -1,4 +1,4 @@
-import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, FIELD_STATE_UNPLAYABLE, MAX_TOWER_HEIGHT } from "./Field";
+import { FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, MAX_TOWER_HEIGHT } from "./Field";
 import { GameBoard } from "./GameBoard";
 import { Player } from "./Player";
 
