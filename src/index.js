@@ -18,5 +18,14 @@ gameFocus.events.on(Focus.VICTORY, (p) => console.log(`${JSON.stringify(p)} won`
 document.querySelector('.gameBoard').style.visibility = 'hidden'
 
 var playerVsPlayerButton = document.querySelector('#playerVsPlayer')
+var playerVsAIButton = document.querySelector('#playerVsAI')
+var AIVsAIButton = document.querySelector('#AIvsAI')
 
 playerVsPlayerButton.addEventListener('click', () => document.querySelector('.gameBoard').style.visibility = 'visible')
+
+function notImplementedYet(caller) {
+    console.warn(caller, '# not implemented yet')
+}
+
+playerVsAIButton.addEventListener('click', () => notImplementedYet('playerVsAIButton'))
+AIVsAIButton.addEventListener('click', () => notImplementedYet('AIVsAIButton'))
