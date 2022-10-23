@@ -17,8 +17,6 @@ export class Focus {
         this.events = this.gameBoard.events
         this.currentPlayer = PLAYER_A
 
-        PLAYER_B.pooledFields = 1
-
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
 
