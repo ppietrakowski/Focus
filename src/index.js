@@ -75,16 +75,13 @@ function checkSelection(clickedField) {
 
     erasePossibleMoves()
     if (!selectedField) {
-        selectedField = clickedField
-        selectedField.isSelected = true
-        renderPossibleMoves(selectedField.field)
-        selectedField.domElement.className = selectedField.getHoveredClassName()
+        if (!clickedField.field.belongsTo(gameFocus.currentPlayer))
+            return
+        
+        selectNewField(clickedField)
     } else {
         if (selectedField === clickedField) {
-            selectedField.isSelected = false
-            selectedField.className = selectedField.getUnhoveredClassName()
-            selectedField = null
-            erasePossibleMoves()
+            unSelectField()
             return
         }
 
@@ -93,18 +90,11 @@ function checkSelection(clickedField) {
 
         if (!direction) {
             console.warn('Tried to move more than is available in this time')
-            selectedField.isSelected = false
-            selectedField.className = selectedField.getUnhoveredClassName()
-            reRenderBoard()
+            unSelectField()
             return
         }
 
-        gameFocus.moveToField(selectedField.field.x, selectedField.field.y, direction, moveCount)
-        reRenderBoard()
-        gameFocus.nextTurn()
-        selectedField.isSelected = false
-        selectedField.className = selectedField.getUnhoveredClassName()
-        selectedField = null
+        move(direction, moveCount)
     }
 
 }
@@ -119,3 +109,24 @@ gameFocus.gameBoard.each(
         fieldsGui.push(e)
     }
 )
+function move(direction, moveCount) {
+    gameFocus.moveToField(selectedField.field.x, selectedField.field.y, direction, moveCount)
+    reRenderBoard()
+    gameFocus.nextTurn()
+    unSelectField()
+}
+
+function selectNewField(clickedField) {
+    selectedField = clickedField
+    selectedField.isSelected = true
+    renderPossibleMoves(selectedField.field)
+    selectedField.domElement.className = selectedField.getHoveredClassName()
+}
+
+function unSelectField() {
+    selectedField.isSelected = false
+    selectedField.className = selectedField.getUnhoveredClassName()
+    reRenderBoard()
+    selectedField = null
+}
+

@@ -26,7 +26,11 @@ export class Focus {
         if (!from.belongsTo(this.currentPlayer))
             return false
 
+            
         let toField = this.getFieldBasedOnDirectionAndMoveCount(from, direction, howManyFieldWantMove)
+        if (!toField.isPlayable)
+                return false
+
         toField.makeAsNextField(from, howManyFieldWantMove)
 
         if (toField.isOvergrown)
