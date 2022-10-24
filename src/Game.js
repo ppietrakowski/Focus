@@ -26,10 +26,10 @@ export class Focus {
         if (!from.belongsTo(this.currentPlayer))
             return false
 
-            
+
         let toField = this.getFieldBasedOnDirectionAndMoveCount(from, direction, howManyFieldWantMove)
         if (!toField.isPlayable)
-                return false
+            return false
 
         toField.makeAsNextField(from, howManyFieldWantMove)
 
@@ -45,17 +45,17 @@ export class Focus {
 
         field.underThisField = this.makeNewUnderAfterPlacing(field, owner)
         field.state = owner.state
-        
+
         if (field.isOvergrown)
             this.popElementsToCreateTower(field)
     }
 
-    makeNewUnderAfterPlacing(field, owner) {
+    makeNewUnderAfterPlacing(field) {
         let newUnderElements = field.underThisField
 
         if (!field.isEmpty)
-        
-        newUnderElements = [{state: field.state}].concat(newUnderElements)
+            newUnderElements = [{ state: field.state }].concat(newUnderElements)
+       
         return newUnderElements
     }
 
@@ -79,7 +79,7 @@ export class Focus {
     getFieldBasedOnDirectionAndMoveCount(field, direction, howManyFieldWantMove) {
         const offset = this.getOffsetBasedOnDirection(field, direction, howManyFieldWantMove)
         const foundField = this.gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
-        
+
         return foundField
     }
 
@@ -87,8 +87,8 @@ export class Focus {
         let mult = howManyFieldWantMove
 
         if (howManyFieldWantMove < 1)
-            mult = 1    
-        
+            mult = 1
+
         if (field.height < howManyFieldWantMove)
             mult = field.height
 
