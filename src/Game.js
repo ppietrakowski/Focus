@@ -17,8 +17,6 @@ export class Focus {
         this.events = this.gameBoard.events
         this.currentPlayer = PLAYER_A
 
-        PLAYER_B.pooledFields = 1
-
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
 
@@ -46,7 +44,8 @@ export class Focus {
         let field = this.gameBoard.getFieldAt(x, y)
 
         field.underThisField = this.makeNewUnderAfterPlacing(field, owner)
-
+        field.state = owner.state
+        
         if (field.isOvergrown)
             this.popElementsToCreateTower(field)
     }
@@ -55,10 +54,8 @@ export class Focus {
         let newUnderElements = field.underThisField
 
         if (!field.isEmpty)
-            newUnderElements = [field.state].concat(newUnderElements)
-
-        field.state = owner.state
-
+        
+        newUnderElements = [{state: field.state}].concat(newUnderElements)
         return newUnderElements
     }
 
