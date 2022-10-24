@@ -6,9 +6,8 @@ body {
 .invisibleGameBoard {
     height: 640px;
     width: 640px;
-    margin-top: 90px;
+    margin-top: 10px;
     padding: 10px 0px 10px 100px;
-    float: left;
 }
 
 .gameBoard {
@@ -37,16 +36,16 @@ body {
     height: 70px;
     width: 330px;
     border: 0;
-    margin-bottom: 20px;
-    margin-left: 155px;
+    margin-top: 10px;
+    margin-left: 250px;
 }
 
 .reserveGreen {
     height: 70px;
     width: 330px;
     border: 0;
-    margin-top: 20px;
-    margin-left: 155px;
+    margin-top: 10px;
+    margin-left: 250px;
 }
 
 .playerRedField {
