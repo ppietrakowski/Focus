@@ -58,7 +58,7 @@ export class FieldView {
      * @param {FieldView} anotherField 
      */
     isInRange(anotherField, range) {
-        return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) && 
-                (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
+        return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) &&
+            (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
     }
 }

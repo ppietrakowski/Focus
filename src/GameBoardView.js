@@ -17,7 +17,7 @@ export class GameBoardView {
         this.board = document.getElementsByClassName('gameBoard')[0]
 
         this.selectedField = null
-//
+        //
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
     }
 

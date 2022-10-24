@@ -39,17 +39,17 @@ export class Field {
         const oldState = cameFrom.state
 
         const temp = cameFrom.shiftNFirstElements(itemCountFromOldList)
-        
+
         if (!this.isEmpty)
             this.underThisField = this.getNewUnderElements(temp)
         else
             this.underThisField = temp
-            
+
         this.state = oldState
     }
 
     getNewUnderElements(shiftedElements) {
-        return shiftedElements.concat([{state: this.state}], this.underThisField)
+        return shiftedElements.concat([{ state: this.state }], this.underThisField)
     }
 
     get height() {
@@ -59,10 +59,10 @@ export class Field {
     get isOvergrown() {
         return this.height >= MAX_TOWER_HEIGHT
     }
-    
+
     shiftNFirstElements(n) {
         let firstElements = []
-        
+
         while (n-- > 0)
             this.shiftElement(firstElements)
 

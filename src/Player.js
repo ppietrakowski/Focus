@@ -9,7 +9,7 @@ export class Player {
     doesOwnThisField(field) {
         if (typeof field == 'number')
             return !!(field & this.state)
-        
+
         return !!(field.state & this.state)
     }
 }

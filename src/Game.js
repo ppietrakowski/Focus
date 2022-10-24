@@ -55,7 +55,7 @@ export class Focus {
 
         if (!field.isEmpty)
             newUnderElements = [{ state: field.state }].concat(newUnderElements)
-       
+
         return newUnderElements
     }
 

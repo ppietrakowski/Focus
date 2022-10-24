@@ -78,7 +78,7 @@ export class GameBoard {
     isOutOfBoundsInYAxis(y) {
         return y < 0 || y >= GameBoard.GAME_BOARD_HEIGHT
     }
-    
+
     countPlayersFields(player) {
         return this.fields.filter(v => v.belongsTo(player)).length
     }
