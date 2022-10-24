@@ -29,6 +29,12 @@ export class GameBoardView {
         this.selectedField = null
 
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
+        this.game.events.on(Focus.ADDED_ITEM_TO_POOL, this.addedElementToPool, this)
+    }
+
+    addedElementToPool(player) {
+        
+
     }
 
     hookGuiMethods() {
