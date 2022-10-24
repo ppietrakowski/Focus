@@ -4,7 +4,7 @@ import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST } from
 
 
 export class GameBoardView {
-    
+
     constructor(game) {
         this.gameBoard = game.gameBoard
 
@@ -17,12 +17,17 @@ export class GameBoardView {
          * @type {FieldView[]}
          */
         this.fields = []
-        this.board = document.getElementsByClassName('gameBoard')[0]
+        this.board = document.getElementsByClassName('invisibleGameBoard')[0]
 
         /**
-         * @type {FieldView}
+         * @type {HTMLDivElement}
          */
-        this.selectedField = null
+        this.greenReserve = null
+
+            /**
+             * @type {FieldView}
+             */
+            this.selectedField = null
 
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
     }
@@ -37,6 +42,10 @@ export class GameBoardView {
                 this.fields.push(e)
             }
         )
+
+        this.greenReserve = document.createElement('div')
+        this.greenReserve.className = 'reserveGreen'
+        this.board.appendChild(this.greenReserve)
     }
 
     checkSelection(clickedField) {
@@ -113,21 +122,21 @@ export class GameBoardView {
             this.unSelectField()
             return
         }
-        
+
         let direction = this.selectedField.field.calculateDirectionTowards(clickedField.field)
 
         if (!direction) {
             this.triedToMoveMoreThanItCan();
             return
         }
-        
+
         this.moveTowardsDirection(clickedField, direction)
     }
 
     wasDoubleClicked(clickedField) {
         return this.selectedField === clickedField
     }
-    
+
     triedToMoveMoreThanItCan() {
         console.warn('Tried to move more than is available in this time');
         this.unSelectField();
@@ -172,9 +181,9 @@ export class GameBoardView {
         this.fields.forEach(v => v.updateField())
         for (let i = 1; i <= maxPossibleMoves; i++) {
             const offset = this.game.getOffsetBasedOnDirection(selectedField, baseDirection, i)
-            
+
             const elements = this.fields.filter(v => v.isInRange(selectedField, offset))
-            
+
             elements.forEach(v => v.visualizeHovered())
         }
     }

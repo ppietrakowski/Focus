@@ -3,15 +3,21 @@ body {
     padding: 0;
 }
 
-.gameBoard {
+.invisibleGameBoard {
     height: 640px;
     width: 640px;
+    margin-top: 90px;
+    padding: 10px 0px 10px 100px;
+    float: left;
+}
+
+.gameBoard {
+    height: 840px;
+    width: 840px;
     border: 0;
     float: left;
     background-image: url(../img/focusEmptyBoard.svg);
     background-repeat: no-repeat;
-    
-    padding: 10px 100px 10px 100px;
 }
 
 .buttonBoard {
