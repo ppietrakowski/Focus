@@ -7,6 +7,10 @@ export class GameBoardView {
     
     constructor(game) {
         this.gameBoard = game.gameBoard
+
+        /**
+         * @type {Focus}
+         */
         this.game = game
 
         /**
@@ -72,7 +76,7 @@ export class GameBoardView {
         playerWhoPlace.pooledFields--
         this.game.placeField(field.field.x, field.field.y, playerWhoPlace)
 
-        this.resetToPlayState(playerWhoPlace)
+        this.resetToPlayState(this.game.getNextPlayer(playerWhoPlace))
     }
 
     playerHasNoPoolAvailable(playerWhoPlace) {

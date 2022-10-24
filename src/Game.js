@@ -17,6 +17,8 @@ export class Focus {
         this.events = this.gameBoard.events
         this.currentPlayer = PLAYER_A
 
+        PLAYER_B.pooledFields = 1
+        
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
 
@@ -95,8 +97,16 @@ export class Focus {
         return { x: direction.x * mult, y: direction.y * mult }
     }
 
-    getNextPlayer() {
-        if (this.currentPlayer.doesOwnThisField(FIELD_STATE_PLAYER_A))
+    /**
+     * 
+     * @param {Player?} toPlayer 
+     * @returns 
+     */
+    getNextPlayer(toPlayer) {
+        if (!toPlayer)
+            toPlayer = this.currentPlayer
+
+        if (toPlayer.doesOwnThisField(FIELD_STATE_PLAYER_A))
             return PLAYER_B
 
         return PLAYER_A
