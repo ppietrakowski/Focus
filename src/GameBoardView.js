@@ -9,9 +9,15 @@ export class GameBoardView {
         this.gameBoard = game.gameBoard
         this.game = game
 
+        /**
+         * @type {FieldView[]}
+         */
         this.fields = []
         this.board = document.getElementsByClassName('gameBoard')[0]
 
+        /**
+         * @type {FieldView}
+         */
         this.selectedField = null
 
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
@@ -95,7 +101,7 @@ export class GameBoardView {
         this.selectedField.isSelected = true
         this.renderPossibleMoves()
 
-        this.selectedField.domElement.className = this.selectedField.getHoveredClassName()
+        this.selectedField.visualizeHovered()
     }
 
     clickedWhenSomethingSelected(clickedField) {
@@ -142,7 +148,7 @@ export class GameBoardView {
 
     unSelectField() {
         this.selectedField.isSelected = false
-        this.selectedField.className = this.selectedField.getUnhoveredClassName()
+        this.selectedField.visualizeUnhovered()
         this.reRenderBoard()
         this.selectedField = null
     }
@@ -159,17 +165,19 @@ export class GameBoardView {
     }
 
     renderInSameLine(selectedField, maxPossibleMoves, baseDirection) {
+        this.fields.forEach(v => v.updateField())
         for (let i = 1; i <= maxPossibleMoves; i++) {
             const offset = this.game.getOffsetBasedOnDirection(selectedField, baseDirection, i)
-
+            
             const elements = this.fields.filter(v => v.isInRange(selectedField, offset))
-
-            elements.forEach(v => v.domElement.className = v.getHoveredClassName())
+            
+            elements.forEach(v => v.visualizeHovered())
         }
     }
 
     erasePossibleMoves() {
-        this.fields.forEach(v => v.domElement.className = v.getUnhoveredClassName())
+        this.fields.forEach(v => v.updateField())
+        this.fields.forEach(v => v.visualizeUnhovered())
     }
 
     reRenderBoard() {

@@ -50,8 +50,13 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     float: left;
+    position: relative;
     background-blend-mode: multiply;
-    z-index: 2;
+}
+
+.playerRedField > img {
+    opacity: 0.75;
+    position: absolute;
 }
 
 .playerRedFieldHovered {
@@ -61,8 +66,13 @@ body {
     background-image: url(../img/focusPawnRed.svg);
     background-repeat: no-repeat;
     float: left;
+    position: relative;
     background-position: center;
-    z-index: 2;
+}
+
+.playerRedFieldHovered > img {
+    opacity: 0.6;
+    position: absolute;
 }
 
 .playerGreenField {
@@ -72,8 +82,9 @@ body {
     background-repeat: no-repeat;
     float: left;
     background-position: center;
-    z-index: 2;
+    position: relative;
 }
+
 
 .playerGreenFieldHovered {
     opacity: 0.75;
@@ -83,7 +94,17 @@ body {
     background-repeat: no-repeat;
     float: left;
     background-position: center;
-    z-index: 2;
+    position: relative;
+}
+
+.playerGreenField > img {
+    opacity: 0.75;
+    position: absolute;
+}
+
+.playerGreenFieldHovered > img {
+    opacity: 0.6;
+    position: absolute;
 }
 
 .emptyField {
