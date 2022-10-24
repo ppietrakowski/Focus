@@ -33,9 +33,19 @@ export class GameBoardView {
 
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToPlaceStateAtPlayerTurn, this)
         this.game.events.on(Focus.ADDED_ITEM_TO_POOL, this.addedElementToPool, this)
+
+        this.clickedReserve = false
+        this.addedElementToPool(PLAYER_GREEN)
     }
 
     placeDuringPlayerTurn(player, reserve) {
+        if (this.clickedReserve) {
+            reserve.addToReserve()
+            this.clickedReserve = false
+            return
+        }
+        this.clickedReserve = !this.clickedReserve
+        
         reserve.removeFromReserve()
         this.switchToPlaceStateAtPlayerTurn(player)
     }

@@ -17,6 +17,8 @@ export class Focus {
         this.gameBoard = new GameBoard()
         this.events = this.gameBoard.events
         this.currentPlayer = PLAYER_RED
+    
+        PLAYER_GREEN.pooledFields++
         
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
