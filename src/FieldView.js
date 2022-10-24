@@ -7,22 +7,28 @@ export class FieldView {
     static FIELD_UNCLICK = 'UnClick'
     static FIELD_CLICK = 'Click'
 
-    /**
-     * 
-     * @param {Focus} game
-     * @param {Field} field 
-     * @param {*} rootElement 
-     */
     constructor(game, field) {
-
+        /**
+         * @type {Field}
+         */
         this.field = field
         this.isSelected = false
+
+        /**
+         * @type {Focus}
+         */
         this.game = game
 
         this.events = new EventEmitter()
 
         this.domElement = document.createElement('div')
 
+        this.underField = [document.createElement('img')]
+        for (let i = 1; i < 5; i++) {
+            this.underField.push(document.createElement('img'))
+        }
+
+        this.underField.forEach(v => this.domElement.appendChild(v))
         this.domElement.className = this.getUnhoveredClassName()
 
         this.domElement.addEventListener('mouseover', e => this.onMouseOver())
@@ -55,7 +61,7 @@ export class FieldView {
 
     /**
      * 
-     * @param {FieldView} anotherField 
+     * @param {Field} anotherField 
      */
     isInRange(anotherField, range) {
         return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) &&
