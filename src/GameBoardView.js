@@ -33,8 +33,6 @@ export class GameBoardView {
 
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToPlaceStateAtPlayerTurn, this)
         this.game.events.on(Focus.ADDED_ITEM_TO_POOL, this.addedElementToPool, this)
-
-        this.addedElementToPool(PLAYER_GREEN)
     }
 
     placeDuringPlayerTurn(player, reserve) {
