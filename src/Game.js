@@ -2,8 +2,9 @@ import { FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, MAX_TOWER_HEIGHT } from "./
 import { GameBoard } from "./GameBoard";
 import { Player } from "./Player";
 
-const PLAYER_A = new Player(FIELD_STATE_PLAYER_A)
-const PLAYER_B = new Player(FIELD_STATE_PLAYER_B)
+export const PLAYER_RED = new Player(FIELD_STATE_PLAYER_A)
+export const PLAYER_GREEN = new Player(FIELD_STATE_PLAYER_B)
+
 
 export class Focus {
     static ADDED_ITEM_TO_POOL = 'addedItemToPool'
@@ -15,9 +16,9 @@ export class Focus {
     constructor() {
         this.gameBoard = new GameBoard()
         this.events = this.gameBoard.events
-        this.currentPlayer = PLAYER_A
+        this.currentPlayer = PLAYER_RED
 
-        PLAYER_B.pooledFields = 1
+        PLAYER_GREEN.pooledFields = 1
         
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
@@ -107,9 +108,9 @@ export class Focus {
             toPlayer = this.currentPlayer
 
         if (toPlayer.doesOwnThisField(FIELD_STATE_PLAYER_A))
-            return PLAYER_B
+            return PLAYER_GREEN
 
-        return PLAYER_A
+        return PLAYER_RED
     }
 
     nextTurn() {

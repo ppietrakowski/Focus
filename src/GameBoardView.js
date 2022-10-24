@@ -1,6 +1,7 @@
-import { Focus } from "./Game";
+import { Focus, PLAYER_GREEN, PLAYER_RED } from "./Game";
 import { FieldView } from './FieldView'
 import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST } from "./Field";
+import { ReserveView } from "./ReserveView";
 
 
 export class GameBoardView {
@@ -19,22 +20,33 @@ export class GameBoardView {
         this.fields = []
         this.board = document.getElementsByClassName('invisibleGameBoard')[0]
 
+        this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0], PLAYER_GREEN)
+        this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0], PLAYER_RED)
 
-        this.greenReserve = document.getElementsByClassName('reserveGreen')[0]
-        this.redReserve = document.getElementsByClassName('reserveRed')[0]
+        this.greenReserve.events.on(ReserveView.POOL_CLICKED, () => this.placeDuringPlayerTurn(PLAYER_GREEN, this.greenReserve))
+        this.redReserve.events.on(ReserveView.POOL_CLICKED, () => this.placeDuringPlayerTurn(PLAYER_RED, this.redReserve))
 
         /**
          * @type {FieldView}
          */
         this.selectedField = null
 
-        this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
+        this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToPlaceStateAtPlayerTurn, this)
         this.game.events.on(Focus.ADDED_ITEM_TO_POOL, this.addedElementToPool, this)
+
+        this.addedElementToPool(PLAYER_GREEN)
+    }
+
+    placeDuringPlayerTurn(player, reserve) {
+        reserve.removeFromReserve()
+        this.switchToPlaceStateAtPlayerTurn(player)
     }
 
     addedElementToPool(player) {
-        
-
+        if (player === PLAYER_GREEN)
+            this.greenReserve.addToReserve()
+        else if (player === PLAYER_RED)
+            this.redReserve.addToReserve()
     }
 
     hookGuiMethods() {
@@ -59,9 +71,9 @@ export class GameBoardView {
         }
     }
 
-    switchToFailedPlayerTurn(failedPlayer) {
-        this.game.currentPlayer = failedPlayer
-        this.fields.forEach(v => this.enterIntoPlaceState(v, failedPlayer))
+    switchToPlaceStateAtPlayerTurn(player) {
+        if (this.game.currentPlayer === player)
+            this.fields.forEach(v => this.enterIntoPlaceState(v, player))
     }
 
     enterIntoPlaceState(field, playerWhoPlace) {
