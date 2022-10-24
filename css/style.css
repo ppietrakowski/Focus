@@ -7,10 +7,40 @@ body {
     height: 640px;
     width: 640px;
     border: 0;
+    float: left;
     background-image: url(../img/focusEmptyBoard.svg);
     background-repeat: no-repeat;
     
-    padding: 80px;
+    padding: 10px 100px 10px 100px;
+}
+
+.buttonBoard {
+    width: 600px;
+    padding: 30px 120px 10px 120px;
+    float: left;
+}
+
+.playOptionButton {
+    width: 200px;
+    height: 50px;
+    padding: 0;
+    float: left;
+}
+
+.reserveRed {
+    height: 70px;
+    width: 330px;
+    border: 0;
+    margin-bottom: 20px;
+    margin-left: 155px;
+}
+
+.reserveGreen {
+    height: 70px;
+    width: 330px;
+    border: 0;
+    margin-top: 20px;
+    margin-left: 155px;
 }
 
 .playerRedField {
