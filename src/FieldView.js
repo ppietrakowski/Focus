@@ -2,19 +2,6 @@ import { EventEmitter } from "eventemitter3"
 import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, Field, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B } from "./Field"
 import { Focus } from "./Game"
 
-
-/**
- * 
- * @param {{state: number}} underElement 
- * @returns 
- */
-function getSourceOfUnderElement(underElement) {
-    return (underElement.state & FIELD_STATE_PLAYER_A) ? 
-        '../img/focusPawnRed.svg' 
-        : (underElement.state & FIELD_STATE_PLAYER_B) ?
-        '../img/focusPawnGreen.svg' : ''
-}
-
 export class FieldView {
 
     static FIELD_UNCLICK = 'UnClick'
@@ -35,13 +22,6 @@ export class FieldView {
         this.events = new EventEmitter()
 
         this.domElement = document.createElement('div')
-
-        this.underField = [document.createElement('img')]
-        for (let i = 1; i < 5; i++) {
-            this.underField.push(document.createElement('img'))
-        }
-
-        this.underField.forEach(v => this.domElement.appendChild(v))
         
         this.domElement.className = this.getUnhoveredClassName()
 
@@ -82,14 +62,7 @@ export class FieldView {
     }
 
     updateField() {
-        for (let i = 0; i < this.field.underThisField.length; i++) {
-            const src = getSourceOfUnderElement(this.field.underThisField[i])
-            this.underField[i].src = src
-            this.underField[i].style.zIndex = i
-            this.underField[i].style.position = this.domElement.style.position
-        }
-
-        this.domElement.style.zIndex = this.field.underThisField.length
+        
     }
 
     /**
