@@ -19,15 +19,14 @@ export class GameBoardView {
         this.fields = []
         this.board = document.getElementsByClassName('invisibleGameBoard')[0]
 
-        /**
-         * @type {HTMLDivElement}
-         */
-        this.greenReserve = null
 
-            /**
-             * @type {FieldView}
-             */
-            this.selectedField = null
+        this.greenReserve = document.getElementsByClassName('reserveGreen')[0]
+        this.redReserve = document.getElementsByClassName('reserveRed')[0]
+
+        /**
+         * @type {FieldView}
+         */
+        this.selectedField = null
 
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
     }
@@ -42,10 +41,6 @@ export class GameBoardView {
                 this.fields.push(e)
             }
         )
-
-        this.greenReserve = document.createElement('div')
-        this.greenReserve.className = 'reserveGreen'
-        this.board.appendChild(this.greenReserve)
     }
 
     checkSelection(clickedField) {
