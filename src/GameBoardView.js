@@ -17,7 +17,7 @@ export class GameBoardView {
         this.board = document.getElementsByClassName('gameBoard')[0]
 
         this.selectedField = null
-        //
+
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
     }
 
@@ -26,21 +26,17 @@ export class GameBoardView {
         this.fields.forEach(v => this.enterIntoPlaceState(v, failedPlayer))
     }
 
-    /**
-     * 
-     * @param {FieldView} field 
-     */
     enterIntoPlaceState(field, playerWhoPlace) {
         field.events.off(FieldView.FIELD_CLICK)
         field.isSelected = false
 
+        // use click event now for placing instead of moving
         field.events.on(FieldView.FIELD_CLICK, () => this.onPlaceFieldClicked(field, playerWhoPlace))
     }
 
     onPlaceFieldClicked(field, playerWhoPlace) {
-        if (playerWhoPlace.pooledFields <= 0) {
-            console.warn(`Tried to place item without any pool`)
-            this.resetToPlayState(playerWhoPlace)
+        if (!playerWhoPlace.hasAnyPool) {
+            this.playerHasNoPoolAvailable(playerWhoPlace);
             return
         }
 
@@ -53,6 +49,11 @@ export class GameBoardView {
         this.game.placeField(field.field.x, field.field.y, playerWhoPlace)
 
         this.resetToPlayState(playerWhoPlace)
+    }
+
+    playerHasNoPoolAvailable(playerWhoPlace) {
+        console.warn(`Tried to place item without any pool`);
+        this.resetToPlayState(playerWhoPlace);
     }
 
     resetToPlayState(newNextPlayer) {
@@ -82,7 +83,7 @@ export class GameBoardView {
         if (!this.selectedField) {
             this.clickedFirstTime(clickedField)
         } else {
-            this.wasClickedWhenSomethingSelected(clickedField)
+            this.clickedWhenSomethingSelected(clickedField)
         }
     }
 
@@ -93,22 +94,34 @@ export class GameBoardView {
         this.selectNewField(clickedField)
     }
 
-    wasClickedWhenSomethingSelected(clickedField) {
-        if (this.selectedField === clickedField) {
+    clickedWhenSomethingSelected(clickedField) {
+        if (this.wasDoubleClicked(clickedField)) {
             this.unSelectField()
             return
         }
-
-        let moveCount = this.calculateMoveCount(clickedField)
+        
         let direction = this.calculateDirection(clickedField)
 
         if (!direction) {
-            console.warn('Tried to move more than is available in this time')
-            this.unSelectField()
+            this.triedToMoveMoreThanItCan();
             return
         }
+        
+        this.moveTowardsDirection(clickedField, direction)
+    }
+    
+    triedToMoveMoreThanItCan() {
+        console.warn('Tried to move more than is available in this time');
+        this.unSelectField();
+    }
 
+    moveTowardsDirection(clickedField, direction) {
+        let moveCount = this.calculateMoveCount(clickedField)
         this.move(direction, moveCount)
+    }
+
+    wasDoubleClicked(clickedField) {
+        return this.selectedField === clickedField
     }
 
     renderPossibleMoves() {
@@ -149,11 +162,12 @@ export class GameBoardView {
         return Math.abs(v.y)
     }
 
+    // TODO: move it to field class
     calculateDirection(clickedField) {
         const v = { x: clickedField.field.x - this.selectedField.field.x, y: clickedField.field.y - this.selectedField.field.y }
 
         if (Math.abs(v.x) > this.selectedField.field.height || Math.abs(v.y) > this.selectedField.field.height)
-            return false
+            return null
 
         if (v.x > 0)
             return DIRECTION_EAST
@@ -167,7 +181,9 @@ export class GameBoardView {
     }
 
     move(direction, moveCount) {
-        if (!this.game.moveToField(this.selectedField.field.x, this.selectedField.field.y, direction, moveCount)) {
+        const isAvailableToMoveThere = this.game.moveToField(this.selectedField.field.x, this.selectedField.field.y, direction, moveCount)
+
+        if (!isAvailableToMoveThere) {
             this.unSelectField()
             return
         }

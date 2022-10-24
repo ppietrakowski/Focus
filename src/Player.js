@@ -12,4 +12,8 @@ export class Player {
 
         return !!(field.state & this.state)
     }
+
+    get hasAnyPool() {
+        return this.pooledFields > 0
+    }
 }
