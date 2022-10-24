@@ -91,10 +91,6 @@ export class Field {
         return !!(this.state & FIELD_STATE_EMPTY)
     }
 
-    get top() {
-        return this.underThisField[0] || null
-    }
-
     popOneField() {
         this.height--
 
@@ -107,5 +103,31 @@ export class Field {
 
     get isPlayable() {
         return !(this.state & FIELD_STATE_UNPLAYABLE)
+    }
+
+    calculateDirectionTowards(anotherField) {
+        const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
+
+        if (Math.abs(v.x) > this.height || Math.abs(v.y) > this.height)
+            return null
+
+        if (v.x > 0)
+            return DIRECTION_EAST
+        else if (v.x < 0)
+            return DIRECTION_WEST
+
+        else if (v.y > 0)
+            return DIRECTION_SOUTH
+
+        return DIRECTION_NORTH
+    }
+
+    calculateMoveCountTowards(anotherField) {
+        const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
+
+        if (Math.abs(v.x) > 0)
+            return Math.abs(v.x)
+
+        return Math.abs(v.y)
     }
 }

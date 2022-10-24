@@ -100,7 +100,7 @@ export class GameBoardView {
             return
         }
         
-        let direction = this.calculateDirection(clickedField)
+        let direction = this.selectedField.field.calculateDirectionTowards(clickedField.field)
 
         if (!direction) {
             this.triedToMoveMoreThanItCan();
@@ -116,7 +116,7 @@ export class GameBoardView {
     }
 
     moveTowardsDirection(clickedField, direction) {
-        let moveCount = this.calculateMoveCount(clickedField)
+        let moveCount = this.selectedField.field.calculateMoveCountTowards(clickedField.field)
         this.move(direction, moveCount)
     }
 
@@ -151,33 +151,6 @@ export class GameBoardView {
 
             elements.forEach(v => v.domElement.className = v.getHoveredClassName())
         }
-    }
-
-    calculateMoveCount(clickedField) {
-        const v = { x: clickedField.field.x - this.selectedField.field.x, y: clickedField.field.y - this.selectedField.field.y }
-
-        if (Math.abs(v.x) > 0)
-            return Math.abs(v.x)
-
-        return Math.abs(v.y)
-    }
-
-    // TODO: move it to field class
-    calculateDirection(clickedField) {
-        const v = { x: clickedField.field.x - this.selectedField.field.x, y: clickedField.field.y - this.selectedField.field.y }
-
-        if (Math.abs(v.x) > this.selectedField.field.height || Math.abs(v.y) > this.selectedField.field.height)
-            return null
-
-        if (v.x > 0)
-            return DIRECTION_EAST
-        else if (v.x < 0)
-            return DIRECTION_WEST
-
-        else if (v.y > 0)
-            return DIRECTION_SOUTH
-
-        return DIRECTION_NORTH
     }
 
     move(direction, moveCount) {
