@@ -4,11 +4,7 @@ import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST } from
 
 
 export class GameBoardView {
-
-    /**
-     * 
-     * @param {Focus} game 
-     */
+    
     constructor(game) {
         this.gameBoard = game.gameBoard
         this.game = game
@@ -19,6 +15,28 @@ export class GameBoardView {
         this.selectedField = null
 
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToFailedPlayerTurn, this)
+    }
+
+    hookGuiMethods() {
+        this.gameBoard.each(
+            element => {
+                const e = new FieldView(this.game, element)
+                this.board.appendChild(e.domElement)
+                e.events.on(FieldView.FIELD_CLICK, () => this.checkSelection(e))
+
+                this.fields.push(e)
+            }
+        )
+    }
+
+    checkSelection(clickedField) {
+        this.erasePossibleMoves()
+
+        if (!this.selectedField) {
+            this.clickedFirstTime(clickedField)
+        } else {
+            this.clickedWhenSomethingSelected(clickedField)
+        }
     }
 
     switchToFailedPlayerTurn(failedPlayer) {
@@ -65,33 +83,19 @@ export class GameBoardView {
         this.game.currentPlayer = newNextPlayer
     }
 
-    hookGuiMethods() {
-        this.gameBoard.each(
-            element => {
-                const e = new FieldView(this.game, element)
-                this.board.appendChild(e.domElement)
-                e.events.on(FieldView.FIELD_CLICK, () => this.checkSelection(e))
-
-                this.fields.push(e)
-            }
-        )
-    }
-
-    checkSelection(clickedField) {
-        this.erasePossibleMoves()
-
-        if (!this.selectedField) {
-            this.clickedFirstTime(clickedField)
-        } else {
-            this.clickedWhenSomethingSelected(clickedField)
-        }
-    }
-
     clickedFirstTime(clickedField) {
         if (!clickedField.field.belongsTo(this.game.currentPlayer))
             return
 
         this.selectNewField(clickedField)
+    }
+
+    selectNewField(clickedField) {
+        this.selectedField = clickedField
+        this.selectedField.isSelected = true
+        this.renderPossibleMoves()
+
+        this.selectedField.domElement.className = this.selectedField.getHoveredClassName()
     }
 
     clickedWhenSomethingSelected(clickedField) {
@@ -109,6 +113,10 @@ export class GameBoardView {
         
         this.moveTowardsDirection(clickedField, direction)
     }
+
+    wasDoubleClicked(clickedField) {
+        return this.selectedField === clickedField
+    }
     
     triedToMoveMoreThanItCan() {
         console.warn('Tried to move more than is available in this time');
@@ -118,39 +126,6 @@ export class GameBoardView {
     moveTowardsDirection(clickedField, direction) {
         let moveCount = this.selectedField.field.calculateMoveCountTowards(clickedField.field)
         this.move(direction, moveCount)
-    }
-
-    wasDoubleClicked(clickedField) {
-        return this.selectedField === clickedField
-    }
-
-    renderPossibleMoves() {
-        const selectedField = this.selectedField.field
-        const maxPossibleMoves = selectedField.height
-
-        // north & south
-        this.renderInSameLine(selectedField, maxPossibleMoves, DIRECTION_NORTH)
-
-        // east & west
-        this.renderInSameLine(selectedField, maxPossibleMoves, DIRECTION_WEST)
-    }
-
-    erasePossibleMoves() {
-        this.fields.forEach(v => v.domElement.className = v.getUnhoveredClassName())
-    }
-
-    reRenderBoard() {
-        this.erasePossibleMoves()
-    }
-
-    renderInSameLine(selectedField, maxPossibleMoves, baseDirection) {
-        for (let i = 1; i <= maxPossibleMoves; i++) {
-            const offset = this.game.getOffsetBasedOnDirection(selectedField, baseDirection, i)
-
-            const elements = this.fields.filter(v => v.isInRange(selectedField, offset))
-
-            elements.forEach(v => v.domElement.className = v.getHoveredClassName())
-        }
     }
 
     move(direction, moveCount) {
@@ -165,18 +140,39 @@ export class GameBoardView {
         this.unSelectField()
     }
 
-    selectNewField(clickedField) {
-        this.selectedField = clickedField
-        this.selectedField.isSelected = true
-        this.renderPossibleMoves()
-
-        this.selectedField.domElement.className = this.selectedField.getHoveredClassName()
-    }
-
     unSelectField() {
         this.selectedField.isSelected = false
         this.selectedField.className = this.selectedField.getUnhoveredClassName()
         this.reRenderBoard()
         this.selectedField = null
+    }
+
+    renderPossibleMoves() {
+        const selectedField = this.selectedField.field
+        const maxPossibleMoves = selectedField.height
+
+        // north & south
+        this.renderInSameLine(selectedField, maxPossibleMoves, DIRECTION_NORTH)
+
+        // east & west
+        this.renderInSameLine(selectedField, maxPossibleMoves, DIRECTION_WEST)
+    }
+
+    renderInSameLine(selectedField, maxPossibleMoves, baseDirection) {
+        for (let i = 1; i <= maxPossibleMoves; i++) {
+            const offset = this.game.getOffsetBasedOnDirection(selectedField, baseDirection, i)
+
+            const elements = this.fields.filter(v => v.isInRange(selectedField, offset))
+
+            elements.forEach(v => v.domElement.className = v.getHoveredClassName())
+        }
+    }
+
+    erasePossibleMoves() {
+        this.fields.forEach(v => v.domElement.className = v.getUnhoveredClassName())
+    }
+
+    reRenderBoard() {
+        this.erasePossibleMoves()
     }
 }
