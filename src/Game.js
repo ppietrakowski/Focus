@@ -22,25 +22,25 @@ export class Focus {
     }
 
     moveToField(x, y, direction, howManyFieldWantMove) {
-        let from = this.gameBoard.getFieldAt(x, y)
+        let fromField = this.gameBoard.getFieldAt(x, y)
 
-        if (!from.belongsTo(this.currentPlayer)) {
+        if (!fromField.belongsTo(this.currentPlayer)) {
             return false
         }
 
-        let toField = this.getFieldBasedOnDirectionAndMoveCount(from, direction, howManyFieldWantMove)
+        let toField = this.getFieldBasedOnDirectionAndMoveCount(fromField, direction, howManyFieldWantMove)
 
         if (!toField.isPlayable) {
             return false
         }
 
-        toField.makeAsNextField(from, howManyFieldWantMove)
+        toField.makeAsNextField(fromField, howManyFieldWantMove)
 
         if (toField.isOvergrown) {
             this.popElementsToCreateTower(toField)
         }
 
-        this.events.emit(Focus.MOVED_FIELD, x, y, toField, from)
+        this.events.emit(Focus.MOVED_FIELD, x, y, toField, fromField)
         return true
     }
 

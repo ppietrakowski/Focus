@@ -37,6 +37,8 @@ export class ReserveView {
         for (let element of reserveElements) {
             this.reserveFields.push(element)
         }
+
+        this.lastReserved = 0
     }
 
     addToReserve() {

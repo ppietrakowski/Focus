@@ -27,7 +27,7 @@ export class GameBoardView {
 
         this.greenReserve = new ReserveViewRequest(this.greenReserve, this.game)
         this.redReserve = new ReserveViewRequest(this.redReserve, this.game)
-
+        
         this.greenReserve.events.on(ReserveView.POOL_CLICKED, () => this.placeDuringPlayerTurn(PLAYER_GREEN, this.greenReserve))
         this.redReserve.events.on(ReserveView.POOL_CLICKED, () => this.placeDuringPlayerTurn(PLAYER_RED, this.redReserve))
 
