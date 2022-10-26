@@ -54,14 +54,18 @@ export class ReserveView {
     removeFromReserve() {
         this.lastReserved--
         if (!this.isSomethingInPool()) {
-            this.lastReserved = Math.max(this.lastReserved, 0)
-
-            console.warn('Trying to click unexisting item in reserve')
-            return false
+            return this.triedToUseEmptyPool()
         }
 
         this.reserveFields[this.lastReserved].className = 'reserveEmptyPawn'
         return true
+    }
+
+    triedToUseEmptyPool() {
+        this.lastReserved = Math.max(this.lastReserved, 0)
+
+        console.warn('Trying to click unexisting item in reserve')
+        return false
     }
 
     isSomethingInPool() {
