@@ -49,14 +49,19 @@ export class GameBoardView {
 
     placeDuringPlayerTurn(player, reserve) {
         if (this.clickedReserve) {
-            reserve.addToReserve()
-            this.clickedReserve = false
-            return
+            return this.clickedTwiceOnReserve(reserve)
         }
+
         this.clickedReserve = !this.clickedReserve
         
         reserve.removeFromReserve()
         this.switchToPlaceStateAtPlayerTurn(player)
+    }
+
+    clickedTwiceOnReserve(reserve) {
+        reserve.addToReserve()
+        this.clickedReserve = false
+        return
     }
 
     addedElementToPool() {
@@ -216,12 +221,16 @@ export class GameBoardView {
     renderInSameLine(selectedField, maxPossibleMoves, baseDirection) {
         this.fields.forEach(v => v.updateField())
         for (let i = 1; i <= maxPossibleMoves; i++) {
-            const offset = this.game.getOffsetBasedOnDirection(selectedField, baseDirection, i)
-
-            const elements = this.fields.filter(v => v.isInRange(selectedField, offset))
-
-            elements.forEach(v => v.visualizeHovered())
+            this.selectNeighboursInRange(selectedField, baseDirection, i);
         }
+    }
+
+    selectNeighboursInRange(selectedField, baseDirection, maxRange) {
+        const offset = this.game.getOffsetBasedOnDirection(selectedField, baseDirection, maxRange)
+
+        const elements = this.fields.filter(v => v.isInRange(selectedField, offset))
+
+        elements.forEach(v => v.visualizeHovered())
     }
 
     erasePossibleMoves() {
