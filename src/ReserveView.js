@@ -1,5 +1,5 @@
 import { EventEmitter } from "eventemitter3"
-import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B } from "./Field"
+import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN } from "./Field"
 import { Player } from "./Player"
 
 /**
@@ -8,9 +8,9 @@ import { Player } from "./Player"
  * @returns 
  */
  function getClassNameOfElement(player) {
-    return (player.state & FIELD_STATE_PLAYER_A) ? 
+    return (player.state & FIELD_STATE_PLAYER_RED) ? 
         'reserveRedPawn' 
-        : (player.state & FIELD_STATE_PLAYER_B) ?
+        : (player.state & FIELD_STATE_PLAYER_GREEN) ?
         'reserveGreenPawn' : 'reserveEmptyPawn'
 }
 
@@ -37,17 +37,18 @@ export class ReserveView {
 
         for (let element of reserveElements) {
             this.reserveFields.push(element)
-            element.addEventListener('click', () => this.events.emit(ReserveView.POOL_CLICKED, this.player))
         }
     }
 
     addToReserve() {
         this.reserveFields[this.lastReserved].className = getClassNameOfElement(this.player)
         this.lastReserved++
+        return true
     }
 
     removeFromReserve() {
         this.lastReserved--
         this.reserveFields[this.lastReserved].className = 'reserveEmptyPawn'
+        return true
     }
 }

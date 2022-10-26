@@ -1,11 +1,12 @@
 import { EventEmitter } from "eventemitter3"
-import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, Field, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B } from "./Field"
+import { Field, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_PLAYER_RED } from "./Field"
 import { Focus } from "./Game"
 
 export class FieldView {
 
     static FIELD_UNCLICK = 'UnClick'
     static FIELD_CLICK = 'Click'
+    static FIELD_DBL_CLICK = 'DblClick'
 
     constructor(game, field) {
         /**
@@ -31,16 +32,17 @@ export class FieldView {
     }
 
     onMouseLeave() {
-        if (this.game.currentPlayer.doesOwnThisField(this.field) && !this.isSelected)
+        if (this.game.currentPlayer.doesOwnThisField(this.field) && !this.isSelected) {
             this.domElement.className = this.getUnhoveredClassName()
+        }
     }
 
     getHoveredClassName() {
-        return (this.field.state & FIELD_STATE_PLAYER_A) ? 'playerRedFieldHovered' : (this.field.state & FIELD_STATE_PLAYER_B) ? 'playerGreenFieldHovered' : 'emptyField'
+        return (this.field.state & FIELD_STATE_PLAYER_RED) ? 'playerRedFieldHovered' : (this.field.state & FIELD_STATE_PLAYER_GREEN) ? 'playerGreenFieldHovered' : 'emptyField'
     }
 
     getUnhoveredClassName() {
-        return (this.field.state & FIELD_STATE_PLAYER_A) ? 'playerRedField' : (this.field.state & FIELD_STATE_PLAYER_B) ? 'playerGreenField' : 'emptyField'
+        return (this.field.state & FIELD_STATE_PLAYER_RED) ? 'playerRedField' : (this.field.state & FIELD_STATE_PLAYER_GREEN) ? 'playerGreenField' : 'emptyField'
     }
 
     onMouseOver() {
@@ -50,7 +52,7 @@ export class FieldView {
     }
 
     onClick() {
-        this.events.emit(FieldView.FIELD_CLICK, this.field)
+        this.events.emit(FieldView.FIELD_CLICK, this)
     }
 
     visualizeHovered() {

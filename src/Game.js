@@ -1,9 +1,9 @@
-import { FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, MAX_TOWER_HEIGHT } from "./Field";
+import { FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, MAX_TOWER_HEIGHT } from "./Field";
 import { GameBoard } from "./GameBoard";
 import { Player } from "./Player";
 
-export const PLAYER_RED = new Player(FIELD_STATE_PLAYER_A)
-export const PLAYER_GREEN = new Player(FIELD_STATE_PLAYER_B)
+export const PLAYER_RED = new Player(FIELD_STATE_PLAYER_RED)
+export const PLAYER_GREEN = new Player(FIELD_STATE_PLAYER_GREEN)
 
 
 export class Focus {
@@ -18,7 +18,7 @@ export class Focus {
         this.events = this.gameBoard.events
         this.currentPlayer = PLAYER_RED
     
-        PLAYER_GREEN.pooledFields++
+        PLAYER_GREEN.pooledPawns++
         
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
@@ -26,18 +26,21 @@ export class Focus {
     moveToField(x, y, direction, howManyFieldWantMove) {
         let from = this.gameBoard.getFieldAt(x, y)
 
-        if (!from.belongsTo(this.currentPlayer))
+        if (!from.belongsTo(this.currentPlayer)) {
             return false
-
+        }
 
         let toField = this.getFieldBasedOnDirectionAndMoveCount(from, direction, howManyFieldWantMove)
-        if (!toField.isPlayable)
+
+        if (!toField.isPlayable) {
             return false
+        }
 
         toField.makeAsNextField(from, howManyFieldWantMove)
 
-        if (toField.isOvergrown)
+        if (toField.isOvergrown) {
             this.popElementsToCreateTower(toField)
+        }
 
         this.events.emit(Focus.MOVED_FIELD, x, y, toField, from)
         return true
@@ -49,15 +52,17 @@ export class Focus {
         field.underThisField = this.makeNewUnderAfterPlacing(field, owner)
         field.state = owner.state
 
-        if (field.isOvergrown)
+        if (field.isOvergrown) {
             this.popElementsToCreateTower(field)
+        }
     }
 
     makeNewUnderAfterPlacing(field) {
         let newUnderElements = field.underThisField
 
-        if (!field.isEmpty)
+        if (!field.isEmpty) {
             newUnderElements = [{ state: field.state }].concat(newUnderElements)
+        }
 
         return newUnderElements
     }
@@ -70,12 +75,13 @@ export class Focus {
     popTopElementFromField(toField) {
         const field = toField.underThisField.pop()
 
-        if (this.currentPlayer.doesOwnThisField(field))
+        if (this.currentPlayer.doesOwnThisField(field)) {
             this.increaseCurrentPlayersPool()
+        }
     }
 
     increaseCurrentPlayersPool() {
-        this.currentPlayer.pooledFields++
+        this.currentPlayer.pooledPawns++
         this.events.emit(Focus.ADDED_ITEM_TO_POOL, this.currentPlayer)
     }
 
@@ -89,11 +95,13 @@ export class Focus {
     getOffsetBasedOnDirection(field, direction, howManyFieldWantMove) {
         let mult = howManyFieldWantMove
 
-        if (howManyFieldWantMove < 1)
+        if (howManyFieldWantMove < 1) {
             mult = 1
+        }
 
-        if (field.height < howManyFieldWantMove)
+        if (field.height < howManyFieldWantMove) {
             mult = field.height
+        }
 
         return { x: direction.x * mult, y: direction.y * mult }
     }
@@ -104,11 +112,13 @@ export class Focus {
      * @returns 
      */
     getNextPlayer(toPlayer) {
-        if (!toPlayer)
+        if (!toPlayer) {
             toPlayer = this.currentPlayer
+        }
 
-        if (toPlayer.doesOwnThisField(FIELD_STATE_PLAYER_A))
+        if (toPlayer.doesOwnThisField(FIELD_STATE_PLAYER_RED)) {
             return PLAYER_GREEN
+        }
 
         return PLAYER_RED
     }
@@ -131,9 +141,10 @@ export class Focus {
     }
 
     checkForPoolAvailability(playerWhoWon, playerWhoFail) {
-        if (playerWhoFail.pooledFields === 0)
+        if (playerWhoFail.pooledPawns === 0) {
             this.events.emit(Focus.VICTORY, playerWhoWon)
-        else
+        } else {
             this.events.emit(Focus.ENEMY_HAS_POOL, playerWhoFail)
+        }
     }
 }

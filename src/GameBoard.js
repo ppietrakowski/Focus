@@ -1,5 +1,5 @@
 import { EventEmitter } from "eventemitter3";
-import { Field, FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_A, FIELD_STATE_PLAYER_B, FIELD_STATE_UNPLAYABLE } from './Field'
+import { Field, FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_UNPLAYABLE } from './Field'
 
 import board from "./board.json"
 
@@ -18,9 +18,9 @@ function boardToStateMask(boardState) {
         return FIELD_STATE_EMPTY
 
     else if (boardState === 2)
-        return FIELD_STATE_PLAYER_A
+        return FIELD_STATE_PLAYER_RED
     else if (boardState === 3)
-        return FIELD_STATE_PLAYER_B
+        return FIELD_STATE_PLAYER_GREEN
 
     throw new Error('Illegal board state')
 }
@@ -48,8 +48,9 @@ export class GameBoard {
     addNewFieldFromJson(json, fieldId) {
         const field = json.find(v => v.id === fieldId) || null;
 
-        if (field === null)
+        if (field === null) {
             throw new Error(`Missing object at (${(fieldId % GameBoard.GAME_BOARD_WIDTH)}, ${Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)}) id=${fieldId}`);
+        }
 
         this.fields[fieldId] = new Field(boardToStateMask(json[fieldId].state), (fieldId % GameBoard.GAME_BOARD_WIDTH), Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH));
     }
@@ -65,8 +66,9 @@ export class GameBoard {
     }
 
     getFieldAt(x, y) {
-        if (this.isOutOfBoundsInXAxis(x) || this.isOutOfBoundsInYAxis(y))
+        if (this.isOutOfBoundsInXAxis(x) || this.isOutOfBoundsInYAxis(y)) {
             throw new Error(`point (${x}, ${y}) is out of bounds`)
+        }
 
         return this.fields[x + y * GameBoard.GAME_BOARD_WIDTH] || null
     }

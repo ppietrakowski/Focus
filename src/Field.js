@@ -1,7 +1,7 @@
 export const FIELD_STATE_UNPLAYABLE = 2 << 0
 export const FIELD_STATE_EMPTY = 2 << 1
-export const FIELD_STATE_PLAYER_A = 2 << 2
-export const FIELD_STATE_PLAYER_B = 2 << 3
+export const FIELD_STATE_PLAYER_RED = 2 << 2
+export const FIELD_STATE_PLAYER_GREEN = 2 << 3
 
 export const DIRECTION_SOUTH = { x: 0, y: 1 }
 export const DIRECTION_NORTH = { x: 0, y: -1 }
@@ -31,8 +31,9 @@ export class Field {
      * @returns 
      */
     makeAsNextField(cameFrom, moveCount) {
-        if (!cameFrom.isPlayable)
+        if (!cameFrom.isPlayable) {
             return
+        }
 
         // one move is just a changing of state
         const itemCountFromOldList = moveCount - 1
@@ -40,10 +41,11 @@ export class Field {
 
         const temp = cameFrom.shiftNFirstElements(itemCountFromOldList)
 
-        if (!this.isEmpty)
+        if (!this.isEmpty) {
             this.underThisField = this.getNewUnderElements(temp)
-        else
+        } else {
             this.underThisField = temp
+        }
 
         this.state = oldState
     }
@@ -63,13 +65,15 @@ export class Field {
     shiftNFirstElements(n) {
         let firstElements = []
 
-        while (n-- > 0)
+        while (n-- > 0) {
             this.shiftElement(firstElements)
+        }
 
-        if (this.underThisField.length === 0)
+        if (this.underThisField.length === 0) {
             Field.clearField(this)
-        else
+        } else {
             this.state = this.underThisField.shift().state
+        }
 
         return firstElements
     }
@@ -83,8 +87,9 @@ export class Field {
     shiftElement(firstElements) {
         const element = this.underThisField.shift() || null
 
-        if (element)
+        if (element !== null) {
             firstElements.push(element)
+        }
     }
 
     get isEmpty() {
@@ -108,25 +113,31 @@ export class Field {
     calculateDirectionTowards(anotherField) {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
-        if (Math.abs(v.x) > this.height || Math.abs(v.y) > this.height)
+        if (!this.canJump(v)) {
             return null
+        }
 
-        if (v.x > 0)
+        if (v.x > 0) {
             return DIRECTION_EAST
-        else if (v.x < 0)
+        } else if (v.x < 0) {
             return DIRECTION_WEST
-
-        else if (v.y > 0)
+        } else if (v.y > 0) {
             return DIRECTION_SOUTH
+        }
 
         return DIRECTION_NORTH
+    }
+
+    canJump(v) {
+        return Math.abs(v.x) <= this.height && Math.abs(v.y) <= this.height
     }
 
     calculateMoveCountTowards(anotherField) {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
-        if (Math.abs(v.x) > 0)
+        if (Math.abs(v.x) > 0) {
             return Math.abs(v.x)
+        }
 
         return Math.abs(v.y)
     }

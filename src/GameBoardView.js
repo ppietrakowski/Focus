@@ -2,6 +2,8 @@ import { Focus, PLAYER_GREEN, PLAYER_RED } from "./Game";
 import { FieldView } from './FieldView'
 import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST } from "./Field";
 import { ReserveView } from "./ReserveView";
+import { Player } from "./Player";
+import { ReserveViewRequest } from "./ReserveViewRequest";
 
 
 export class GameBoardView {
@@ -18,10 +20,13 @@ export class GameBoardView {
          * @type {FieldView[]}
          */
         this.fields = []
-        this.board = document.getElementsByClassName('invisibleGameBoard')[0]
+        this.board = document.getElementsByClassName('virtualGameBoard')[0]
 
         this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0], PLAYER_GREEN)
         this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0], PLAYER_RED)
+        
+        this.greenReserve = new ReserveViewRequest(this.greenReserve, this.game)
+        this.redReserve = new ReserveViewRequest(this.redReserve, this.game)
 
         this.greenReserve.events.on(ReserveView.POOL_CLICKED, () => this.placeDuringPlayerTurn(PLAYER_GREEN, this.greenReserve))
         this.redReserve.events.on(ReserveView.POOL_CLICKED, () => this.placeDuringPlayerTurn(PLAYER_RED, this.redReserve))
@@ -31,11 +36,15 @@ export class GameBoardView {
          */
         this.selectedField = null
 
+        /**
+         * @type {Player}
+         */
+        this.playerWhoPlace = null
+
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToPlaceStateAtPlayerTurn, this)
         this.game.events.on(Focus.ADDED_ITEM_TO_POOL, this.addedElementToPool, this)
 
         this.clickedReserve = false
-        this.addedElementToPool(PLAYER_GREEN)
     }
 
     placeDuringPlayerTurn(player, reserve) {
@@ -51,10 +60,11 @@ export class GameBoardView {
     }
 
     addedElementToPool(player) {
-        if (player === PLAYER_GREEN)
+        if (player === PLAYER_GREEN) {
             this.greenReserve.addToReserve()
-        else if (player === PLAYER_RED)
+        } else if (player === PLAYER_RED) {
             this.redReserve.addToReserve()
+        }
     }
 
     hookGuiMethods() {
@@ -62,7 +72,7 @@ export class GameBoardView {
             element => {
                 const e = new FieldView(this.game, element)
                 this.board.appendChild(e.domElement)
-                e.events.on(FieldView.FIELD_CLICK, () => this.checkSelection(e))
+                e.events.on(FieldView.FIELD_CLICK, this.checkSelection, this)
 
                 this.fields.push(e)
             }
@@ -80,33 +90,40 @@ export class GameBoardView {
     }
 
     switchToPlaceStateAtPlayerTurn(player) {
-        if (this.game.currentPlayer === player)
-            this.fields.forEach(v => this.enterIntoPlaceState(v, player))
+        if (this.game.currentPlayer === player) {
+            this.playerWhoPlace = player
+            this.fields.forEach(v => this.enterIntoPlaceState(v))
+        }
     }
 
-    enterIntoPlaceState(field, playerWhoPlace) {
+    enterIntoPlaceState(field) {
         field.events.off(FieldView.FIELD_CLICK)
         field.isSelected = false
 
         // use click event now for placing instead of moving
-        field.events.on(FieldView.FIELD_CLICK, () => this.onPlaceFieldClicked(field, playerWhoPlace))
+        field.events.on(FieldView.FIELD_CLICK, this.onPlaceFieldClicked, this)
     }
 
-    onPlaceFieldClicked(field, playerWhoPlace) {
-        if (!playerWhoPlace.hasAnyPool) {
-            this.playerHasNoPoolAvailable(playerWhoPlace);
+    onPlaceFieldClicked(field) {
+
+        if (!this.playerWhoPlace) {
+            throw new Error('Trying to place field without set player who place')
+        }
+        
+        if (!this.playerWhoPlace.hasAnyPool) {
+            this.playerHasNoPoolAvailable(this.playerWhoPlace);
             return
         }
 
         if (!field.field.isPlayable) {
-            this.resetToPlayState(playerWhoPlace)
+            this.resetToPlayState(this.playerWhoPlace)
             return
         }
 
-        playerWhoPlace.pooledFields--
-        this.game.placeField(field.field.x, field.field.y, playerWhoPlace)
+        this.playerWhoPlace.pooledPawns--
+        this.game.placeField(field.field.x, field.field.y, this.playerWhoPlace)
 
-        this.resetToPlayState(this.game.getNextPlayer(playerWhoPlace))
+        this.resetToPlayState(this.game.getNextPlayer(this.playerWhoPlace))
     }
 
     playerHasNoPoolAvailable(playerWhoPlace) {
@@ -124,8 +141,9 @@ export class GameBoardView {
     }
 
     clickedFirstTime(clickedField) {
-        if (!clickedField.field.belongsTo(this.game.currentPlayer))
+        if (!clickedField.field.belongsTo(this.game.currentPlayer)) {
             return
+        }
 
         this.selectNewField(clickedField)
     }

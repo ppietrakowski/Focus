@@ -3,7 +3,7 @@ body {
     padding: 0;
 }
 
-.invisibleGameBoard {
+.virtualGameBoard {
     height: 640px;
     width: 640px;
     margin-top: 10px;
