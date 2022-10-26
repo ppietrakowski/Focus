@@ -43,7 +43,6 @@ body {
 .reserveEmptyPawn {
     height: 70px;
     width: 30px;
-    margin-left: 30px;
     border: 0;
     float: left;
 }
@@ -51,7 +50,6 @@ body {
 .reserveRedPawn {
     height: 70px;
     width: 30px;
-    margin-left: 30px;
     background-image: url(../img/focusReserveRed.svg);
     background-repeat: no-repeat;
     background-position: center;
@@ -61,7 +59,6 @@ body {
 .reserveGreenPawn {
     height: 70px;
     width: 30px;
-    margin-left: 30px;
     background-image: url(../img/focusReserveGreen.svg);
     background-repeat: no-repeat;
     background-position: center;

@@ -24,7 +24,7 @@ export class GameBoardView {
 
         this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0], PLAYER_GREEN)
         this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0], PLAYER_RED)
-        
+
         this.greenReserve = new ReserveViewRequest(this.greenReserve, this.game)
         this.redReserve = new ReserveViewRequest(this.redReserve, this.game)
 
@@ -59,12 +59,9 @@ export class GameBoardView {
         this.switchToPlaceStateAtPlayerTurn(player)
     }
 
-    addedElementToPool(player) {
-        if (player === PLAYER_GREEN) {
-            this.greenReserve.addToReserve()
-        } else if (player === PLAYER_RED) {
-            this.redReserve.addToReserve()
-        }
+    addedElementToPool() {
+        this.greenReserve.addToReserve()
+        this.redReserve.addToReserve()
     }
 
     hookGuiMethods() {

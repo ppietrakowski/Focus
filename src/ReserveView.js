@@ -26,7 +26,6 @@ export class ReserveView {
         this.reserveBar = reserveBar
         this.player = player
         this.events = new EventEmitter()
-        this.lastReserved = 0
 
         const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn')
         
@@ -41,14 +40,29 @@ export class ReserveView {
     }
 
     addToReserve() {
+        if (!this.isSomethingInPool()) {
+            return false
+        }
+
         this.reserveFields[this.lastReserved].className = getClassNameOfElement(this.player)
-        this.lastReserved++
+        this.lastReserved++ 
         return true
     }
 
     removeFromReserve() {
         this.lastReserved--
+        if (!this.isSomethingInPool()) {
+            this.lastReserved = Math.max(this.lastReserved, 0)
+
+            console.warn('Trying to click unexisting item in reserve')
+            return false
+        }
+
         this.reserveFields[this.lastReserved].className = 'reserveEmptyPawn'
         return true
+    }
+
+    isSomethingInPool() {
+        return this.reserveFields[this.lastReserved] && this.player.hasAnyPool
     }
 }
