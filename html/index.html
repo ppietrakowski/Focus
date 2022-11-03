@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .virtualGameBoard {
+      height: 640px;
+      width: 640px;
+      margin-top: 10px;
+      padding: 10px 0px 10px 100px;
+    }
+
+    .gameBoard {
+      height: 840px;
+      width: 840px;
+      border: 0;
+      float: left;
+      background-image: url(../img/focusEmptyBoard.svg);
+      background-repeat: no-repeat;
+    }
+
+    .buttonBoard {
+      width: 600px;
+      padding: 30px 120px 10px 120px;
+      float: left;
+    }
+
+    .playOptionButton {
+      width: 200px;
+      height: 50px;
+      padding: 0;
+      float: left;
+    }
+
+    .reserveRed {
+      height: 70px;
+      width: 330px;
+      border: 0;
+      margin-top: 10px;
+      margin-left: 250px;
+    }
+
+    .reserveEmptyPawn {
+      height: 70px;
+      width: 30px;
+      border: 0;
+      float: left;
+    }
+
+    .reserveRedPawn {
+      height: 70px;
+      width: 30px;
+      background-image: url(../img/focusReserveRed.svg);
+      background-repeat: no-repeat;
+      background-position: center;
+      float: left;
+    }
+
+    .reserveGreenPawn {
+      height: 70px;
+      width: 30px;
+      background-image: url(../img/focusReserveGreen.svg);
+      background-repeat: no-repeat;
+      background-position: center;
+      float: left;
+    }
+
+    .reserveGreen {
+      height: 70px;
+      width: 330px;
+      border: 0;
+      margin-top: 10px;
+      margin-left: 250px;
+    }
+
+    .playerRedField {
+      height: 80px;
+      width: 80px;
+      background-image: url(../img/focusPawnRed.svg);
+      background-repeat: no-repeat;
+      background-position: center;
+      float: left;
+      position: relative;
+      background-blend-mode: multiply;
+    }
+
+    .playerRedField>img {
+      opacity: 0.75;
+      position: absolute;
+    }
+
+    .playerRedFieldHovered {
+      opacity: 0.75;
+      height: 80px;
+      width: 80px;
+      background-image: url(../img/focusPawnRed.svg);
+      background-repeat: no-repeat;
+      float: left;
+      position: relative;
+      background-position: center;
+    }
+
+    .playerRedFieldHovered>img {
+      opacity: 0.6;
+      position: absolute;
+    }
+
+    .playerGreenField {
+      height: 80px;
+      width: 80px;
+      background-image: url(../img/focusPawnGreen.svg);
+      background-repeat: no-repeat;
+      float: left;
+      background-position: center;
+      position: relative;
+    }
+
+
+    .playerGreenFieldHovered {
+      opacity: 0.75;
+      height: 80px;
+      width: 80px;
+      background-image: url(../img/focusPawnGreen.svg);
+      background-repeat: no-repeat;
+      float: left;
+      background-position: center;
+      position: relative;
+    }
+
+    .playerGreenField>img {
+      opacity: 0.75;
+      position: absolute;
+    }
+
+    .playerGreenFieldHovered>img {
+      opacity: 0.6;
+      position: absolute;
+    }
+
+    .emptyField {
+      height: 80px;
+      width: 80px;
+      background-repeat: no-repeat;
+      background-position: center;
+      float: left;
+      z-index: 2;
+    }
+  </style>
+
+  <title>Focus</title>
+</head>
+
+<body>
+
+  <div id="gameStyles" class="buttonBoard">
+    <button id="playerVsPlayer" class="playOptionButton">gracz vs. gracz</button>
+    <button id="playerVsAI" class="playOptionButton">gracz vs. komputer</button>
+    <button id="AIvsAI" class="playOptionButton">komputer vs. komputer</button>
+  </div>
+
+  <div class="gameBoard">
+    <div class="reserveRed">
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+    </div>
+    <div class="virtualGameBoard"></div>
+    <div class="reserveGreen">
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+      <div class="reserveEmptyPawn"></div>
+    </div>
+  </div>
+</body>
+
+</html>

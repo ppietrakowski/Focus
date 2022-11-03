@@ -1,4 +1,4 @@
-import { EventEmitter } from "eventemitter3"
+import EventEmitter from "eventemitter3"
 import { Field, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_PLAYER_RED } from "./Field"
 import { Focus } from "./Game"
 
@@ -8,7 +8,17 @@ export class FieldView {
     static FIELD_CLICK = 'Click'
     static FIELD_DBL_CLICK = 'DblClick'
 
-    constructor(game, field) {
+    static FieldMouseOver = 'FieldMouseOver'
+    static FieldMouseLeave = 'FieldMouseLeave'
+
+    field: Field
+    isSelected: boolean
+
+    game: Focus
+    events: EventEmitter
+    domElement: HTMLDivElement
+
+    constructor(game: Focus, field: Field) {
         /**
          * @type {Field}
          */
@@ -33,7 +43,8 @@ export class FieldView {
 
     onMouseLeave() {
         if (this.game.currentPlayer.doesOwnThisField(this.field) && !this.isSelected) {
-            this.domElement.className = this.getUnhoveredClassName()
+            // this.domElement.className = this.getUnhoveredClassName()
+            this.events.emit(FieldView.FieldMouseLeave, this.game.currentPlayer)
         }
     }
 
@@ -46,8 +57,9 @@ export class FieldView {
     }
 
     onMouseOver() {
-        if (this.game.currentPlayer.doesOwnThisField(this.field) && !this.isSelected) {
-            this.domElement.className = this.getHoveredClassName()
+        if (this.game.currentPlayer.doesOwnThisField(this.field)) {
+            // this.domElement.className = this.getHoveredClassName()
+            this.events.emit(FieldView.FieldMouseOver, this.game.currentPlayer)
         }
     }
 
@@ -63,15 +75,11 @@ export class FieldView {
         this.domElement.className = this.getUnhoveredClassName()
     }
 
-    updateField() {
-        
-    }
-
     /**
      * 
      * @param {Field} anotherField 
      */
-    isInRange(anotherField, range) {
+    isInRange(anotherField: Field, range: {x: number, y: number}) {
         return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) &&
             (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
     }

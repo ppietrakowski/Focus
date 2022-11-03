@@ -1,16 +1,20 @@
-import { EventEmitter } from "eventemitter3";
+import EventEmitter from "eventemitter3";
 import { Field, FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_UNPLAYABLE } from './Field'
 
 import board from "./board.json"
+import { Player } from "./Player";
 
-/**
- * @callback ForEachCallback
- * @param {Field} element
- * @param {number} x
- * @param {number} y
- */
 
-function boardToStateMask(boardState) {
+interface BoardState {
+    id: number
+    state: number
+}
+
+interface ForEachCallback {
+    (element: Field, x: number, y: number): void
+}
+
+function boardToStateMask(boardState: number) {
     if (boardState === 0)
         return FIELD_STATE_UNPLAYABLE
 
@@ -30,23 +34,27 @@ export class GameBoard {
 
     static GAME_BOARD_WIDTH = 8
     static GAME_BOARD_HEIGHT = 8
+    events: EventEmitter
+    fields: Field[]
 
     constructor() {
         this.events = new EventEmitter()
-        this.fields = [new Field(boardToStateMask(board.find(v => v.id === 0).state), 0, 0)]
+        const elements = board.elements;
+
+        this.fields = [new Field(boardToStateMask(elements.find((v: BoardState) => v.id === 0).state), 0, 0)]
 
         const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
 
-        if (board.length < maxSize)
+        if (elements.length < maxSize)
             throw new Error(`Board should have at least ${maxSize} element`)
 
         for (let i = 1; i < maxSize; i++) {
-            this.addNewFieldFromJson(board, i);
+            this.addNewFieldFromJson(elements, i);
         }
     }
 
-    addNewFieldFromJson(json, fieldId) {
-        const field = json.find(v => v.id === fieldId) || null;
+    addNewFieldFromJson(json: any, fieldId: number) {
+        const field = json.find((v: BoardState)  => v.id === fieldId) || null;
 
         if (field === null) {
             throw new Error(`Missing object at (${(fieldId % GameBoard.GAME_BOARD_WIDTH)}, ${Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)}) id=${fieldId}`);
@@ -55,17 +63,13 @@ export class GameBoard {
         this.fields[fieldId] = new Field(boardToStateMask(json[fieldId].state), (fieldId % GameBoard.GAME_BOARD_WIDTH), Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH));
     }
 
-    /**
-     * 
-     * @param {ForEachCallback} callback 
-     */
-    each(callback) {
+    each(callback: ForEachCallback) {
         for (let field of this.fields) {
             callback(field, field.x, field.y)
         }
     }
 
-    getFieldAt(x, y) {
+    getFieldAt(x: number, y: number) {
         if (this.isOutOfBoundsInXAxis(x) || this.isOutOfBoundsInYAxis(y)) {
             throw new Error(`point (${x}, ${y}) is out of bounds`)
         }
@@ -73,15 +77,15 @@ export class GameBoard {
         return this.fields[x + y * GameBoard.GAME_BOARD_WIDTH] || null
     }
 
-    isOutOfBoundsInXAxis(x) {
+    isOutOfBoundsInXAxis(x: number) {
         return x < 0 || x >= GameBoard.GAME_BOARD_WIDTH
     }
 
-    isOutOfBoundsInYAxis(y) {
+    isOutOfBoundsInYAxis(y: number) {
         return y < 0 || y >= GameBoard.GAME_BOARD_HEIGHT
     }
 
-    countPlayersFields(player) {
+    countPlayersFields(player: Player) {
         return this.fields.filter(v => v.belongsTo(player)).length
     }
 }

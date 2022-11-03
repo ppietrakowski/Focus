@@ -1,12 +1,16 @@
+import { Field } from "./Field"
 
 export class Player {
 
-    constructor(state) {
+    pooledPawns: number
+    state: number
+
+    constructor(state: number) {
         this.state = state
         this.pooledPawns = 0
     }
 
-    doesOwnThisField(field) {
+    doesOwnThisField(field: number | Field) {
         if (typeof field == 'number') {
             return !!(field & this.state)
         }

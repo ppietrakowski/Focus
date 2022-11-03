@@ -1,44 +1,60 @@
-import { EventEmitter } from "eventemitter3"
+import EventEmitter from "eventemitter3"
 import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN } from "./Field"
+import { FieldView } from "./FieldView"
 import { Player } from "./Player"
 
-/**
- * 
- * @param {Player} player 
- * @returns 
- */
- function getClassNameOfElement(player) {
+
+ function getClassNameOfElement(player: Player) {
     return (player.state & FIELD_STATE_PLAYER_RED) ? 
         'reserveRedPawn' 
         : (player.state & FIELD_STATE_PLAYER_GREEN) ?
         'reserveGreenPawn' : 'reserveEmptyPawn'
 }
 
-export class ReserveView {
+export interface IReserveView {
+    addToReserve(): void
+    removeFromReserve(): void
+    getFieldAt(i: number): HTMLDivElement
+
+    readonly owner: Player
+    events: EventEmitter
+}
+
+export class ReserveView implements IReserveView {
 
     static POOL_CLICKED = 'poolClicked'
+
+    events: EventEmitter
+    
+    reserveFields: HTMLDivElement[]
+    private lastReserved: number
+    
     /**
      * 
      * @param {HTMLDivElement} reserveBar 
      * @param {Player} player
      */
-    constructor(reserveBar, player) {
+    constructor(private readonly reserveBar: HTMLDivElement, readonly owner: Player) {
         this.reserveBar = reserveBar
-        this.player = player
         this.events = new EventEmitter()
 
-        const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn')
-        
+        const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn') 
+
+
         /**
          * @type {HTMLDivElement[]}
          */
         this.reserveFields = []
 
-        for (let element of reserveElements) {
-            this.reserveFields.push(element)
+        for (let i = 0; i < reserveBar.length; i++) {
+            this.reserveFields.push(reserveElements[i] as HTMLDivElement)
         }
 
         this.lastReserved = 0
+    }
+
+    getFieldAt(i: number): HTMLDivElement {
+        return this.reserveFields[i]
     }
 
     addToReserve() {
@@ -46,7 +62,7 @@ export class ReserveView {
             return false
         }
 
-        this.reserveFields[this.lastReserved].className = getClassNameOfElement(this.player)
+        this.reserveFields[this.lastReserved].className = getClassNameOfElement(this.owner)
         this.lastReserved++ 
         return true
     }
@@ -69,6 +85,6 @@ export class ReserveView {
     }
 
     isSomethingInPool() {
-        return this.reserveFields[this.lastReserved] && this.player.hasAnyPool
+        return this.reserveFields[this.lastReserved] && this.owner.hasAnyPool
     }
 }

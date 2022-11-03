@@ -1,29 +1,38 @@
 import { Focus, PLAYER_GREEN, PLAYER_RED } from "./Game";
 import { FieldView } from './FieldView'
-import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST } from "./Field";
-import { ReserveView } from "./ReserveView";
+import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, Field } from "./Field";
+import { IReserveView, ReserveView } from "./ReserveView";
 import { Player } from "./Player";
 import { ReserveViewRequest } from "./ReserveViewRequest";
+import { AiController } from "./AiController";
+import PlayerAiController from "./PlayerAiController";
+import { GameBoard } from "./GameBoard";
 
 
 export class GameBoardView {
 
-    constructor(game) {
+    game: Focus
+    gameBoard: GameBoard
+    fields: FieldView[]
+    board: HTMLDivElement
+    greenReserve: IReserveView
+    redReserve: IReserveView
+
+    private selectedField: FieldView
+    private playerWhoPlace: Player
+    private clickedReserve: boolean
+    private red: AiController
+    private green: AiController
+
+    constructor(game: Focus) {
         this.gameBoard = game.gameBoard
 
-        /**
-         * @type {Focus}
-         */
         this.game = game
-
-        /**
-         * @type {FieldView[]}
-         */
         this.fields = []
-        this.board = document.getElementsByClassName('virtualGameBoard')[0]
+        this.board = document.getElementsByClassName('virtualGameBoard')[0] as HTMLDivElement
 
-        this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0], PLAYER_GREEN)
-        this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0], PLAYER_RED)
+        this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0] as HTMLDivElement, PLAYER_GREEN)
+        this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0] as HTMLDivElement, PLAYER_RED)
 
         this.greenReserve = new ReserveViewRequest(this.greenReserve, this.game)
         this.redReserve = new ReserveViewRequest(this.redReserve, this.game)
@@ -31,23 +40,23 @@ export class GameBoardView {
         this.greenReserve.events.on(ReserveView.POOL_CLICKED, () => this.placeDuringPlayerTurn(PLAYER_GREEN, this.greenReserve))
         this.redReserve.events.on(ReserveView.POOL_CLICKED, () => this.placeDuringPlayerTurn(PLAYER_RED, this.redReserve))
 
-        /**
-         * @type {FieldView}
-         */
         this.selectedField = null
 
-        /**
-         * @type {Player}
-         */
         this.playerWhoPlace = null
 
         this.game.events.on(Focus.ENEMY_HAS_POOL, this.switchToPlaceStateAtPlayerTurn, this)
         this.game.events.on(Focus.ADDED_ITEM_TO_POOL, this.addedElementToPool, this)
 
         this.clickedReserve = false
+
+        this.red = new PlayerAiController(PLAYER_RED, game, this)
+        this.green = new PlayerAiController(PLAYER_GREEN, game, this)
+
+        console.log(this.red)
+        console.log(this.green)
     }
 
-    placeDuringPlayerTurn(player, reserve) {
+    placeDuringPlayerTurn(player: Player, reserve: IReserveView) {
         if (this.clickedReserve) {
             return this.clickedTwiceOnReserve(reserve)
         }
@@ -58,7 +67,7 @@ export class GameBoardView {
         this.switchToPlaceStateAtPlayerTurn(player)
     }
 
-    clickedTwiceOnReserve(reserve) {
+    clickedTwiceOnReserve(reserve: IReserveView) {
         reserve.addToReserve()
         this.clickedReserve = false
         return
@@ -81,7 +90,11 @@ export class GameBoardView {
         )
     }
 
-    checkSelection(clickedField) {
+    emitSelection(clickedField: FieldView) {
+        this.game.events.emit('selectedField', clickedField, this.game.currentPlayer)
+    }
+
+    checkSelection(clickedField: FieldView) {
         this.erasePossibleMoves()
 
         if (!this.selectedField) {
@@ -92,14 +105,14 @@ export class GameBoardView {
         this.clickedWhenSomethingSelected(clickedField)
     }
 
-    switchToPlaceStateAtPlayerTurn(player) {
+    switchToPlaceStateAtPlayerTurn(player: Player) {
         if (this.game.currentPlayer === player) {
             this.playerWhoPlace = player
             this.fields.forEach(v => this.enterIntoPlaceState(v))
         }
     }
 
-    enterIntoPlaceState(field) {
+    enterIntoPlaceState(field: FieldView) {
         field.events.off(FieldView.FIELD_CLICK)
         field.isSelected = false
 
@@ -107,7 +120,7 @@ export class GameBoardView {
         field.events.on(FieldView.FIELD_CLICK, this.onPlaceFieldClicked, this)
     }
 
-    onPlaceFieldClicked(field) {
+    onPlaceFieldClicked(field: FieldView) {
 
         if (!this.playerWhoPlace) {
             throw new Error('Trying to place field without set player who place')
@@ -129,12 +142,12 @@ export class GameBoardView {
         this.resetToPlayState(this.game.getNextPlayer(this.playerWhoPlace))
     }
 
-    playerHasNoPoolAvailable(playerWhoPlace) {
+    playerHasNoPoolAvailable(playerWhoPlace: Player) {
         console.warn(`Tried to place item without any pool`);
         this.resetToPlayState(playerWhoPlace);
     }
 
-    resetToPlayState(newNextPlayer) {
+    resetToPlayState(newNextPlayer: Player) {
         this.fields.forEach(v => v.events.off(FieldView.FIELD_CLICK))
         this.fields.forEach(v => v.events.on(FieldView.FIELD_CLICK, () => this.checkSelection(v)))
 
@@ -143,7 +156,7 @@ export class GameBoardView {
         this.game.currentPlayer = newNextPlayer
     }
 
-    clickedFirstTime(clickedField) {
+    clickedFirstTime(clickedField: FieldView) {
         if (!clickedField.field.belongsTo(this.game.currentPlayer)) {
             return
         }
@@ -151,7 +164,7 @@ export class GameBoardView {
         this.selectNewField(clickedField)
     }
 
-    selectNewField(clickedField) {
+    selectNewField(clickedField: FieldView) {
         this.selectedField = clickedField
         this.selectedField.isSelected = true
         this.renderPossibleMoves()
@@ -159,7 +172,7 @@ export class GameBoardView {
         this.selectedField.visualizeHovered()
     }
 
-    clickedWhenSomethingSelected(clickedField) {
+    clickedWhenSomethingSelected(clickedField: FieldView) {
         if (this.wasDoubleClicked(clickedField)) {
             this.unSelectField()
             return
@@ -175,7 +188,7 @@ export class GameBoardView {
         this.moveTowardsDirection(clickedField, direction)
     }
 
-    wasDoubleClicked(clickedField) {
+    wasDoubleClicked(clickedField: FieldView) {
         return this.selectedField === clickedField
     }
 
@@ -184,12 +197,12 @@ export class GameBoardView {
         this.unSelectField();
     }
 
-    moveTowardsDirection(clickedField, direction) {
+    moveTowardsDirection(clickedField: FieldView, direction: {x: number, y: number}) {
         let moveCount = this.selectedField.field.calculateMoveCountTowards(clickedField.field)
         this.move(direction, moveCount)
     }
 
-    move(direction, moveCount) {
+    move(direction: {x: number, y: number}, moveCount: number) {
         const isAvailableToMoveThere = this.game.moveToField(this.selectedField.field.x, this.selectedField.field.y, direction, moveCount)
 
         if (!isAvailableToMoveThere) {
@@ -213,29 +226,29 @@ export class GameBoardView {
         const maxPossibleMoves = selectedField.height
 
         // north & south
-        this.renderInSameLine(selectedField, maxPossibleMoves, DIRECTION_NORTH)
+        this.renderInSameLine(maxPossibleMoves, DIRECTION_NORTH)
 
         // east & west
-        this.renderInSameLine(selectedField, maxPossibleMoves, DIRECTION_WEST)
+        this.renderInSameLine(maxPossibleMoves, DIRECTION_WEST)
     }
 
-    renderInSameLine(selectedField, maxPossibleMoves, baseDirection) {
-        this.fields.forEach(v => v.updateField())
+    renderInSameLine(maxPossibleMoves: number, baseDirection: {x: number, y: number}) {
         for (let i = 1; i <= maxPossibleMoves; i++) {
-            this.selectNeighboursInRange(selectedField, baseDirection, i);
+            this.selectNeighboursInRange(baseDirection, i);
         }
     }
 
-    selectNeighboursInRange(selectedField, baseDirection, maxRange) {
-        const offset = this.game.getOffsetBasedOnDirection(selectedField, baseDirection, maxRange)
+    selectNeighboursInRange(baseDirection: {x: number, y: number}, maxRange: number) {
+        const {field} = this.selectedField
+        
+        const offset = this.game.getOffsetBasedOnDirection(field, baseDirection, maxRange)
 
-        const elements = this.fields.filter(v => v.isInRange(selectedField, offset))
+        const elements = this.fields.filter(v => v.isInRange(field, offset))
 
         elements.forEach(v => v.visualizeHovered())
     }
 
     erasePossibleMoves() {
-        this.fields.forEach(v => v.updateField())
         this.fields.forEach(v => v.visualizeUnhovered())
     }
 

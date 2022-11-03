@@ -1,4 +1,5 @@
-import { FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, MAX_TOWER_HEIGHT } from "./Field";
+import EventEmitter from "eventemitter3";
+import { FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, MAX_TOWER_HEIGHT, Field } from "./Field";
 import { GameBoard } from "./GameBoard";
 import { Player } from "./Player";
 
@@ -7,11 +8,15 @@ export const PLAYER_GREEN = new Player(FIELD_STATE_PLAYER_GREEN)
 
 
 export class Focus {
-    static ADDED_ITEM_TO_POOL = 'addedItemToPool'
-    static MOVED_FIELD = 'movedField'
-    static VICTORY = 'victory'
-    static ENEMY_HAS_POOL = 'enemyHasPool'
-    static NEXT_TURN = 'nextTurn'
+    static readonly ADDED_ITEM_TO_POOL = 'addedItemToPool'
+    static readonly MOVED_FIELD = 'movedField'
+    static readonly VICTORY = 'victory'
+    static readonly ENEMY_HAS_POOL = 'enemyHasPool'
+    static readonly NEXT_TURN = 'nextTurn'
+
+    gameBoard: GameBoard
+    events: EventEmitter
+    currentPlayer: Player
 
     constructor() {
         this.gameBoard = new GameBoard()
@@ -21,7 +26,7 @@ export class Focus {
         this.events.on(Focus.MOVED_FIELD, this.checkForVictoryCondition, this)
     }
 
-    moveToField(x, y, direction, howManyFieldWantMove) {
+    moveToField(x: number, y: number, direction: {x: number, y: number}, howManyFieldWantMove: number) {
         let fromField = this.gameBoard.getFieldAt(x, y)
 
         if (!fromField.belongsTo(this.currentPlayer)) {
@@ -44,10 +49,10 @@ export class Focus {
         return true
     }
 
-    placeField(x, y, owner) {
+    placeField(x: number, y: number, owner: Player) {
         let field = this.gameBoard.getFieldAt(x, y)
 
-        field.underThisField = this.makeNewUnderAfterPlacing(field, owner)
+        field.underThisField = this.makeNewUnderAfterPlacing(field)
         field.state = owner.state
 
         if (field.isOvergrown) {
@@ -55,7 +60,7 @@ export class Focus {
         }
     }
 
-    makeNewUnderAfterPlacing(field) {
+    makeNewUnderAfterPlacing(field: Field) {
         let newUnderElements = field.underThisField
 
         if (!field.isEmpty) {
@@ -65,15 +70,15 @@ export class Focus {
         return newUnderElements
     }
 
-    popElementsToCreateTower(toField) {
+    popElementsToCreateTower(toField: Field) {
         while (toField.height > MAX_TOWER_HEIGHT)
             this.popTopElementFromField(toField)
     }
 
-    popTopElementFromField(toField) {
+    popTopElementFromField(toField: Field) {
         const field = toField.underThisField.pop()
 
-        if (this.currentPlayer.doesOwnThisField(field)) {
+        if (this.currentPlayer.doesOwnThisField(field.state)) {
             this.increaseCurrentPlayersPool()
         }
     }
@@ -83,14 +88,14 @@ export class Focus {
         this.events.emit(Focus.ADDED_ITEM_TO_POOL, this.currentPlayer)
     }
 
-    getFieldBasedOnDirectionAndMoveCount(field, direction, howManyFieldWantMove) {
+    getFieldBasedOnDirectionAndMoveCount(field: Field, direction: {x: number, y: number}, howManyFieldWantMove: number) {
         const offset = this.getOffsetBasedOnDirection(field, direction, howManyFieldWantMove)
         const foundField = this.gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
 
         return foundField
     }
 
-    getOffsetBasedOnDirection(field, direction, howManyFieldWantMove) {
+    getOffsetBasedOnDirection(field: Field, direction: {x: number, y: number}, howManyFieldWantMove: number) {
         let mult = howManyFieldWantMove
 
         if (howManyFieldWantMove < 1) {
@@ -104,12 +109,7 @@ export class Focus {
         return { x: direction.x * mult, y: direction.y * mult }
     }
 
-    /**
-     * 
-     * @param {Player?} toPlayer 
-     * @returns 
-     */
-    getNextPlayer(toPlayer) {
+    getNextPlayer(toPlayer?: Player) {
         if (!toPlayer) {
             toPlayer = this.currentPlayer
         }
@@ -138,7 +138,7 @@ export class Focus {
         }
     }
 
-    checkForPoolAvailability(playerWhoWon, playerWhoFail) {
+    checkForPoolAvailability(playerWhoWon: Player, playerWhoFail: Player) {
         if (playerWhoFail.pooledPawns !== 0) {
             this.events.emit(Focus.ENEMY_HAS_POOL, playerWhoFail)
             return
