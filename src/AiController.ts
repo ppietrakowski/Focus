@@ -1,12 +1,20 @@
-import { Focus } from './Game'
-import { Player } from './Player'
+import { Focus, IFocus } from './Game'
+import { IPlayer, Player } from './Player'
 import { GameBoardView } from './GameBoardView'
 
-export abstract class AiController {
+export interface IAiController {
+    move(): void
+    stopMoving(): void
+    checkIsYourTurn(player: IPlayer): void
+    
+    ownedPlayer: IPlayer
+}
 
-    ownedPlayer: Player
+export abstract class AiController implements IAiController {
 
-    constructor(aiOwnedPlayer: Player, protected readonly game: Focus, protected readonly gameBoard: GameBoardView) {
+    ownedPlayer: IPlayer
+
+    constructor(aiOwnedPlayer: IPlayer, protected readonly game: IFocus, protected readonly gameBoard: GameBoardView) {
         this.ownedPlayer = aiOwnedPlayer
         this.gameBoard = gameBoard
 
@@ -17,7 +25,7 @@ export abstract class AiController {
 
     abstract stopMoving(): void
 
-    checkIsYourTurn(player: Player) {
+    checkIsYourTurn(player: IPlayer) {
         if (player == this.ownedPlayer) {
             this.move()
         } else {

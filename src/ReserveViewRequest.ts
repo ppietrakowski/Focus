@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import { Focus } from './Game'
+import { Focus, IFocus } from './Game'
 import { Player } from './Player'
 import { IReserveView, ReserveView } from './ReserveView'
 
@@ -7,7 +7,7 @@ export class ReserveViewRequest implements IReserveView {
     events: EventEmitter
     readonly owner: Player
 
-    constructor(private readonly reserveView: IReserveView, private readonly game: Focus) {
+    constructor(private readonly reserveView: IReserveView, private readonly game: IFocus) {
        
         this.owner = this.reserveView.owner
         this.events = reserveView.events

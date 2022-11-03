@@ -1,6 +1,16 @@
-import { Field } from './Field'
+import { Field, IField } from './Field'
 
-export class Player {
+
+export interface IPlayer {
+
+    pooledPawns: number
+    
+    doesOwnThisField(field: number | IField): boolean
+    possessField(field: IField): void
+    get hasAnyPool(): boolean
+}
+
+export class Player implements IPlayer {
 
     pooledPawns: number
     state: number
@@ -10,12 +20,16 @@ export class Player {
         this.pooledPawns = 0
     }
 
-    doesOwnThisField(field: number | Field) {
+    doesOwnThisField(field: number | IField) {
         if (typeof field == 'number') {
             return !!(field & this.state)
         }
         
         return !!(field.state & this.state)
+    }
+
+    possessField(field: IField): void {
+        field.state = this.state
     }
 
     get hasAnyPool() {

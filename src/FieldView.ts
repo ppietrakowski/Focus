@@ -1,70 +1,41 @@
 import EventEmitter from 'eventemitter3'
-import { Field, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_PLAYER_RED } from './Field'
-import { Focus } from './Game'
+import { Field, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_PLAYER_RED, IField } from './Field'
+import { Focus, IFocus } from './Game'
 
-export class FieldView {
+export interface IFieldView {
+    isInRange(anotherField: IField, range: {x: number, y: number}): boolean
+    visualizeHovered(): void
+    visualizeUnhovered(): void
 
-    static FIELD_UNCLICK = 'UnClick'
-    static FIELD_CLICK = 'Click'
-    static FIELD_DBL_CLICK = 'DblClick'
+    field: IField
+    events: EventEmitter
+    domElement: HTMLDivElement
+}
 
-    static FieldMouseOver = 'FieldMouseOver'
-    static FieldMouseLeave = 'FieldMouseLeave'
+export class FieldView implements IFieldView {
 
-    field: Field
-    isSelected: boolean
+    static readonly FIELD_UNCLICK = 'UnClick'
+    static readonly FIELD_CLICK = 'Click'
+    static readonly FIELD_DBL_CLICK = 'DblClick'
 
-    game: Focus
+    static readonly FieldMouseOver = 'FieldMouseOver'
+    static readonly FieldMouseLeave = 'FieldMouseLeave'
+
+    field: IField
+
     events: EventEmitter
     domElement: HTMLDivElement
 
-    constructor(game: Focus, field: Field) {
-        /**
-         * @type {Field}
-         */
+    constructor(private readonly game: IFocus, field: IField) {
         this.field = field
-        this.isSelected = false
-
-        /**
-         * @type {Focus}
-         */
-        this.game = game
-
         this.events = new EventEmitter()
-
         this.domElement = document.createElement('div')
         
         this.domElement.className = this.getUnhoveredClassName()
 
-        this.domElement.addEventListener('mouseover', e => this.onMouseOver())
-        this.domElement.addEventListener('mouseleave', e => this.onMouseLeave())
+        this.domElement.addEventListener('mouseover', () => this.onMouseOver())
+        this.domElement.addEventListener('mouseleave', () => this.onMouseLeave())
         this.domElement.addEventListener('click', () => this.onClick())
-    }
-
-    onMouseLeave() {
-        if (this.game.currentPlayer.doesOwnThisField(this.field) && !this.isSelected) {
-            // this.domElement.className = this.getUnhoveredClassName()
-            this.events.emit(FieldView.FieldMouseLeave, this.game.currentPlayer)
-        }
-    }
-
-    getHoveredClassName() {
-        return (this.field.state & FIELD_STATE_PLAYER_RED) ? 'playerRedFieldHovered' : (this.field.state & FIELD_STATE_PLAYER_GREEN) ? 'playerGreenFieldHovered' : 'emptyField'
-    }
-
-    getUnhoveredClassName() {
-        return (this.field.state & FIELD_STATE_PLAYER_RED) ? 'playerRedField' : (this.field.state & FIELD_STATE_PLAYER_GREEN) ? 'playerGreenField' : 'emptyField'
-    }
-
-    onMouseOver() {
-        if (this.game.currentPlayer.doesOwnThisField(this.field)) {
-            // this.domElement.className = this.getHoveredClassName()
-            this.events.emit(FieldView.FieldMouseOver, this.game.currentPlayer)
-        }
-    }
-
-    onClick() {
-        this.events.emit(FieldView.FIELD_CLICK, this)
     }
 
     visualizeHovered() {
@@ -75,12 +46,32 @@ export class FieldView {
         this.domElement.className = this.getUnhoveredClassName()
     }
 
-    /**
-     * 
-     * @param {Field} anotherField 
-     */
-    isInRange(anotherField: Field, range: {x: number, y: number}) {
+    isInRange(anotherField: IField, range: {x: number, y: number}) {
         return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) &&
             (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
+    }
+
+    private onMouseLeave() {
+        if (this.game.currentPlayer.doesOwnThisField(this.field)) {
+            this.events.emit(FieldView.FieldMouseLeave, this.game.currentPlayer)
+        }
+    }
+
+    private getHoveredClassName() {
+        return (this.field.state & FIELD_STATE_PLAYER_RED) ? 'playerRedFieldHovered' : (this.field.state & FIELD_STATE_PLAYER_GREEN) ? 'playerGreenFieldHovered' : 'emptyField'
+    }
+
+    private getUnhoveredClassName() {
+        return (this.field.state & FIELD_STATE_PLAYER_RED) ? 'playerRedField' : (this.field.state & FIELD_STATE_PLAYER_GREEN) ? 'playerGreenField' : 'emptyField'
+    }
+
+    private onMouseOver() {
+        if (this.game.currentPlayer.doesOwnThisField(this.field)) {
+            this.events.emit(FieldView.FieldMouseOver, this.game.currentPlayer)
+        }
+    }
+
+    private onClick() {
+        this.events.emit(FieldView.FIELD_CLICK, this)
     }
 }

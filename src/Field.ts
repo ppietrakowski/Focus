@@ -1,4 +1,4 @@
-import { Player } from './Player'
+import { IPlayer, Player } from './Player'
 
 export const FIELD_STATE_UNPLAYABLE = 2 << 0
 export const FIELD_STATE_EMPTY = 2 << 1
@@ -16,9 +16,28 @@ export interface UnderFieldState {
     state: number
 }
 
-export class Field {
+export interface IField {
+    state: number
+    underThisField: UnderFieldState[]
 
-    static clearField(field: Field) {
+    x: number
+    y: number
+
+    makeAsNextField(cameFrom: IField, moveCount: number): void
+
+    get height(): number
+    get isOvergrown(): boolean
+    get isEmpty(): boolean
+    get isPlayable(): boolean
+
+    belongsTo(player: IPlayer): boolean
+    calculateDirectionTowards(anotherField: IField): {x: number, y: number}
+    calculateMoveCountTowards(anotherField: IField): number
+}
+
+export class Field implements IField {
+
+    private static clearField(field: Field) {
         field.state = FIELD_STATE_EMPTY
         field.underThisField = []
     }
@@ -33,36 +52,20 @@ export class Field {
         this.underThisField = []
         this.x = x
         this.y = y
-
     }
 
-    /**
-     * 
-     * @param {Field} cameFrom 
-     * @param {number} moveCount 
-     * @returns 
-     */
-    makeAsNextField(cameFrom: Field, moveCount: number) {
-        if (!cameFrom.isPlayable) {
+    makeAsNextField(cameFrom: IField, moveCount: number) {
+        if (!cameFrom.isPlayable || !(cameFrom instanceof Field)) {
             return
         }
 
-        // one move is just a changing of state
-        const itemCountFromOldList = moveCount - 1
         const oldState = cameFrom.state
-
-        const temp = cameFrom.shiftNFirstElements(itemCountFromOldList)
+        
+        // one move is just a changing of state
+        const temp = cameFrom.shiftNFirstElements(moveCount - 1)
 
         this.underThisField = this.getNewUnderElements(temp)
         this.state = oldState
-    }
-
-    getNewUnderElements(shiftedElements: UnderFieldState[]) {
-        if (this.isEmpty) {
-            return shiftedElements
-        }
-
-        return shiftedElements.concat([{ state: this.state }], this.underThisField)
     }
 
     get height() {
@@ -71,57 +74,21 @@ export class Field {
 
     get isOvergrown() {
         return this.height >= MAX_TOWER_HEIGHT
-    }
-
-    shiftNFirstElements(n: number) {
-        const firstElements : UnderFieldState[] = []
-
-        while (n-- > 0) {
-            this.shiftElement(firstElements)
-        }
-
-        if (this.underThisField.length === 0) {
-            Field.clearField(this)
-            return firstElements
-        }
-
-        // update the this.state to next element under
-        this.state = this.underThisField.shift().state
-
-        return firstElements
-    }
-
-    makeOnlyUnderFieldAsCurrentField() {
-        const element = this.underThisField.shift()
-
-        this.state = element.state
-    }
-
-    shiftElement(firstElements: UnderFieldState[]) {
-        const element = this.underThisField.shift() || null
-
-        if (element !== null) {
-            firstElements.push(element)
-        }
-    }
+    }    
 
     get isEmpty() {
         return !!(this.state & FIELD_STATE_EMPTY)
-    }
-
-    popOneField() {
-        return this.underThisField.pop()
-    }
-
-    belongsTo(player: Player) {
-        return !!(this.state & player.state)
     }
 
     get isPlayable() {
         return !(this.state & FIELD_STATE_UNPLAYABLE)
     }
 
-    calculateDirectionTowards(anotherField: Field) {
+    belongsTo(player: IPlayer) {
+        return player.doesOwnThisField(this.state)
+    }
+
+    calculateDirectionTowards(anotherField: IField) {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
         if (!this.canJump(v)) {
@@ -139,11 +106,7 @@ export class Field {
         return DIRECTION_NORTH
     }
 
-    canJump(v: {x: number, y: number}) {
-        return Math.abs(v.x) <= this.height && Math.abs(v.y) <= this.height
-    }
-
-    calculateMoveCountTowards(anotherField: Field) {
+    calculateMoveCountTowards(anotherField: IField) {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
         if (Math.abs(v.x) > 0) {
@@ -151,5 +114,43 @@ export class Field {
         }
 
         return Math.abs(v.y)
+    }
+
+    private shiftNFirstElements(n: number) {
+        const firstElements : UnderFieldState[] = []
+
+        while (n-- > 0) {
+            this.shiftElement(firstElements)
+        }
+
+        if (this.underThisField.length === 0) {
+            Field.clearField(this)
+            return firstElements
+        }
+
+        // update the this field's state to next element under
+        this.state = this.underThisField.shift().state
+
+        return firstElements
+    }
+
+    private shiftElement(firstElements: UnderFieldState[]) {
+        const element = this.underThisField.shift() || null
+
+        if (element !== null) {
+            firstElements.push(element)
+        }
+    }
+
+    private getNewUnderElements(shiftedElements: UnderFieldState[]) {
+        if (this.isEmpty) {
+            return shiftedElements
+        }
+
+        return shiftedElements.concat([{ state: this.state }], this.underThisField)
+    }
+
+    private canJump(v: {x: number, y: number}) {
+        return Math.abs(v.x) <= this.height && Math.abs(v.y) <= this.height
     }
 }
