@@ -1,4 +1,4 @@
-import { Player } from "./Player"
+import { Player } from './Player'
 
 export const FIELD_STATE_UNPLAYABLE = 2 << 0
 export const FIELD_STATE_EMPTY = 2 << 1
@@ -74,7 +74,7 @@ export class Field {
     }
 
     shiftNFirstElements(n: number) {
-        let firstElements : UnderFieldState[] = []
+        const firstElements : UnderFieldState[] = []
 
         while (n-- > 0) {
             this.shiftElement(firstElements)

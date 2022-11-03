@@ -1,12 +1,12 @@
-import { Focus, PLAYER_GREEN, PLAYER_RED } from "./Game";
+import { Focus, PLAYER_GREEN, PLAYER_RED } from './Game'
 import { FieldView } from './FieldView'
-import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, Field } from "./Field";
-import { IReserveView, ReserveView } from "./ReserveView";
-import { Player } from "./Player";
-import { ReserveViewRequest } from "./ReserveViewRequest";
-import { AiController } from "./AiController";
-import PlayerAiController from "./PlayerAiController";
-import { GameBoard } from "./GameBoard";
+import { DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, Field } from './Field'
+import { IReserveView, ReserveView } from './ReserveView'
+import { Player } from './Player'
+import { ReserveViewRequest } from './ReserveViewRequest'
+import { AiController } from './AiController'
+import PlayerAiController from './PlayerAiController'
+import { GameBoard } from './GameBoard'
 
 
 export class GameBoardView {
@@ -127,7 +127,7 @@ export class GameBoardView {
         }
         
         if (!this.playerWhoPlace.hasAnyPool) {
-            this.playerHasNoPoolAvailable(this.playerWhoPlace);
+            this.playerHasNoPoolAvailable(this.playerWhoPlace)
             return
         }
 
@@ -143,8 +143,8 @@ export class GameBoardView {
     }
 
     playerHasNoPoolAvailable(playerWhoPlace: Player) {
-        console.warn(`Tried to place item without any pool`);
-        this.resetToPlayState(playerWhoPlace);
+        console.warn('Tried to place item without any pool')
+        this.resetToPlayState(playerWhoPlace)
     }
 
     resetToPlayState(newNextPlayer: Player) {
@@ -178,10 +178,10 @@ export class GameBoardView {
             return
         }
 
-        let direction = this.selectedField.field.calculateDirectionTowards(clickedField.field)
+        const direction = this.selectedField.field.calculateDirectionTowards(clickedField.field)
 
         if (!direction) {
-            this.triedToMoveMoreThanItCan();
+            this.triedToMoveMoreThanItCan()
             return
         }
 
@@ -193,12 +193,12 @@ export class GameBoardView {
     }
 
     triedToMoveMoreThanItCan() {
-        console.warn('Tried to move more than is available in this time');
-        this.unSelectField();
+        console.warn('Tried to move more than is available in this time')
+        this.unSelectField()
     }
 
     moveTowardsDirection(clickedField: FieldView, direction: {x: number, y: number}) {
-        let moveCount = this.selectedField.field.calculateMoveCountTowards(clickedField.field)
+        const moveCount = this.selectedField.field.calculateMoveCountTowards(clickedField.field)
         this.move(direction, moveCount)
     }
 
@@ -234,7 +234,7 @@ export class GameBoardView {
 
     renderInSameLine(maxPossibleMoves: number, baseDirection: {x: number, y: number}) {
         for (let i = 1; i <= maxPossibleMoves; i++) {
-            this.selectNeighboursInRange(baseDirection, i);
+            this.selectNeighboursInRange(baseDirection, i)
         }
     }
 

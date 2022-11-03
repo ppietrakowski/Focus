@@ -1,7 +1,7 @@
-import EventEmitter from "eventemitter3"
-import { Focus } from "./Game"
-import { Player } from "./Player"
-import { IReserveView, ReserveView } from "./ReserveView"
+import EventEmitter from 'eventemitter3'
+import { Focus } from './Game'
+import { Player } from './Player'
+import { IReserveView, ReserveView } from './ReserveView'
 
 export class ReserveViewRequest implements IReserveView {
     events: EventEmitter
@@ -18,7 +18,7 @@ export class ReserveViewRequest implements IReserveView {
     }
     
     getFieldAt(i: number): HTMLDivElement {
-        throw new Error("Method not implemented.")
+        return this.reserveView.getFieldAt(i)
     }
 
     addToReserve() {

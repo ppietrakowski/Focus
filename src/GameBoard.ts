@@ -1,8 +1,8 @@
-import EventEmitter from "eventemitter3";
+import EventEmitter from 'eventemitter3'
 import { Field, FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_UNPLAYABLE } from './Field'
 
-import board from "./board.json"
-import { Player } from "./Player";
+import board from './board.json'
+import { Player } from './Player'
 
 
 interface BoardState {
@@ -39,7 +39,7 @@ export class GameBoard {
 
     constructor() {
         this.events = new EventEmitter()
-        const elements = board.elements;
+        const elements = board.elements
 
         this.fields = [new Field(boardToStateMask(elements.find((v: BoardState) => v.id === 0).state), 0, 0)]
 
@@ -49,22 +49,22 @@ export class GameBoard {
             throw new Error(`Board should have at least ${maxSize} element`)
 
         for (let i = 1; i < maxSize; i++) {
-            this.addNewFieldFromJson(elements, i);
+            this.addNewFieldFromJson(elements, i)
         }
     }
 
     addNewFieldFromJson(json: any, fieldId: number) {
-        const field = json.find((v: BoardState)  => v.id === fieldId) || null;
+        const field = json.find((v: BoardState)  => v.id === fieldId) || null
 
         if (field === null) {
-            throw new Error(`Missing object at (${(fieldId % GameBoard.GAME_BOARD_WIDTH)}, ${Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)}) id=${fieldId}`);
+            throw new Error(`Missing object at (${(fieldId % GameBoard.GAME_BOARD_WIDTH)}, ${Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)}) id=${fieldId}`)
         }
 
-        this.fields[fieldId] = new Field(boardToStateMask(json[fieldId].state), (fieldId % GameBoard.GAME_BOARD_WIDTH), Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH));
+        this.fields[fieldId] = new Field(boardToStateMask(json[fieldId].state), (fieldId % GameBoard.GAME_BOARD_WIDTH), Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH))
     }
 
     each(callback: ForEachCallback) {
-        for (let field of this.fields) {
+        for (const field of this.fields) {
             callback(field, field.x, field.y)
         }
     }

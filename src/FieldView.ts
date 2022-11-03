@@ -1,6 +1,6 @@
-import EventEmitter from "eventemitter3"
-import { Field, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_PLAYER_RED } from "./Field"
-import { Focus } from "./Game"
+import EventEmitter from 'eventemitter3'
+import { Field, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_PLAYER_RED } from './Field'
+import { Focus } from './Game'
 
 export class FieldView {
 

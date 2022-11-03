@@ -1,8 +1,8 @@
-import { Focus } from "./Game"
-import { Player } from "./Player"
-import { GameBoardView } from "./GameBoardView"
+import { Focus } from './Game'
+import { Player } from './Player'
+import { GameBoardView } from './GameBoardView'
 
-export class AiController {
+export abstract class AiController {
 
     ownedPlayer: Player
 
@@ -13,12 +13,9 @@ export class AiController {
         this.game.events.on(Focus.NEXT_TURN, this.checkIsYourTurn, this)
     }
 
-    move() {
-    }
+    abstract move(): void
 
-    stopMoving() {
-
-    }
+    abstract stopMoving(): void
 
     checkIsYourTurn(player: Player) {
         if (player == this.ownedPlayer) {

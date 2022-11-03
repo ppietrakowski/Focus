@@ -1,14 +1,14 @@
-import EventEmitter from "eventemitter3"
-import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN } from "./Field"
-import { FieldView } from "./FieldView"
-import { Player } from "./Player"
+import EventEmitter from 'eventemitter3'
+import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN } from './Field'
+import { FieldView } from './FieldView'
+import { Player } from './Player'
 
 
- function getClassNameOfElement(player: Player) {
+function getClassNameOfElement(player: Player) {
     return (player.state & FIELD_STATE_PLAYER_RED) ? 
         'reserveRedPawn' 
         : (player.state & FIELD_STATE_PLAYER_GREEN) ?
-        'reserveGreenPawn' : 'reserveEmptyPawn'
+            'reserveGreenPawn' : 'reserveEmptyPawn'
 }
 
 export interface IReserveView {

@@ -1,7 +1,7 @@
-import EventEmitter from "eventemitter3";
-import { FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, MAX_TOWER_HEIGHT, Field } from "./Field";
-import { GameBoard } from "./GameBoard";
-import { Player } from "./Player";
+import EventEmitter from 'eventemitter3'
+import { FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, MAX_TOWER_HEIGHT, Field } from './Field'
+import { GameBoard } from './GameBoard'
+import { Player } from './Player'
 
 export const PLAYER_RED = new Player(FIELD_STATE_PLAYER_RED)
 export const PLAYER_GREEN = new Player(FIELD_STATE_PLAYER_GREEN)
@@ -27,13 +27,13 @@ export class Focus {
     }
 
     moveToField(x: number, y: number, direction: {x: number, y: number}, howManyFieldWantMove: number) {
-        let fromField = this.gameBoard.getFieldAt(x, y)
+        const fromField = this.gameBoard.getFieldAt(x, y)
 
         if (!fromField.belongsTo(this.currentPlayer)) {
             return false
         }
 
-        let toField = this.getFieldBasedOnDirectionAndMoveCount(fromField, direction, howManyFieldWantMove)
+        const toField = this.getFieldBasedOnDirectionAndMoveCount(fromField, direction, howManyFieldWantMove)
 
         if (!toField.isPlayable) {
             return false
@@ -50,7 +50,7 @@ export class Focus {
     }
 
     placeField(x: number, y: number, owner: Player) {
-        let field = this.gameBoard.getFieldAt(x, y)
+        const field = this.gameBoard.getFieldAt(x, y)
 
         field.underThisField = this.makeNewUnderAfterPlacing(field)
         field.state = owner.state

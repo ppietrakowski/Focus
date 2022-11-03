@@ -1,9 +1,9 @@
-import { AiController } from "./AiController";
-import { FieldView } from "./FieldView";
-import { Focus } from "./Game";
-import { GameBoard } from "./GameBoard";
-import { GameBoardView } from "./GameBoardView";
-import { Player } from "./Player";
+import { AiController } from './AiController'
+import { FieldView } from './FieldView'
+import { Focus } from './Game'
+import { GameBoard } from './GameBoard'
+import { GameBoardView } from './GameBoardView'
+import { Player } from './Player'
 
 
 export default class PlayerAiController extends AiController {
@@ -16,10 +16,11 @@ export default class PlayerAiController extends AiController {
         this.selectedField = null
     }
 
-    move() {
+    move(): void {
+        this.selectedField = null
     }
 
-    stopMoving() {
-
+    stopMoving(): void {
+        this.selectedField = null
     }
 }

@@ -6,7 +6,7 @@ const focus = new Focus()
 const gameBoardView = new GameBoardView(focus)
 
 gameBoardView.hookGuiMethods()
-focus.events.on(Focus.ADDED_ITEM_TO_POOL, () => console.log("added to pool"))
+focus.events.on(Focus.ADDED_ITEM_TO_POOL, () => console.log('added to pool'))
 focus.events.on(Focus.ENEMY_HAS_POOL, () => console.log('Should place pawn'))
 focus.events.on(Focus.VICTORY, (p) => console.log(`${JSON.stringify(p)} won`))
 
