@@ -86,9 +86,10 @@ export class GameBoardView {
 
         if (!this.selectedField) {
             this.clickedFirstTime(clickedField)
-        } else {
-            this.clickedWhenSomethingSelected(clickedField)
+            return
         }
+
+        this.clickedWhenSomethingSelected(clickedField)
     }
 
     switchToPlaceStateAtPlayerTurn(player) {

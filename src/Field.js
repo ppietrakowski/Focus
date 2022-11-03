@@ -22,6 +22,7 @@ export class Field {
         this.underThisField = []
         this.x = x
         this.y = y
+
     }
 
     /**
@@ -41,16 +42,15 @@ export class Field {
 
         const temp = cameFrom.shiftNFirstElements(itemCountFromOldList)
 
-        if (!this.isEmpty) {
-            this.underThisField = this.getNewUnderElements(temp)
-        } else {
-            this.underThisField = temp
-        }
-
+        this.underThisField = this.getNewUnderElements(temp)
         this.state = oldState
     }
 
     getNewUnderElements(shiftedElements) {
+        if (this.isEmpty) {
+            return shiftedElements
+        }
+        
         return shiftedElements.concat([{ state: this.state }], this.underThisField)
     }
 
@@ -71,9 +71,11 @@ export class Field {
 
         if (this.underThisField.length === 0) {
             Field.clearField(this)
-        } else {
-            this.state = this.underThisField.shift().state
+            return firstElements
         }
+
+        // update the this.state to next element under
+        this.state = this.underThisField.shift().state
 
         return firstElements
     }

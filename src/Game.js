@@ -139,10 +139,12 @@ export class Focus {
     }
 
     checkForPoolAvailability(playerWhoWon, playerWhoFail) {
-        if (playerWhoFail.pooledPawns === 0) {
-            this.events.emit(Focus.VICTORY, playerWhoWon)
-        } else {
+        if (playerWhoFail.pooledPawns !== 0) {
             this.events.emit(Focus.ENEMY_HAS_POOL, playerWhoFail)
+            return
         }
+        
+        // no pawns = Victory
+        this.events.emit(Focus.VICTORY, playerWhoWon)
     }
 }
