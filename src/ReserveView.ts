@@ -12,7 +12,7 @@ function getClassNameOfElement(player: Player) {
 
 export interface IReserveView {
     addToReserve(): void
-    removeFromReserve(): void
+    removeFromReserve(): boolean
     getFieldAt(i: number): HTMLDivElement
 
     readonly owner: Player

@@ -14,10 +14,8 @@ export class GameBoardController {
     static readonly MOVE_AVAILABLE = 'MoveAvailable'
 
     constructor(private readonly gameBoardView: IGameBoardView, private readonly playerA: IAiController, private readonly playerB: IAiController) {
-        this.installCallbacks()
-
-        this.game.currentPlayer.pooledPawns++
-        this.gameBoardView.redReserve.addToReserve()    
+        playerA.attachGameBoardController(this)
+        playerB.attachGameBoardController(this)
     }
 
 
@@ -26,13 +24,13 @@ export class GameBoardController {
 
         this.gameBoardView.each(v => v.events.on(FieldView.FieldMouseOver, this.onMouseOverField, this))
         this.gameBoardView.each(v => v.events.on(FieldView.FieldMouseLeave, this.onMouseLeaveField, this))
-
     }
 
     private poolClicked(player: IPlayer, reserve: IReserveView) {
         if (this.isTurnOfPlayer(player)) {
-            reserve.removeFromReserve()
-            this.switchToPlaceStateAtPlayerTurn(player)
+            if (reserve.removeFromReserve()) {
+                this.switchToPlaceStateAtPlayerTurn(player)
+            }
         }
     }
 
