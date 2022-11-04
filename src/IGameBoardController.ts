@@ -83,27 +83,27 @@ export class GameBoardController {
         }
         
         if (!this.playerWhoPlace.hasAnyPool) {
-            this.playerHasNoPoolAvailable(field, this.playerWhoPlace)
+            this.playerHasNoPoolAvailable(this.playerWhoPlace)
             return
         }
 
         if (!field.field.isPlayable) {
-            this.resetToPlayState(field, this.playerWhoPlace)
+            this.resetToPlayState(this.playerWhoPlace)
             return
         }
 
         this.playerWhoPlace.pooledPawns--
         this.game.placeField(field.field.x, field.field.y, this.playerWhoPlace)
 
-        this.resetToPlayState(field, this.game.getNextPlayer(this.playerWhoPlace))
+        this.resetToPlayState(this.game.getNextPlayer(this.playerWhoPlace))
     }
 
-    private playerHasNoPoolAvailable(field: IFieldView, playerWhoPlace: IPlayer) {
+    private playerHasNoPoolAvailable(playerWhoPlace: IPlayer) {
         console.warn('Tried to place item without any pool')
-        this.resetToPlayState(field, playerWhoPlace)
+        this.resetToPlayState(playerWhoPlace)
     }
 
-    private resetToPlayState(field: IFieldView, newNextPlayer: IPlayer) {
+    private resetToPlayState(newNextPlayer: IPlayer) {
         this.gameBoardView.each(v => v.restoreClickListeners())
         this.gameBoardView.erasePossibleMoves()
 
