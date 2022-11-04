@@ -1,8 +1,11 @@
 import EventEmitter from 'eventemitter3'
-import { IField, Field, FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_UNPLAYABLE } from './Field'
+import { Field } from './Field'
+import { IField } from './IField'
 
 import board from './board.json'
 import { IPlayer, Player } from './Player'
+import { IGameBoard } from './IGameBoard'
+import { FieldState } from './FieldState'
 
 
 interface BoardState {
@@ -10,32 +13,24 @@ interface BoardState {
     state: number
 }
 
-interface ForEachCallback {
+export interface ForEachCallback {
     (element: IField, x: number, y: number): void
 }
 
 function boardToStateMask(boardState: number) {
     if (boardState === 0)
-        return FIELD_STATE_UNPLAYABLE
+        return FieldState.FIELD_STATE_UNPLAYABLE
 
     else if (boardState === 1)
-        return FIELD_STATE_EMPTY
+        return FieldState.FIELD_STATE_EMPTY
 
     else if (boardState === 2)
-        return FIELD_STATE_PLAYER_RED
+        return FieldState.FIELD_STATE_PLAYER_RED
     else if (boardState === 3)
-        return FIELD_STATE_PLAYER_GREEN
+        return FieldState.FIELD_STATE_PLAYER_GREEN
 
     throw new Error('Illegal board state')
 }
-
-export interface IGameBoard {
-    events: EventEmitter
-    each(callback: ForEachCallback): void
-    getFieldAt(x: number, y: number): IField
-    countPlayersFields(player: IPlayer): number
-}
-
 
 export class GameBoard implements IGameBoard {
     static readonly MAX_TOWER_HEIGHT = 5

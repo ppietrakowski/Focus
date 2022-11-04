@@ -1,6 +1,8 @@
-import { Focus, IFocus } from './Game'
+import { Focus } from './Game'
+import { IFocus } from "./IFocus"
 import { IPlayer, Player } from './Player'
 import { GameBoardView } from './GameBoardView'
+import { IGameBoardView } from './IGameBoardView'
 
 export interface IAiController {
     move(): void
@@ -14,7 +16,7 @@ export abstract class AiController implements IAiController {
 
     ownedPlayer: IPlayer
 
-    constructor(aiOwnedPlayer: IPlayer, protected readonly game: IFocus, protected readonly gameBoard: GameBoardView) {
+    constructor(aiOwnedPlayer: IPlayer, protected readonly game: IFocus, protected readonly gameBoard: IGameBoardView) {
         this.ownedPlayer = aiOwnedPlayer
         this.gameBoard = gameBoard
 

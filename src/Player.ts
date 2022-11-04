@@ -1,4 +1,4 @@
-import { Field, IField } from './Field'
+import { IField } from './IField'
 
 
 export interface IPlayer {

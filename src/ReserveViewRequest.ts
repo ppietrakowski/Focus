@@ -1,5 +1,6 @@
 import EventEmitter from 'eventemitter3'
-import { Focus, IFocus } from './Game'
+import { Focus } from './Game'
+import { IFocus } from "./IFocus"
 import { Player } from './Player'
 import { IReserveView, ReserveView } from './ReserveView'
 

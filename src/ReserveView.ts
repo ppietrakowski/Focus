@@ -1,13 +1,12 @@
 import EventEmitter from 'eventemitter3'
-import { FIELD_STATE_EMPTY, FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN } from './Field'
-import { FieldView } from './FieldView'
+import { FieldState } from './FieldState'
 import { Player } from './Player'
 
 
 function getClassNameOfElement(player: Player) {
-    return (player.state & FIELD_STATE_PLAYER_RED) ? 
+    return (player.state & FieldState.FIELD_STATE_PLAYER_RED) ? 
         'reserveRedPawn' 
-        : (player.state & FIELD_STATE_PLAYER_GREEN) ?
+        : (player.state & FieldState.FIELD_STATE_PLAYER_GREEN) ?
             'reserveGreenPawn' : 'reserveEmptyPawn'
 }
 
@@ -29,24 +28,14 @@ export class ReserveView implements IReserveView {
     reserveFields: HTMLDivElement[]
     private lastReserved: number
     
-    /**
-     * 
-     * @param {HTMLDivElement} reserveBar 
-     * @param {Player} player
-     */
     constructor(private readonly reserveBar: HTMLDivElement, readonly owner: Player) {
-        this.reserveBar = reserveBar
         this.events = new EventEmitter()
 
         const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn') 
 
-
-        /**
-         * @type {HTMLDivElement[]}
-         */
         this.reserveFields = []
 
-        for (let i = 0; i < reserveBar.length; i++) {
+        for (let i = 0; i < reserveElements.length; i++) {
             this.reserveFields.push(reserveElements[i] as HTMLDivElement)
         }
 

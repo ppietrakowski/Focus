@@ -1,11 +1,22 @@
 import EventEmitter from 'eventemitter3'
-import { Field, FIELD_STATE_PLAYER_GREEN, FIELD_STATE_PLAYER_RED, IField } from './Field'
-import { Focus, IFocus } from './Game'
+import { Field } from './Field'
+import { FieldState } from './FieldState'
+import { Focus } from './Game'
+import { IField } from './IField'
+import { IFocus } from "./IFocus"
+
+export interface IClickListener {
+    (field: IFieldView): void
+}
 
 export interface IFieldView {
     isInRange(anotherField: IField, range: {x: number, y: number}): boolean
     visualizeHovered(): void
     visualizeUnhovered(): void
+    addClickListener(listener: IClickListener, context: any): void
+    
+    backupClickListeners(): void
+    restoreClickListeners(): void
 
     field: IField
     events: EventEmitter
@@ -25,6 +36,9 @@ export class FieldView implements IFieldView {
 
     events: EventEmitter
     domElement: HTMLDivElement
+    private clickListeners: IClickListener[]
+    private backedClickListeners: IClickListener[]
+
 
     constructor(private readonly game: IFocus, field: IField) {
         this.field = field
@@ -32,10 +46,22 @@ export class FieldView implements IFieldView {
         this.domElement = document.createElement('div')
         
         this.domElement.className = this.getUnhoveredClassName()
+        this.clickListeners = []
+        this.backedClickListeners = []
+    }
 
-        this.domElement.addEventListener('mouseover', () => this.onMouseOver())
-        this.domElement.addEventListener('mouseleave', () => this.onMouseLeave())
-        this.domElement.addEventListener('click', () => this.onClick())
+    addClickListener(listener: IClickListener, context: any): void {
+        this.clickListeners.push(listener.bind(context))
+    }
+    
+    backupClickListeners(): void {
+        this.backedClickListeners = this.clickListeners.map(v => v)
+        this.clickListeners = []
+    }
+
+    restoreClickListeners(): void {
+        this.clickListeners = this.backedClickListeners.map(v => v)
+        this.backedClickListeners = []
     }
 
     visualizeHovered() {
@@ -51,27 +77,23 @@ export class FieldView implements IFieldView {
             (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
     }
 
-    private onMouseLeave() {
-        if (this.game.currentPlayer.doesOwnThisField(this.field)) {
-            this.events.emit(FieldView.FieldMouseLeave, this.game.currentPlayer)
-        }
+    onMouseLeave() {
+        this.events.emit(FieldView.FieldMouseLeave, this.game.currentPlayer, this)
     }
 
     private getHoveredClassName() {
-        return (this.field.state & FIELD_STATE_PLAYER_RED) ? 'playerRedFieldHovered' : (this.field.state & FIELD_STATE_PLAYER_GREEN) ? 'playerGreenFieldHovered' : 'emptyField'
+        return (this.field.state & FieldState.FIELD_STATE_PLAYER_RED) ? 'playerRedFieldHovered' : (this.field.state & FieldState.FIELD_STATE_PLAYER_GREEN) ? 'playerGreenFieldHovered' : 'emptyField'
     }
 
     private getUnhoveredClassName() {
-        return (this.field.state & FIELD_STATE_PLAYER_RED) ? 'playerRedField' : (this.field.state & FIELD_STATE_PLAYER_GREEN) ? 'playerGreenField' : 'emptyField'
+        return (this.field.state & FieldState.FIELD_STATE_PLAYER_RED) ? 'playerRedField' : (this.field.state & FieldState.FIELD_STATE_PLAYER_GREEN) ? 'playerGreenField' : 'emptyField'
+    }
+    
+    onMouseOver() {
+        this.events.emit(FieldView.FieldMouseOver, this.game.currentPlayer, this)
     }
 
-    private onMouseOver() {
-        if (this.game.currentPlayer.doesOwnThisField(this.field)) {
-            this.events.emit(FieldView.FieldMouseOver, this.game.currentPlayer)
-        }
-    }
-
-    private onClick() {
-        this.events.emit(FieldView.FIELD_CLICK, this)
+    onClick() {
+        this.clickListeners.forEach(v => v(this))
     }
 }

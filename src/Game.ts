@@ -1,23 +1,15 @@
 import EventEmitter from 'eventemitter3'
-import { FIELD_STATE_PLAYER_RED, FIELD_STATE_PLAYER_GREEN, MAX_TOWER_HEIGHT, Field, IField } from './Field'
-import { GameBoard, IGameBoard } from './GameBoard'
+import { MAX_TOWER_HEIGHT, Field } from './Field'
+import { GameBoard } from './GameBoard'
+import { IFocus } from './IFocus'
+import { IField } from './IField'
+
+import { IGameBoard } from "./IGameBoard"
 import { IPlayer, Player } from './Player'
+import { FieldState } from './FieldState'
 
-export const PLAYER_RED = new Player(FIELD_STATE_PLAYER_RED)
-export const PLAYER_GREEN = new Player(FIELD_STATE_PLAYER_GREEN)
-
-export interface IFocus {
-    events: EventEmitter
-    gameBoard: IGameBoard
-
-    moveToField(x: number, y: number, direction: {x: number, y: number}, howManyFieldWantMove: number): boolean
-    placeField(x: number, y: number, owner: IPlayer): void
-    getOffsetBasedOnDirection(field: IField, direction: {x: number, y: number}, howManyFieldWantMove: number): {x: number, y: number}
-    getNextPlayer(player?: IPlayer): IPlayer
-    nextTurn(): void
-
-    get currentPlayer(): IPlayer
-}
+export const PLAYER_RED = new Player(FieldState.FIELD_STATE_PLAYER_RED)
+export const PLAYER_GREEN = new Player(FieldState.FIELD_STATE_PLAYER_GREEN)
 
 export class Focus implements IFocus {
     static readonly ADDED_ITEM_TO_POOL = 'addedItemToPool'
@@ -39,6 +31,10 @@ export class Focus implements IFocus {
     }
     
 
+    set currentPlayer(player: IPlayer) {
+        this._currentPlayer = player
+    }
+    
     moveToField(x: number, y: number, direction: {x: number, y: number}, howManyFieldWantMove: number) {
         const fromField = this.gameBoard.getFieldAt(x, y)
 
@@ -92,7 +88,7 @@ export class Focus implements IFocus {
             toPlayer = this.currentPlayer
         }
 
-        if (toPlayer.doesOwnThisField(FIELD_STATE_PLAYER_RED)) {
+        if (toPlayer.doesOwnThisField(FieldState.FIELD_STATE_PLAYER_RED)) {
             return PLAYER_GREEN
         }
 
