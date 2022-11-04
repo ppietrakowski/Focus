@@ -1,14 +1,8 @@
-import { IAiController } from "./AiController";
-import { FieldView, IFieldView } from "./FieldView";
-import { GameBoardView } from "./GameBoardView";
-import { IField } from "./IField";
+import { AiController, IAiController } from "./AiController";
+import { IFieldView } from "./FieldView";
 import { IGameBoardView } from "./IGameBoardView";
-import { IPlayer } from "./Player";
-import { IReserveView } from "./ReserveView";
+import { IPlayer, Player } from "./Player";
 
-interface AnyFunction {
-    (...args: any[]): void
-}
 export class GameBoardController {
 
     static readonly MOVE_AVAILABLE = 'MoveAvailable'
@@ -18,93 +12,19 @@ export class GameBoardController {
         playerB.attachGameBoardController(this)
     }
 
-
-    private installCallbacks() {
-        this.gameBoardView.events.on(GameBoardView.POOL_CLICKED, this.poolClicked, this)
-
-        this.gameBoardView.each(v => v.events.on(FieldView.FieldMouseOver, this.onMouseOverField, this))
-        this.gameBoardView.each(v => v.events.on(FieldView.FieldMouseLeave, this.onMouseLeaveField, this))
-    }
-
-    private poolClicked(player: IPlayer, reserve: IReserveView) {
-        if (this.isTurnOfPlayer(player)) {
-            if (reserve.removeFromReserve()) {
-                this.switchToPlaceStateAtPlayerTurn(player)
-            }
-        }
-    }
-
-    private onMouseOverField(player: IPlayer, field: IFieldView) {
-        const {currentPlayer} = this.gameBoardView.game
-
-        if (this.isTurnOfPlayer(player) && currentPlayer.doesOwnThisField(field.field)) {
-            field.visualizeHovered()
-        }
-    }
-
-    private onMouseLeaveField(player: IPlayer, field: IFieldView) {
-        const {currentPlayer} = this.gameBoardView.game
-        if (this.isTurnOfPlayer(player) && currentPlayer.doesOwnThisField(field.field)) {
-            field.visualizeUnhovered()
-        }
-    }
-
     get game() {
         return this.gameBoardView.game
     }
 
-    private isTurnOfPlayer(player: IPlayer) {
-        const {currentPlayer} = this.gameBoardView.game
-
-        return currentPlayer === player
-    }
-
     private playerWhoPlace: IPlayer
 
-    switchToPlaceStateAtPlayerTurn(player: IPlayer) {
-        if (this.game.currentPlayer === player) {
-            this.playerWhoPlace = player
-            this.gameBoardView.each(v => this.enterIntoPlaceState(v))
-        }
-    }
-
-    private enterIntoPlaceState(field: IFieldView) {
-        field.backupClickListeners()
-
-        // use click event now for placing instead of moving
-        field.addClickListener(this.onPlaceFieldClicked, this)
-    }
-
-    onPlaceFieldClicked(field: IFieldView) {
-        if (!this.playerWhoPlace) {
-            throw new Error('Trying to place field without set player who place')
-        }
-        
-        if (!this.playerWhoPlace.hasAnyPool) {
-            this.playerHasNoPoolAvailable(this.playerWhoPlace)
+    placePoolState(player: IPlayer, aicontroller: IAiController) {
+        if (this.game.currentPlayer !== player) {
             return
         }
 
-        if (!field.field.isPlayable) {
-            this.resetToPlayState(this.playerWhoPlace)
-            return
+        if (player.hasAnyPool) {
+            aicontroller.onPlaceStateStarted()
         }
-
-        this.playerWhoPlace.pooledPawns--
-        this.game.placeField(field.field.x, field.field.y, this.playerWhoPlace)
-
-        this.resetToPlayState(this.game.getNextPlayer(this.playerWhoPlace))
-    }
-
-    private playerHasNoPoolAvailable(playerWhoPlace: IPlayer) {
-        console.warn('Tried to place item without any pool')
-        this.resetToPlayState(playerWhoPlace)
-    }
-
-    private resetToPlayState(newNextPlayer: IPlayer) {
-        this.gameBoardView.each(v => v.restoreClickListeners())
-        this.gameBoardView.erasePossibleMoves()
-
-        this.game.currentPlayer = newNextPlayer
     }
 }

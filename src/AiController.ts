@@ -12,6 +12,8 @@ export interface IAiController {
     
     attachGameBoardController(controller: GameBoardController): void
 
+    onPlaceStateStarted(): void
+
     ownedPlayer: IPlayer
 }
 
@@ -32,7 +34,7 @@ export abstract class AiController implements IAiController {
     }
 
     abstract move(): void
-
+    abstract onPlaceStateStarted(): void
     abstract stopMoving(): void
 
     checkIsYourTurn(player: IPlayer) {

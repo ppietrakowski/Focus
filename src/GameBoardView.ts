@@ -35,12 +35,16 @@ export class GameBoardView implements IGameBoardView {
 
         this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0] as HTMLDivElement, PLAYER_GREEN)
         this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0] as HTMLDivElement, PLAYER_RED)
+        
+        PLAYER_GREEN.pooledPawns++
+        this.greenReserve.addToReserve()
 
         this.greenReserve = new ReserveViewRequest(this.greenReserve, this.game)
         this.redReserve = new ReserveViewRequest(this.redReserve, this.game)
         
         this.greenReserve.events.on(ReserveView.POOL_CLICKED, () => this.emitPoolClicked(PLAYER_GREEN, this.greenReserve))
         this.redReserve.events.on(ReserveView.POOL_CLICKED, () => this.emitPoolClicked(PLAYER_RED, this.redReserve))
+
     }
 
     private emitPoolClicked(player: IPlayer, reserve: IReserveView) {

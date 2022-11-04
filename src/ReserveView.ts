@@ -57,12 +57,12 @@ export class ReserveView implements IReserveView {
     }
 
     removeFromReserve() {
-        this.lastReserved--
         if (!this.isSomethingInPool()) {
             return this.triedToUseEmptyPool()
         }
-
+        
         this.reserveFields[this.lastReserved].className = 'reserveEmptyPawn'
+        this.lastReserved--
         return true
     }
 
@@ -74,6 +74,7 @@ export class ReserveView implements IReserveView {
     }
 
     isSomethingInPool() {
+        console.log(!!this.reserveFields[this.lastReserved])
         return this.reserveFields[this.lastReserved] && this.owner.hasAnyPool
     }
 }
