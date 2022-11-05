@@ -1,7 +1,7 @@
 import { AiController, IAiController } from "./AiController";
 import { IFieldView } from "./FieldView";
 import { Focus } from "./Game";
-import { IAddedToPoolListener, IEnemyHasPoolListener } from "./IFocus";
+import { EventEnemyHasPool, IAddedToPoolListener, IEnemyHasPoolListener } from "./IFocus";
 import { IGameBoardView } from "./IGameBoardView";
 import { IPlayer, Player } from "./Player";
 
@@ -15,7 +15,7 @@ export class GameBoardController implements IEnemyHasPoolListener
         playerA.attachGameBoardController(this)
         playerB.attachGameBoardController(this)
 
-        this.game.addEnemyHasPoolListener(this)
+        this.game.events.on(EventEnemyHasPool, this.onEnemyHasPool, this)
     }
 
     onEnemyHasPool(enemy: IPlayer): void

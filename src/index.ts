@@ -1,6 +1,6 @@
 import { Focus, PLAYER_GREEN, PLAYER_RED } from './Game'
 import { GameBoardView } from './GameBoardView'
-import { IAddedToPoolListener, IEnemyHasPoolListener, INewTurnListener, IVictoryListener } from './IFocus'
+import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory, IAddedToPoolListener, IEnemyHasPoolListener, INewTurnListener, IVictoryListener } from './IFocus'
 import { GameBoardController } from './IGameBoardController'
 import { IPlayer } from './Player'
 import PlayerAiController from './PlayerAiController'
@@ -36,10 +36,10 @@ class LoggingListener implements IAddedToPoolListener, IEnemyHasPoolListener, IV
 
 const logging = new LoggingListener()
 
-focus.addAddedToPoolListener(logging)
-focus.addVictoryListener(logging)
-focus.addEnemyHasPoolListener(logging)
-focus.addNewTurnListener(logging)
+focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
+focus.events.on(EventVictory, logging.onVictory, logging)
+focus.events.on(EventEnemyHasPool, logging.onEnemyHasPool, logging)
+focus.events.on(EventNewTurn, logging.onNextTurnBegin, logging)
 
 const gameBoard = document.querySelector('.gameBoard') as HTMLDivElement
 gameBoard.style.visibility = 'hidden'

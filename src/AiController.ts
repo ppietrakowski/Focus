@@ -1,5 +1,5 @@
 import { Focus } from './Game'
-import { IFocus, INewTurnListener } from "./IFocus"
+import { EventNewTurn, IFocus, INewTurnListener } from "./IFocus"
 import { IPlayer, Player } from './Player'
 import { GameBoardView } from './GameBoardView'
 import { IGameBoardView } from './IGameBoardView'
@@ -30,7 +30,7 @@ export abstract class AiController implements IAiController
         this.gameBoard = gameBoard
 
 
-        this.game.addNewTurnListener(this)
+        this.game.events.on(EventNewTurn, this.onNextTurnBegin, this)
     }
 
     onNextTurnBegin(currentPlayer: IPlayer): void

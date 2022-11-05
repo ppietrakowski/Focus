@@ -1,53 +1,39 @@
 import { Field } from './Field'
 import { GameBoard } from './GameBoard'
-import { IAddedToPoolListener, IEnemyHasPoolListener, IFocus, IMovedListener, INewTurnListener, IVictoryListener } from './IFocus'
+import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IAddedToPoolListener, IEnemyHasPoolListener, IFocus, IMovedListener, INewTurnListener, IVictoryListener } from './IFocus'
 import { EventFieldOvergrown, FieldState, IField } from './IField'
 
 import { IGameBoard } from "./IGameBoard"
 import { IPlayer, Player } from './Player'
+import EventEmitter from 'eventemitter3'
 
 export const PLAYER_RED = new Player(FieldState.Red)
 export const PLAYER_GREEN = new Player(FieldState.Green)
 
-export class Focus implements IFocus, IMovedListener
+export class Focus implements IFocus
 {
-    static readonly ADDED_ITEM_TO_POOL = 'addedItemToPool'
-    static readonly MOVED_FIELD = 'movedField'
-    static readonly VICTORY = 'victory'
-    static readonly ENEMY_HAS_POOL = 'enemyHasPool'
-    static readonly NEXT_TURN = 'nextTurn'
-
+    events: EventEmitter
     gameBoard: IGameBoard
     private _currentPlayer: IPlayer
 
-    private _victoryListeners: IVictoryListener[]
-    private _movedListeners: IMovedListener[]
-    private _addedToPoolListeners: IAddedToPoolListener[]
-    private _enemyHasPoolListeners: IEnemyHasPoolListener[]
-    private _newTurnListeners: INewTurnListener[]
-
     constructor()
     {
+        this.events = new EventEmitter()
         this.gameBoard = new GameBoard()
         this._currentPlayer = PLAYER_RED
 
-        this._victoryListeners = []
-        this._movedListeners = []
-        this._addedToPoolListeners = []
-        this._enemyHasPoolListeners = []
-        this._newTurnListeners = []
+        this.events.on(EventMovedField, this.onMoveField, this)
 
-        this.addMovedListener(this)
-
-        this.gameBoard.each(v => v.events.on(EventFieldOvergrown, this.increaseCurrentPlayersPool, this))
+        this.gameBoard.each(v => v.events.on(EventFieldOvergrown, this.onOverGrownField, this))
     }
 
-    onOverGrownField(field: IField, stateThatWasPoped: FieldState): void
+    private onOverGrownField(field: IField, stateThatWasPoped: FieldState): void
     {
-        this.increaseCurrentPlayersPool()
+        if (stateThatWasPoped === this.currentPlayer.state)
+            this.increaseCurrentPlayersPool()
     }
 
-    onMoveField(): void
+    private onMoveField(): void
     {
         const player = this.getNextPlayer()
 
@@ -61,56 +47,6 @@ export class Focus implements IFocus, IMovedListener
         {
             this.checkForPoolAvailability(player, this.currentPlayer)
         }
-    }
-
-    addVictoryListener(listener: IVictoryListener): void
-    {
-        this._victoryListeners.push(listener)
-    }
-
-    removeVictoryListener(listener: IVictoryListener): void
-    {
-        this._victoryListeners = this._victoryListeners.filter(l => l !== listener)
-    }
-
-    addMovedListener(listener: IMovedListener): void
-    {
-        this._movedListeners.push(listener)
-    }
-
-    removeMovedListener(listener: IMovedListener): void
-    {
-        this._movedListeners = this._movedListeners.filter(l => l !== listener)
-    }
-
-    addAddedToPoolListener(listener: IAddedToPoolListener): void
-    {
-        this._addedToPoolListeners.push(listener)
-    }
-
-    removeAddedToPoolListener(listener: IAddedToPoolListener): void
-    {
-        this._addedToPoolListeners = this._addedToPoolListeners.filter(l => l !== listener)
-    }
-
-    addEnemyHasPoolListener(listener: IEnemyHasPoolListener): void
-    {
-        this._enemyHasPoolListeners.push(listener)
-    }
-
-    removeEnemyHasPoolListener(listener: IEnemyHasPoolListener): void
-    {
-        this._enemyHasPoolListeners = this._enemyHasPoolListeners.filter(l => l !== listener)
-    }
-
-    addNewTurnListener(listener: INewTurnListener): void
-    {
-        this._newTurnListeners.push(listener)
-    }
-
-    removeNewTurnListener(listener: INewTurnListener): void
-    {
-        this._newTurnListeners = this._newTurnListeners.filter(l => l !== listener)
     }
 
     set currentPlayer(player: IPlayer)
@@ -140,7 +76,7 @@ export class Focus implements IFocus, IMovedListener
             return false
         }
 
-        this._movedListeners.forEach(l => l.onMoveField(x, y, fromField, toField))
+        this.events.emit(EventMovedField, x, y, fromField, toField)
 
         this.nextTurn()
         return true
@@ -194,7 +130,7 @@ export class Focus implements IFocus, IMovedListener
     nextTurn()
     {
         this._currentPlayer = this.getNextPlayer()
-        this._newTurnListeners.forEach(l => l.onNextTurnBegin(this._currentPlayer))
+        this.events.emit(EventNewTurn, this._currentPlayer)
     }
 
     get currentPlayer(): IPlayer
@@ -205,19 +141,18 @@ export class Focus implements IFocus, IMovedListener
     private increaseCurrentPlayersPool()
     {
         this.currentPlayer.pooledPawns++
-        this._addedToPoolListeners.forEach(l => l.onAddedToPool(this.currentPlayer))
+        this.events.emit(EventAddedToPool, this._currentPlayer)
     }
 
     private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer)
     {
         if (playerWhoFail.pooledPawns !== 0)
         {
-            debugger;
-            this._enemyHasPoolListeners.forEach(l => l.onEnemyHasPool(playerWhoFail))
+            this.events.emit(EventEnemyHasPool)
             return
         }
 
         // no pawns = Victory
-        this._victoryListeners.forEach(l => l.onVictory(playerWhoWon))
+        this.events.emit(EventVictory, playerWhoWon)
     }
 }
