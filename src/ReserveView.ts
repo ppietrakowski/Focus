@@ -1,14 +1,14 @@
 import EventEmitter from 'eventemitter3'
-import { FieldState } from './FieldState'
+import { FieldState } from './IField'
 import { IPoolClickedListener } from './IGameBoardView'
 import { IPlayer, Player } from './Player'
 
 
 function getClassNameOfElement(player: IPlayer)
 {
-    return (player.state & FieldState.FIELD_STATE_PLAYER_RED) ?
+    return (player.state & FieldState.Red) ?
         'reserveRedPawn'
-        : (player.state & FieldState.FIELD_STATE_PLAYER_GREEN) ?
+        : (player.state & FieldState.Green) ?
             'reserveGreenPawn' : 'reserveEmptyPawn'
 }
 

@@ -1,14 +1,13 @@
 import { Field } from './Field'
 import { GameBoard } from './GameBoard'
 import { IAddedToPoolListener, IEnemyHasPoolListener, IFocus, IMovedListener, INewTurnListener, IVictoryListener } from './IFocus'
-import { EventFieldOvergrown, IField } from './IField'
+import { EventFieldOvergrown, FieldState, IField } from './IField'
 
 import { IGameBoard } from "./IGameBoard"
 import { IPlayer, Player } from './Player'
-import { FieldState } from './FieldState'
 
-export const PLAYER_RED = new Player(FieldState.FIELD_STATE_PLAYER_RED)
-export const PLAYER_GREEN = new Player(FieldState.FIELD_STATE_PLAYER_GREEN)
+export const PLAYER_RED = new Player(FieldState.Red)
+export const PLAYER_GREEN = new Player(FieldState.Green)
 
 export class Focus implements IFocus, IMovedListener
 {
@@ -184,7 +183,7 @@ export class Focus implements IFocus, IMovedListener
             toPlayer = this.currentPlayer
         }
 
-        if (toPlayer.doesOwnThisField(FieldState.FIELD_STATE_PLAYER_RED))
+        if (toPlayer.doesOwnThisField(FieldState.Red))
         {
             return PLAYER_GREEN
         }
