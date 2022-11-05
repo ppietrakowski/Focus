@@ -1,5 +1,4 @@
-import { FieldState } from './FieldState'
-import { IField } from './IField'
+import { FieldState, IField } from './IField'
 import { IFocus } from "./IFocus"
 import { IPlayer } from './Player'
 
@@ -104,12 +103,12 @@ export class FieldView implements IFieldView
 
     private getHoveredClassName()
     {
-        return (this.field.state & FieldState.FIELD_STATE_PLAYER_RED) ? 'playerRedFieldHovered' : (this.field.state & FieldState.FIELD_STATE_PLAYER_GREEN) ? 'playerGreenFieldHovered' : 'emptyField'
+        return (this.field.state & FieldState.Red) ? 'playerRedFieldHovered' : (this.field.state & FieldState.Green) ? 'playerGreenFieldHovered' : 'emptyField'
     }
 
     private getUnhoveredClassName()
     {
-        return (this.field.state & FieldState.FIELD_STATE_PLAYER_RED) ? 'playerRedField' : (this.field.state & FieldState.FIELD_STATE_PLAYER_GREEN) ? 'playerGreenField' : 'emptyField'
+        return (this.field.state & FieldState.Red) ? 'playerRedField' : (this.field.state & FieldState.Green) ? 'playerGreenField' : 'emptyField'
     }
 
     onMouseOver()
