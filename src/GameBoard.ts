@@ -1,48 +1,48 @@
-import EventEmitter from 'eventemitter3'
 import { Field } from './Field'
 import { IField } from './IField'
 
 import board from './board.json'
-import { IPlayer, Player } from './Player'
+import { IPlayer } from './Player'
 import { IGameBoard } from './IGameBoard'
-import { FieldState } from './FieldState'
+import { FieldState } from './IField'
 
 
-interface BoardState {
+interface BoardState
+{
     id: number
     state: number
 }
 
-export interface ForEachCallback {
+export interface ForEachCallback
+{
     (element: IField, x: number, y: number): void
 }
 
-function boardToStateMask(boardState: number) {
+function boardToStateMask(boardState: number)
+{
     if (boardState === 0)
-        return FieldState.FIELD_STATE_UNPLAYABLE
-
+        return FieldState.Unplayable
     else if (boardState === 1)
-        return FieldState.FIELD_STATE_EMPTY
+        return FieldState.Empty
 
     else if (boardState === 2)
-        return FieldState.FIELD_STATE_PLAYER_RED
+        return FieldState.Red
     else if (boardState === 3)
-        return FieldState.FIELD_STATE_PLAYER_GREEN
+        return FieldState.Green
 
     throw new Error('Illegal board state')
 }
 
-export class GameBoard implements IGameBoard {
+export class GameBoard implements IGameBoard
+{
     static readonly MAX_TOWER_HEIGHT = 5
     static readonly GAME_BOARD_WIDTH = 8
     static readonly GAME_BOARD_HEIGHT = 8
 
     private fields: IField[]
 
-    events: EventEmitter
-
-    constructor() {
-        this.events = new EventEmitter()
+    constructor()
+    {
         const elements = board.elements
 
         this.fields = []
@@ -52,46 +52,59 @@ export class GameBoard implements IGameBoard {
         if (elements.length < maxSize)
             throw new Error(`Board should have at least ${maxSize} element`)
 
-        for (let i = 0; i < maxSize; i++) {
+        for (let i = 0; i < maxSize; i++)
+        {
             this.addNewFieldFromJson(elements, i)
         }
     }
 
-    each(callback: ForEachCallback) {
-        for (const field of this.fields) {
-            callback(field, field.x, field.y)
+    each(callback: ForEachCallback)
+    {
+        for (let i = 0; i < this.fields.length; i++)
+        {
+            const x = (i % GameBoard.GAME_BOARD_WIDTH)
+            const y = Math.floor(i / GameBoard.GAME_BOARD_WIDTH)
+
+            callback(this.fields[i], x, y)
         }
     }
 
-    getFieldAt(x: number, y: number) {
-        if (this.isOutOfBoundsInXAxis(x) || this.isOutOfBoundsInYAxis(y)) {
+    getFieldAt(x: number, y: number)
+    {
+        if (this.isOutOfBoundsInXAxis(x) || this.isOutOfBoundsInYAxis(y))
+        {
             throw new Error(`point (${x}, ${y}) is out of bounds`)
         }
 
         return this.fields[x + y * GameBoard.GAME_BOARD_WIDTH] || null
     }
 
-    countPlayersFields(player: IPlayer) {
-        return this.fields.filter(v => v.belongsTo(player)).length
+    countPlayersFields(player: IPlayer)
+    {
+        return this.fields.filter(v => player.doesOwnThisField(v)).length
     }
 
-    private addNewFieldFromJson(json: any, fieldId: number) {
-        const field = json.find((v: BoardState)  => v.id === fieldId) || null
+    private addNewFieldFromJson(json: any, fieldId: number)
+    {
+        const field = json.find((v: BoardState) => v.id === fieldId) || null
 
-        if (field === null) {
+        if (field === null)
+        {
             throw new Error(`Missing object at (${(fieldId % GameBoard.GAME_BOARD_WIDTH)}, ${Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)}) id=${fieldId}`)
         }
 
         this.fields[fieldId] = new Field(boardToStateMask(json[fieldId].state), (fieldId % GameBoard.GAME_BOARD_WIDTH), Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH))
     }
 
-    private isOutOfBoundsInXAxis(x: number) {
+    private isOutOfBoundsInXAxis(x: number)
+    {
         return x < 0 || x >= GameBoard.GAME_BOARD_WIDTH
     }
 
-    private isOutOfBoundsInYAxis(y: number) {
+    private isOutOfBoundsInYAxis(y: number)
+    {
         return y < 0 || y >= GameBoard.GAME_BOARD_HEIGHT
     }
 
-    
+
 }

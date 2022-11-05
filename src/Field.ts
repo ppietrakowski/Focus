@@ -1,127 +1,164 @@
-import { FieldState } from './FieldState'
-import { Direction, DIRECTION_EAST, DIRECTION_NORTH, DIRECTION_SOUTH, DIRECTION_WEST, IField, UnderFieldState } from './IField'
-import { IPlayer } from './Player'
+import { Player } from './Player'
+import { IField, FieldState, Direction, EventFieldOvergrown, getDirectionFromOffset } from './IField'
+import EventEmitter from 'eventemitter3'
 
+export const MaxTowerHeight = 5
 
+export class Field implements IField 
+{
+    private _state: FieldState
+    private _underThisField: FieldState[]
+    private _x: number
+    private _y: number
+    events: EventEmitter
 
-export const MAX_TOWER_HEIGHT = 5
-
-export class Field implements IField {
-
-    private static clearField(field: Field) {
-        field.state = FieldState.FIELD_STATE_EMPTY
-        field.underThisField = []
+    constructor(state: FieldState, x: number, y: number) 
+    {
+        this._state = state
+        this._underThisField = []
+        this._x = x
+        this._y = y
+        this.events = new EventEmitter()
     }
 
-    state: number
-    underThisField: UnderFieldState[]
-    x: number
-    y: number
-
-    constructor(state: number, x: number, y: number) {
-        this.state = state
-        this.underThisField = []
-        this.x = x
-        this.y = y
-    }
-
-    makeAsNextField(cameFrom: IField, moveCount: number) {
-        if (!cameFrom.isPlayable || !(cameFrom instanceof Field)) {
-            return
+    moveToThisField(fromWhichField: IField, additionalDistance?: number) 
+	{
+        if (!fromWhichField.isPlayable || !(fromWhichField instanceof Field)) 
+		{
+            return false
         }
 
-        const oldState = cameFrom.state
-        
-        // one move is just a changing of state
-        const temp = cameFrom.shiftNFirstElements(moveCount - 1)
+		additionalDistance = additionalDistance || this.getDistanceToField(fromWhichField)
 
-        this.underThisField = this.getNewUnderElements(temp)
-        this.state = oldState
+        if (this.tryToMoveThanAvailable(additionalDistance))
+        {
+            return false
+        }
+  
+        const oldState = fromWhichField.state
+
+        this._underThisField = this.getNewUnderElements(fromWhichField, additionalDistance)
+        this._state = oldState
+
+        this.reduceOverGrown()
+
+        return true
     }
 
-    get height() {
-        return this.underThisField.length + 1
+    private reduceOverGrown() 
+    {
+        while (this._underThisField.length > MaxTowerHeight) 
+        {
+            const fieldState = this._underThisField.pop()
+            this.events.emit(EventFieldOvergrown, this, fieldState)
+        }
     }
 
-    get isOvergrown() {
-        return this.height >= MAX_TOWER_HEIGHT
-    }    
-
-    get isEmpty() {
-        return !!(this.state & FieldState.FIELD_STATE_EMPTY)
+    private tryToMoveThanAvailable(additionalDistance: number) {
+        return additionalDistance > this.height
     }
 
-    get isPlayable() {
-        return !(this.state & FieldState.FIELD_STATE_UNPLAYABLE)
+    private getNewUnderElements(fromWhichField: Field, distance: number) 
+    {
+        const shiftedElements = fromWhichField.shiftElements(distance - 1)
+
+        if (fromWhichField.isEmpty) 
+        {
+            return shiftedElements
+        }
+
+        return shiftedElements.concat([this._state], this._underThisField)
     }
 
-    belongsTo(player: IPlayer) {
-        return player.doesOwnThisField(this.state)
+    private shiftElements(n: number) 
+    {
+        const firstElements : FieldState[] = []
+
+        while (n-- > 0) 
+        {
+            const element = this._underThisField.shift() || null
+
+            if (element) 
+            {
+                firstElements.push(element)
+            }
+        }
+
+        // update the this.state to next element under
+        this._state = this._underThisField.shift() || FieldState.Empty
+
+        return firstElements
     }
 
-    calculateDirectionTowards(anotherField: IField): Direction {
+    placeAtTop(state: FieldState): void {
+        this._underThisField = [this._state].concat(this._underThisField)
+        this._state = state
+
+        this.reduceOverGrown()
+    }
+
+    getDistanceToField(anotherField: Field) 
+    {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
-        if (!this.canJump(v)) {
-            return null
-        }
-
-        if (v.x > 0) {
-            return DIRECTION_EAST
-        } else if (v.x < 0) {
-            return DIRECTION_WEST
-        } else if (v.y > 0) {
-            return DIRECTION_SOUTH
-        }
-
-        return DIRECTION_NORTH
-    }
-
-    calculateMoveCountTowards(anotherField: IField) {
-        const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
-
-        if (Math.abs(v.x) > 0) {
+        if (Math.abs(v.x) > 0) 
+        {
             return Math.abs(v.x)
         }
 
         return Math.abs(v.y)
     }
 
-    private shiftNFirstElements(n: number) {
-        const firstElements : UnderFieldState[] = []
+    getDirectionToField(anotherField: IField): Direction 
+    {
+        const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
-        while (n-- > 0) {
-            this.shiftElement(firstElements)
+        if (!this.canJump(v)) 
+        {
+            return null
         }
 
-        if (this.underThisField.length === 0) {
-            Field.clearField(this)
-            return firstElements
-        }
-
-        // update the this field's state to next element under
-        this.state = this.underThisField.shift().state
-
-        return firstElements
+        return getDirectionFromOffset(v.x, v.y)
     }
 
-    private shiftElement(firstElements: UnderFieldState[]) {
-        const element = this.underThisField.shift() || null
-
-        if (element !== null) {
-            firstElements.push(element)
-        }
-    }
-
-    private getNewUnderElements(shiftedElements: UnderFieldState[]) {
-        if (this.isEmpty) {
-            return shiftedElements
-        }
-
-        return shiftedElements.concat([{ state: this.state }], this.underThisField)
-    }
-
-    private canJump(v: {x: number, y: number}) {
+    private canJump(v: {x: number, y: number}) 
+    {
         return Math.abs(v.x) <= this.height && Math.abs(v.y) <= this.height
+    }
+
+    possessByPlayer(player: Player): void 
+    {
+        this._state = player.state
+    }
+
+    get state(): FieldState 
+    {
+        return this._state
+    }
+
+    get x(): number 
+    {
+        return this._x
+    }
+
+    get y(): number 
+    {
+        return this._y
+    }
+
+    get height() {
+        return this._underThisField.length + 1
+    }
+
+    get isOvergrown() {
+        return this.height >= MaxTowerHeight
+    }
+    
+    get isEmpty() {
+        return !!(this._state & FieldState.Empty)
+    }
+    
+    get isPlayable() {
+        return !(this._state & FieldState.Unplayable)
     }
 }

@@ -1,32 +1,79 @@
-import { FieldState } from "./FieldState"
-import { IPlayer } from "./Player"
+import EventEmmiter from 'eventemitter3'
+import { IPlayer, Player } from './Player'
 
-export interface UnderFieldState {
-    state: number
+export type Direction = {
+    x: number,
+    y: number
 }
 
-export const DIRECTION_SOUTH = { x: 0, y: 1 }
-export const DIRECTION_NORTH = { x: 0, y: -1 }
-export const DIRECTION_EAST = { x: 1, y: 0 }
-export const DIRECTION_WEST = { x: -1, y: 0 }
+export enum FieldState 
+{
+    Unplayable = 2 << 0,
+    Empty = 2 << 1,
+    Red = 2 << 2,
+    Green = 2 << 3
+}
 
-export type Direction = {x: number, y: number}
+interface IFieldOvergrownListener 
+{
+    (field: IField, stateThatWasPoped: FieldState): void
+}
 
-export interface IField {
-    state: FieldState
-    underThisField: UnderFieldState[]
+/**
+* Event name. Event that can happen when field.height > 5
+* @delegate IFieldOvergrownListener
+*/
+export const EventFieldOvergrown = 'FieldOvergrown'
 
-    x: number
-    y: number
+export const DirectionSouth = { x: 0, y: 1 }
+export const DirectionNorth = { x: 0, y: -1 }
+export const DirectionEast = { x: 1, y: 0 }
+export const DirectionWest = { x: -1, y: 0 }
 
-    makeAsNextField(cameFrom: IField, moveCount: number): void
+export interface IField 
+{
+    events: EventEmmiter
 
+    /**
+    * Moves from argument field to this field
+    * It return false, if is not possible to move to this field
+    * @param additionalDistance? move distance, if not specified the distance value is used
+    */
+    moveToThisField(fromWhichField: IField, additionalDistance?: number): boolean
+    placeAtTop(state: FieldState): void
+
+    getDistanceToField(field: IField): number
+    getDirectionToField(field: IField): Direction
+
+    possessByPlayer(player: IPlayer): void
+
+    /**
+    * Returns a height of this field, should not be greater than 5
+    */
     get height(): number
-    get isOvergrown(): boolean
+    get state(): FieldState
+
+    get x(): number
+    get y(): number
+
     get isEmpty(): boolean
     get isPlayable(): boolean
+}
 
-    belongsTo(player: IPlayer): boolean
-    calculateDirectionTowards(anotherField: IField): Direction
-    calculateMoveCountTowards(anotherField: IField): number
+export function getDirectionFromOffset(x: number, y: number) 
+{
+    if (x > 0) 
+    {
+        return DirectionEast
+    }
+    else if (x < 0) 
+    {
+        return DirectionWest
+    }
+    else if (y > 0) 
+    {
+        return DirectionSouth
+    }
+
+    return DirectionNorth
 }

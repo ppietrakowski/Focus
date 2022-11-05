@@ -1,79 +1,101 @@
 import EventEmitter from 'eventemitter3'
 import { FieldState } from './FieldState'
-import { Player } from './Player'
+import { IPoolClickedListener } from './IGameBoardView'
+import { IPlayer, Player } from './Player'
 
 
-function getClassNameOfElement(player: Player) {
-    return (player.state & FieldState.FIELD_STATE_PLAYER_RED) ? 
-        'reserveRedPawn' 
+function getClassNameOfElement(player: IPlayer)
+{
+    return (player.state & FieldState.FIELD_STATE_PLAYER_RED) ?
+        'reserveRedPawn'
         : (player.state & FieldState.FIELD_STATE_PLAYER_GREEN) ?
             'reserveGreenPawn' : 'reserveEmptyPawn'
 }
 
-export interface IReserveView {
+export interface IReserveView
+{
     addToReserve(): void
     removeFromReserve(): boolean
     getFieldAt(i: number): HTMLDivElement
+    addPoolClickedListener(listener: IPoolClickedListener): void
+    emitPoolClicked(player: IPlayer, reserve: IReserveView): void
 
-    readonly owner: Player
-    events: EventEmitter
+    readonly owner: IPlayer
 }
 
-export class ReserveView implements IReserveView {
+export class ReserveView implements IReserveView
+{
 
     static POOL_CLICKED = 'poolClicked'
 
-    events: EventEmitter
-    
     reserveFields: HTMLDivElement[]
     private lastReserved: number
-    
-    constructor(private readonly reserveBar: HTMLDivElement, readonly owner: Player) {
-        this.events = new EventEmitter()
+    private _poolClickedListeners: IPoolClickedListener[]
 
-        const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn') 
+    constructor(private readonly reserveBar: HTMLDivElement, readonly owner: IPlayer)
+    {
+        const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn')
 
         this.reserveFields = []
 
-        for (let i = 0; i < reserveElements.length; i++) {
+        for (let i = 0; i < reserveElements.length; i++)
+        {
             this.reserveFields.push(reserveElements[i] as HTMLDivElement)
         }
 
         this.lastReserved = 0
+        this._poolClickedListeners = []
     }
 
-    getFieldAt(i: number): HTMLDivElement {
+    emitPoolClicked(player: IPlayer, reserve: IReserveView): void
+    {
+        this._poolClickedListeners.forEach(l => l.onPoolClicked(player, reserve))
+    }
+
+    addPoolClickedListener(listener: IPoolClickedListener): void
+    {
+        this._poolClickedListeners.push(listener)
+    }
+
+    getFieldAt(i: number): HTMLDivElement
+    {
         return this.reserveFields[i]
     }
 
-    addToReserve() {
-        if (!this.isSomethingInPool()) {
+    addToReserve()
+    {
+        if (!this.isSomethingInPool())
+        {
             return false
         }
 
         this.reserveFields[this.lastReserved].className = getClassNameOfElement(this.owner)
-        this.lastReserved++ 
+        this.lastReserved++
         return true
     }
 
-    removeFromReserve() {
-        if (!this.isSomethingInPool()) {
+    removeFromReserve()
+    {
+        if (!this.isSomethingInPool())
+        {
             return this.triedToUseEmptyPool()
         }
-        
+
         this.reserveFields[this.lastReserved].className = 'reserveEmptyPawn'
         this.lastReserved--
         return true
     }
 
-    triedToUseEmptyPool() {
+    triedToUseEmptyPool()
+    {
         this.lastReserved = Math.max(this.lastReserved, 0)
 
         console.warn('Trying to click unexisting item in reserve')
         return false
     }
 
-    isSomethingInPool() {
+    isSomethingInPool()
+    {
         console.log(!!this.reserveFields[this.lastReserved])
         return this.reserveFields[this.lastReserved] && this.owner.hasAnyPool
     }
