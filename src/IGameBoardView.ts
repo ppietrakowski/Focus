@@ -3,6 +3,7 @@ import { IFieldView } from './FieldView'
 import { IReserveView } from './ReserveView'
 import { IGameBoard } from './IGameBoard'
 import { IPlayer } from './Player'
+import EventEmitter from 'eventemitter3'
 
 
 export interface ForEachFieldInView
@@ -12,7 +13,7 @@ export interface ForEachFieldInView
 
 export interface IPoolClickedListener
 {
-    onPoolClicked(player: IPlayer, reserve: IReserveView): void
+    (player: IPlayer, reserve: IReserveView): void
 }
 
 export interface IGameBoardView
@@ -27,12 +28,13 @@ export interface IGameBoardView
     renderPossibleMoves(selectedField: IFieldView): void
     each(callback: ForEachFieldInView): void
 
-
-    addPoolClickedListener(listener: IPoolClickedListener): void
-    removePoolClickedListener(listener: IPoolClickedListener): void
+    addPoolClickedListener(listener: IPoolClickedListener, context: any): void
+    removePoolClickedListener(listener: IPoolClickedListener, context: any): void
 
     get isSomethingSelected(): boolean
     
     greenReserve: IReserveView
     redReserve: IReserveView
+
+    events: EventEmitter
 }

@@ -24,6 +24,8 @@ export class Focus implements IFocus
 
         this.events.on(EventMovedField, this.onMoveField, this)
 
+        this.increaseCurrentPlayersPool()
+
         this.gameBoard.each(v => v.events.on(EventFieldOvergrown, this.onOverGrownField, this))
     }
 
@@ -92,6 +94,7 @@ export class Focus implements IFocus
         const field = this.gameBoard.getFieldAt(x, y)
 
         field.placeAtTop(owner.state)
+        this.nextTurn()
     }
 
     getFieldBasedOnDirectionAndMoveCount(field: Field, direction: { x: number, y: number }, howManyFieldWantMove: number)

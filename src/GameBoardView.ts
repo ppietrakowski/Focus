@@ -1,16 +1,17 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
 import { IFocus } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
-import { IReserveView, ReserveView } from './ReserveView'
+import { EventPoolClicked, IReserveView, ReserveView } from './ReserveView'
 import { IPlayer } from './Player'
 import { ReserveViewRequest } from './ReserveViewRequest'
 import { IGameBoard } from './IGameBoard'
 import { ForEachFieldInView, IGameBoardView, IPoolClickedListener } from './IGameBoardView'
 import { FieldViewRequest } from './FieldViewRequest'
 import { DirectionNorth, DirectionWest } from './IField'
+import EventEmitter from 'eventemitter3'
 
 
-export class GameBoardView implements IGameBoardView, IPoolClickedListener
+export class GameBoardView implements IGameBoardView
 {
 
     static readonly POOL_CLICKED = 'PoolClicked'
@@ -20,12 +21,14 @@ export class GameBoardView implements IGameBoardView, IPoolClickedListener
     board: HTMLDivElement
     greenReserve: IReserveView
     redReserve: IReserveView
+    events: EventEmitter
 
     private _poolClickedListeners: IPoolClickedListener[]
     private fields: IFieldView[]
 
     constructor(game: IFocus)
     {
+        this.events = new EventEmitter()
         this.gameBoard = game.gameBoard
 
         this.game = game
@@ -39,25 +42,28 @@ export class GameBoardView implements IGameBoardView, IPoolClickedListener
         this.greenReserve = new ReserveViewRequest(this.greenReserve, this.game)
         this.redReserve = new ReserveViewRequest(this.redReserve, this.game)
 
-        this.greenReserve.addPoolClickedListener(this)
-        this.redReserve.addPoolClickedListener(this)
+        this.greenReserve.addPoolClickedListener(this.onPoolClicked, this)
+        this.redReserve.addPoolClickedListener(this.onPoolClicked, this)
+
+        this.redReserve.addToReserve()
 
         this._poolClickedListeners = []
     }
+    
 
-    onPoolClicked(player: IPlayer, reserve: IReserveView): void
+    private onPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
-        this._poolClickedListeners.forEach(l => l.onPoolClicked(player, reserve))
+        this.events.emit(EventPoolClicked, player, reserve)
     }
 
-    addPoolClickedListener(listener: IPoolClickedListener): void
+    addPoolClickedListener(listener: IPoolClickedListener, context?: any): void
     {
-        this._poolClickedListeners.push(listener)
+        this.events.on(EventPoolClicked, listener, context)
     }
 
-    removePoolClickedListener(listener: IPoolClickedListener): void
+    removePoolClickedListener(listener: IPoolClickedListener, context?: any): void
     {
-        this._poolClickedListeners = this._poolClickedListeners.filter(l => l !== listener)
+        this.events.off(EventPoolClicked, listener, context)
     }
 
     getFieldAt(i: number): IFieldView

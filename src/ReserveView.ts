@@ -17,11 +17,14 @@ export interface IReserveView
     addToReserve(): void
     removeFromReserve(): boolean
     getFieldAt(i: number): HTMLDivElement
-    addPoolClickedListener(listener: IPoolClickedListener): void
+    addPoolClickedListener(listener: IPoolClickedListener, context: any): void
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
 
+    events: EventEmitter
     readonly owner: IPlayer
 }
+
+export const EventPoolClicked = 'PoolClicked'
 
 export class ReserveView implements IReserveView
 {
@@ -34,6 +37,7 @@ export class ReserveView implements IReserveView
 
     constructor(private readonly reserveBar: HTMLDivElement, readonly owner: IPlayer)
     {
+        this.events = new EventEmitter()
         const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn')
 
         this.reserveFields = []
@@ -46,15 +50,16 @@ export class ReserveView implements IReserveView
         this.lastReserved = 0
         this._poolClickedListeners = []
     }
+    events: EventEmitter
 
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
-        this._poolClickedListeners.forEach(l => l.onPoolClicked(player, reserve))
+        this.events.emit(EventPoolClicked, player, reserve)
     }
 
-    addPoolClickedListener(listener: IPoolClickedListener): void
+    addPoolClickedListener(listener: IPoolClickedListener, context: any): void
     {
-        this._poolClickedListeners.push(listener)
+        this.events.on(EventPoolClicked, listener, context)
     }
 
     getFieldAt(i: number): HTMLDivElement

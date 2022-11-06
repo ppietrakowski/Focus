@@ -24,7 +24,7 @@ export interface IFieldView
     visualizeHovered(): void
     visualizeUnhovered(): void
 
-    addClickListener(clickListener: IClickListener, context: any): void
+    addClickListener(clickListener: IClickListener, context: any, backup?: boolean): void
 
     backupClickListeners(): void
     restoreClickListeners(): void
@@ -53,25 +53,29 @@ export class FieldView implements IFieldView
         this._backupClickListeners = []
     }
 
-    addClickListener(clickListener: IClickListener, context: any): void
+    addClickListener(clickListener: IClickListener, context: any, backup?: boolean): void
     {
         this.events.on(EventClickField, clickListener, context)
-        this._backupClickListeners.push({ listener: clickListener, context: context })
+        
+        if (backup)
+            this._backupClickListeners.push({ listener: clickListener, context: context })
     }
 
     backupClickListeners(): void
     {
-        this.events.off(EventClickField)
+        this.events.removeAllListeners(EventClickField)
     }
 
     restoreClickListeners(): void
     {
-        this.events.off(EventClickField)
+        this.events.removeAllListeners(EventClickField)
 
         for (const listener of this._backupClickListeners)
         {
             this.events.on(EventClickField, listener.listener, listener.context)
         }
+
+        console.log(`field at (${this.field.x}, ${this.field.y}) restored listeners`)
     }
 
     visualizeHovered()

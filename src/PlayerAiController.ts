@@ -11,7 +11,7 @@ import { Direction } from './IField'
  * Class responsible for managing owning player turn.
  * Works by hook to gameBoard and IFieldView events
  */
-export default class PlayerAiController extends AiController implements IPoolClickedListener, IMouseStateListener
+export default class PlayerAiController extends AiController
 {
 
     private selectedField?: IFieldView
@@ -24,7 +24,7 @@ export default class PlayerAiController extends AiController implements IPoolCli
 
         this.gameBoard.each(v => this.hookIntoClickEvent(v))
 
-        this.gameBoard.addPoolClickedListener(this)
+        this.gameBoard.addPoolClickedListener(this.onPoolClicked, this)
 
         this.gameBoard.each(v => v.events.on(EventMouseOverField, this.onMouseOverFieldView, this))
         this.gameBoard.each(v => v.events.on(EventMouseLeaveField, this.onMouseLeaveFieldView, this))
@@ -95,7 +95,7 @@ export default class PlayerAiController extends AiController implements IPoolCli
 
     private hookIntoClickEvent(v: IFieldView)
     {
-        v.addClickListener(this.onFieldViewClick, this)
+        v.addClickListener(this.onFieldViewClick, this, true)
     }
 
     move(): void
@@ -206,7 +206,7 @@ export default class PlayerAiController extends AiController implements IPoolCli
         field.backupClickListeners()
 
         // use click event now for placing instead of moving
-        field.addClickListener(this.onPlaceFieldClicked, this)
+        field.addClickListener(this.onPlaceFieldClicked, this, false)
     }
 
     private onPlaceFieldClicked(field: IFieldView)
@@ -227,15 +227,14 @@ export default class PlayerAiController extends AiController implements IPoolCli
         this.ownedPlayer.pooledPawns--
         this.game.placeField(field.field.x, field.field.y, this.ownedPlayer)
         console.log('HERE I AM')
-        this.resetToPlayState(this.game.getNextPlayer(this.ownedPlayer))
+        this.resetToPlayState(this.game.currentPlayer)
     }
 
     private resetToPlayState(newNextPlayer: IPlayer)
     {
         this.gameBoard.each(v => v.restoreClickListeners())
-        this.gameBoard.erasePossibleMoves()
-
         this.game.currentPlayer = newNextPlayer
+        this.unselectField()
     }
 
     private unselectField()

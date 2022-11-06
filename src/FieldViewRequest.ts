@@ -18,9 +18,9 @@ export class FieldViewRequest implements IFieldView
         this.domElement.addEventListener('click', () => this.onClick())
     }
 
-    addClickListener(clickListener: IClickListener, context: any): void
+    addClickListener(clickListener: IClickListener, context: any, backup?: boolean): void
     {
-        this.fieldView.addClickListener(clickListener, context)
+        this.fieldView.addClickListener(clickListener, context, backup)
     }
 
     backupClickListeners(): void

@@ -1,3 +1,4 @@
+import EventEmitter from 'eventemitter3'
 import { IFocus } from './IFocus'
 import { IPoolClickedListener } from './IGameBoardView'
 import { IPlayer, Player } from './Player'
@@ -6,10 +7,11 @@ import { IReserveView, ReserveView } from './ReserveView'
 export class ReserveViewRequest implements IReserveView
 {
     readonly owner: IPlayer
+    events: EventEmitter
 
     constructor(private readonly reserveView: IReserveView, private readonly game: IFocus)
     {
-
+        this.events = reserveView.events
         this.owner = this.reserveView.owner
 
         if (reserveView instanceof ReserveView)
@@ -18,9 +20,9 @@ export class ReserveViewRequest implements IReserveView
         }
     }
 
-    addPoolClickedListener(listener: IPoolClickedListener): void
+    addPoolClickedListener(listener: IPoolClickedListener, context: any): void
     {
-        this.reserveView.addPoolClickedListener(listener)
+        this.reserveView.addPoolClickedListener(listener, context)
     }
 
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
