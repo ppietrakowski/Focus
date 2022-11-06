@@ -30,10 +30,10 @@ export class ReserveView implements IReserveView
 {
 
     static POOL_CLICKED = 'poolClicked'
-
+    
+    events: EventEmitter
     reserveFields: HTMLDivElement[]
     private lastReserved: number
-    private _poolClickedListeners: IPoolClickedListener[]
 
     constructor(private readonly reserveBar: HTMLDivElement, readonly owner: IPlayer)
     {
@@ -48,9 +48,7 @@ export class ReserveView implements IReserveView
         }
 
         this.lastReserved = 0
-        this._poolClickedListeners = []
     }
-    events: EventEmitter
 
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
