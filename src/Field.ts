@@ -30,11 +30,10 @@ export class Field implements IField
 
         additionalDistance = additionalDistance || this.getDistanceToField(fromWhichField)
 
-        // one move is just a changing of state
-        const itemCountFromOldList = additionalDistance - 1
         const oldState = fromWhichField.state
-
-        this._underThisField = this.getNewUnderElements(fromWhichField, itemCountFromOldList)
+        
+        // one move is just a changing of state
+        this._underThisField = this.getNewUnderElements(fromWhichField, additionalDistance - 1)
         this._state = oldState
 
         return true
