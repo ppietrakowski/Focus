@@ -13,18 +13,18 @@ import EventEmitter from 'eventemitter3'
 
 export class GameBoardView implements IGameBoardView
 {
-
+    
     static readonly POOL_CLICKED = 'PoolClicked'
-
+    
     game: IFocus
     gameBoard: IGameBoard
     board: HTMLDivElement
     greenReserve: IReserveView
     redReserve: IReserveView
     events: EventEmitter
-
-    private _poolClickedListeners: IPoolClickedListener[]
+    
     private fields: IFieldView[]
+    private selectedField: IFieldView
 
     constructor(game: IFocus)
     {
@@ -47,8 +47,6 @@ export class GameBoardView implements IGameBoardView
         this.redReserve.addPoolClickedListener(this.onPoolClicked, this)
 
         this.game.events.on(EventAddedToPool, this.addedToPool, this)
-
-        this._poolClickedListeners = []
     }
 
     private addedToPool(player: IPlayer)
@@ -103,7 +101,6 @@ export class GameBoardView implements IGameBoardView
         }
     }
 
-    private selectedField: IFieldView
 
     renderPossibleMoves(selectedField: IFieldView)
     {
