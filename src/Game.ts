@@ -146,6 +146,12 @@ export class Focus implements IFocus
         this.events.emit(EventAddedToPool, this._currentPlayer)
     }
 
+    get hasEnded(): boolean
+    {
+        return this._hasEnded
+    }
+    private _hasEnded = false
+
     private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer)
     {
         if (playerWhoFail.pooledPawns !== 0)
@@ -154,6 +160,7 @@ export class Focus implements IFocus
             return
         }
 
+        this._hasEnded = true
         // no pawns = Victory
         this.events.emit(EventVictory, playerWhoWon)
     }

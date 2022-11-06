@@ -49,6 +49,9 @@ export abstract class AiController implements IAiController
 
     checkIsYourTurn(player: IPlayer)
     {
+        if (this.game.hasEnded)
+            return
+            
         if (player == this.ownedPlayer)
         {
             this.move()
