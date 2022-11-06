@@ -40,10 +40,18 @@ export default class PlayerAiController extends AiController
         this.clearTintFromHoveredField(player, fieldView)
     }
 
+    private _usedPool = false
+
     onPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
         if (this.isTurnOfPlayer(player))
         {
+            if (this._usedPool) {
+                reserve.addToReserve()
+                this._usedPool = false
+                return
+            }
+
             if (reserve.removeFromReserve())
             {
                 this.gameBoardController.placePoolState(this.ownedPlayer, this)

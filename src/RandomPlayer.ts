@@ -1,4 +1,5 @@
 import { AiController } from './AiController'
+import { PLAYER_GREEN } from './Game'
 import { GameBoard } from './GameBoard'
 import { DirectionEast, DirectionNorth, DirectionSouth, DirectionWest } from './IField'
 import { IFocus } from './IFocus'
@@ -54,10 +55,19 @@ export class RandomPlayer extends AiController
         let y = 0
         console.log('Computer player places')
 
-        while (!this.ownedPlayer.doesOwnThisField(this.game.gameBoard.getFieldAt(x, y)))
+        while (!this.game.gameBoard.getFieldAt(x, y).isPlayable)
         {
             x = Math.floor(Math.random() * GameBoard.GAME_BOARD_WIDTH)
             y = Math.floor(Math.random() * GameBoard.GAME_BOARD_HEIGHT)
+        }
+        
+        console.log('placed')
+        
+        if (this.ownedPlayer === PLAYER_GREEN)
+        {
+            this.gameBoard.greenReserve.removeFromReserve()
+        } else {
+            this.gameBoard.redReserve.removeFromReserve()
         }
 
         this.game.placeField(x, y, this.ownedPlayer)
@@ -65,7 +75,5 @@ export class RandomPlayer extends AiController
 
     stopMoving(): void
     {
-        console.log(this.game.currentPlayer, __filename)
     }
-
 }

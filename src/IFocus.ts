@@ -49,4 +49,6 @@ export interface IFocus
     get currentPlayer(): IPlayer
     set currentPlayer(player: IPlayer)
     get hasEnded(): boolean
+
+    hasPoolToPut: boolean
 }

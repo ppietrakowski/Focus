@@ -1,5 +1,5 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
-import { IFocus } from './IFocus'
+import { EventAddedToPool, IFocus } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
 import { EventPoolClicked, IReserveView, ReserveView } from './ReserveView'
 import { IPlayer } from './Player'
@@ -39,15 +39,22 @@ export class GameBoardView implements IGameBoardView
         this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0] as HTMLDivElement, PLAYER_GREEN)
         this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0] as HTMLDivElement, PLAYER_RED)
 
+        this.greenReserve.addToReserve()
         this.greenReserve = new ReserveViewRequest(this.greenReserve, this.game)
         this.redReserve = new ReserveViewRequest(this.redReserve, this.game)
 
         this.greenReserve.addPoolClickedListener(this.onPoolClicked, this)
         this.redReserve.addPoolClickedListener(this.onPoolClicked, this)
 
-        this.redReserve.addToReserve()
+        this.game.events.on(EventAddedToPool, this.addedToPool, this)
 
         this._poolClickedListeners = []
+    }
+
+    private addedToPool(player: IPlayer)
+    {
+        this.greenReserve.addToReserve()
+        this.redReserve.addToReserve()
     }
     
 

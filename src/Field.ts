@@ -35,7 +35,8 @@ export class Field implements IField
         // one move is just a changing of state
         this._underThisField = this.getNewUnderElements(fromWhichField, additionalDistance - 1)
         this._state = oldState
-
+    
+        this.reduceOverGrown()
         return true
     }
 

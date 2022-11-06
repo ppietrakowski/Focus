@@ -15,16 +15,18 @@ export class Focus implements IFocus
     events: EventEmitter
     gameBoard: IGameBoard
     private _currentPlayer: IPlayer
+    hasPoolToPut: boolean
 
     constructor()
     {
         this.events = new EventEmitter()
         this.gameBoard = new GameBoard()
         this._currentPlayer = PLAYER_RED
+        this.hasPoolToPut = false
 
         this.events.on(EventMovedField, this.onMoveField, this)
 
-        this.increaseCurrentPlayersPool()
+        PLAYER_GREEN.pooledPawns++
 
         this.gameBoard.each(v => v.events.on(EventFieldOvergrown, this.onOverGrownField, this))
     }
@@ -139,6 +141,17 @@ export class Focus implements IFocus
 
     nextTurn()
     {
+        if (this.hasPoolToPut)
+        {    
+            this._currentPlayer = this.getNextPlayer()
+            this.hasPoolToPut = false
+            return
+        }
+
+        if (this.hasEnded)
+            return
+
+        
         this._currentPlayer = this.getNextPlayer()
         this.events.emit(EventNewTurn, this._currentPlayer)
     }
@@ -159,7 +172,7 @@ export class Focus implements IFocus
     {
         if (playerWhoFail.pooledPawns !== 0)
         {
-            this.events.emit(EventEnemyHasPool)
+            this.events.emit(EventEnemyHasPool, playerWhoFail)
             return
         }
 

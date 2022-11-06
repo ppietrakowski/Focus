@@ -18,6 +18,13 @@ export class GameBoardController implements IEnemyHasPoolListener
 
     onEnemyHasPool(enemy: IPlayer): void
     {
+        console.log('ff')
+        
+        this.game.hasPoolToPut = true
+
+        if (this.game.currentPlayer !== enemy)
+            this.game.nextTurn()
+
         this.switchToPoolState(enemy)
     }
 
@@ -51,6 +58,7 @@ export class GameBoardController implements IEnemyHasPoolListener
         if (player.hasAnyPool)
         {
             aicontroller.onPlaceStateStarted()
+            this.game.hasPoolToPut = false
         }
     }
 }

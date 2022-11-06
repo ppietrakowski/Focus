@@ -101,7 +101,6 @@ export class ReserveView implements IReserveView
 
     isSomethingInPool()
     {
-        console.log(!!this.reserveFields[this.lastReserved])
         return this.reserveFields[this.lastReserved] && this.owner.hasAnyPool
     }
 }
