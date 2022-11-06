@@ -6,7 +6,10 @@ import { IPlayer } from './Player'
 
 export class FieldViewRequest implements IFieldView
 {
-
+    readonly events: EventEmitter
+    field: IField
+    domElement: HTMLDivElement
+    
     constructor(private readonly fieldView: IFieldView, private readonly owningPlayer: IPlayer)
     {
         this.domElement = this.fieldView.domElement
@@ -33,7 +36,6 @@ export class FieldViewRequest implements IFieldView
         this.fieldView.restoreClickListeners()
     }
 
-    events: EventEmitter
 
     private onClick(): void
     {
@@ -59,8 +61,7 @@ export class FieldViewRequest implements IFieldView
         }
     }
 
-    field: IField
-    domElement: HTMLDivElement
+    
 
     isInRange(anotherField: IField, range: { x: number; y: number; }): boolean
     {

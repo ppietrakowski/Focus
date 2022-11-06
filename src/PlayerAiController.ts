@@ -1,8 +1,8 @@
 import { AiController } from './AiController'
-import { EventMouseLeaveField, EventMouseOverField, IFieldView, IMouseStateListener } from './FieldView'
+import { EventMouseLeaveField, EventMouseOverField, IFieldView } from './FieldView'
 import { IFocus } from './IFocus'
 import { IPlayer, Player } from './Player'
-import { IGameBoardView, IPoolClickedListener } from './IGameBoardView'
+import { IGameBoardView } from './IGameBoardView'
 import { IReserveView } from './ReserveView'
 import { Direction } from './IField'
 
@@ -13,7 +13,6 @@ import { Direction } from './IField'
  */
 export default class PlayerAiController extends AiController
 {
-
     private selectedField?: IFieldView
 
     constructor(player: Player, game: IFocus, gameBoard: IGameBoardView)
@@ -52,6 +51,7 @@ export default class PlayerAiController extends AiController
                 return
             }
 
+            this._usedPool = !this._usedPool
             if (reserve.removeFromReserve())
             {
                 this.gameBoardController.placePoolState(this.ownedPlayer, this)
@@ -232,9 +232,7 @@ export default class PlayerAiController extends AiController
             return
         }
 
-        this.ownedPlayer.pooledPawns--
         this.game.placeField(field.field.x, field.field.y, this.ownedPlayer)
-        console.log('HERE I AM')
         this.resetToPlayState(this.game.currentPlayer)
     }
 

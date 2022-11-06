@@ -10,8 +10,7 @@ export interface IClickListener
 
 export interface IMouseStateListener
 {
-    onMouseOverFieldView(player: IPlayer, fieldView: IFieldView): void
-    onMouseLeaveFieldView(player: IPlayer, fieldView: IFieldView): void
+    (player: IPlayer, fieldView: IFieldView): void
 }
 
 export const EventClickField = 'EventClickField'
@@ -29,19 +28,24 @@ export interface IFieldView
     backupClickListeners(): void
     restoreClickListeners(): void
 
-    events: EventEmitter
+    readonly events: EventEmitter
     field: IField
     domElement: HTMLDivElement
 }
 
+interface IClickListenerBackup
+{
+    listener: IClickListener
+    context: any
+}
 
 export class FieldView implements IFieldView
 {
     field: IField
-    events: EventEmitter
+    readonly events: EventEmitter
 
     domElement: HTMLDivElement
-    private _backupClickListeners: { listener: IClickListener, context: any }[]
+    private _backupClickListeners: IClickListenerBackup[]
 
     constructor(private readonly game: IFocus, field: IField)
     {
@@ -57,8 +61,10 @@ export class FieldView implements IFieldView
     {
         this.events.on(EventClickField, clickListener, context)
         
-        if (backup)
+        if (backup) 
+        {
             this._backupClickListeners.push({ listener: clickListener, context: context })
+        }
     }
 
     backupClickListeners(): void

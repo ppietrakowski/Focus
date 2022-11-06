@@ -135,12 +135,11 @@ export class GameBoardView implements IGameBoardView
     private selectNeighboursInRange(baseDirection: { x: number, y: number }, maxRange: number)
     {
         const { field } = this.selectedField
-
         const offset = this.game.getOffsetBasedOnDirection(field, baseDirection, maxRange)
 
-        const elements = this.fields.filter(v => v.isInRange(field, offset))
+        const neighbours = this.fields.filter(v => v.isInRange(field, offset))
 
-        elements.forEach(v => v.visualizeHovered())
+        neighbours.forEach(v => v.visualizeHovered())
     }
 
     unselectField(): void

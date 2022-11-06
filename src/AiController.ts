@@ -5,7 +5,7 @@ import { GameBoardView } from './GameBoardView'
 import { IGameBoardView } from './IGameBoardView'
 import { GameBoardController } from './IGameBoardController'
 
-export interface IAiController extends INewTurnListener
+export interface IAiController
 {
     move(): void
     stopMoving(): void
@@ -15,13 +15,13 @@ export interface IAiController extends INewTurnListener
 
     onPlaceStateStarted(): void
 
-    ownedPlayer: IPlayer
+    readonly ownedPlayer: IPlayer
 }
 
 export abstract class AiController implements IAiController
 {
 
-    ownedPlayer: IPlayer
+    readonly ownedPlayer: IPlayer
     protected gameBoardController: GameBoardController
 
     constructor(aiOwnedPlayer: IPlayer, protected readonly game: IFocus, protected readonly gameBoard: IGameBoardView)
@@ -29,13 +29,7 @@ export abstract class AiController implements IAiController
         this.ownedPlayer = aiOwnedPlayer
         this.gameBoard = gameBoard
 
-
-        this.game.events.on(EventNewTurn, this.onNextTurnBegin, this)
-    }
-
-    onNextTurnBegin(currentPlayer: IPlayer): void
-    {
-        this.checkIsYourTurn(currentPlayer)
+        this.game.events.on(EventNewTurn, this.checkIsYourTurn, this)
     }
 
     attachGameBoardController(controller: GameBoardController): void

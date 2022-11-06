@@ -1,4 +1,4 @@
-import { Player } from './Player'
+import { IPlayer } from './Player'
 import { IField, FieldState, Direction, EventFieldOvergrown, getDirectionFromOffset } from './IField'
 import EventEmitter from 'eventemitter3'
 
@@ -10,7 +10,8 @@ export class Field implements IField
     private _underThisField: FieldState[]
     private _x: number
     private _y: number
-    events: EventEmitter
+
+    readonly events: EventEmitter
 
     constructor(state: FieldState, x: number, y: number) 
     {
@@ -18,6 +19,7 @@ export class Field implements IField
         this._underThisField = []
         this._x = x
         this._y = y
+        
         this.events = new EventEmitter()
     }
 
@@ -89,7 +91,7 @@ export class Field implements IField
         this.reduceOverGrown()
     }
 
-    getDistanceToField(anotherField: Field) 
+    getDistanceToField(anotherField: IField) 
     {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
@@ -118,7 +120,7 @@ export class Field implements IField
         return Math.abs(v.x) <= this.height && Math.abs(v.y) <= this.height
     }
 
-    possessByPlayer(player: Player): void 
+    possessByPlayer(player: IPlayer): void 
     {
         this._state = player.state
     }

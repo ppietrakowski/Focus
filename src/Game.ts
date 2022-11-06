@@ -96,6 +96,9 @@ export class Focus implements IFocus
         const field = this.gameBoard.getFieldAt(x, y)
 
         field.placeAtTop(owner.state)
+        owner.pooledPawns--
+
+        // placing is just one move
         this.nextTurn()
     }
 

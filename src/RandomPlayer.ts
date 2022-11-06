@@ -1,7 +1,8 @@
 import { AiController } from './AiController'
 import { PLAYER_GREEN } from './Game'
 import { GameBoard } from './GameBoard'
-import { DirectionEast, DirectionNorth, DirectionSouth, DirectionWest } from './IField'
+import { IPredicate, randomInteger } from './GameUtils'
+import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, IField } from './IField'
 import { IFocus } from './IFocus'
 import { IGameBoardView } from './IGameBoardView'
 import { IPlayer } from './Player'
@@ -18,55 +19,69 @@ export class RandomPlayer extends AiController
 
     move(): void
     {
+        const { x, y } = this.getRandomFieldPosition(f => this.ownedPlayer.doesOwnThisField(f))
+
+        let direction = this.getRandomDirection(x, y)
+
+        while (!this.game.moveToField(x, y, direction, 1))
+        {
+            direction = this.getRandomDirection(x, y)
+        }
+    }
+
+    private getRandomFieldPosition(predicate: IPredicate<IField>)
+    {
         let x = 0
         let y = 0
 
-        while (!this.ownedPlayer.doesOwnThisField(this.game.gameBoard.getFieldAt(x, y)))
+        while (!predicate(this.game.gameBoard.getFieldAt(x, y)))
         {
-            x = Math.floor(Math.random() * GameBoard.GAME_BOARD_WIDTH)
-            y = Math.floor(Math.random() * GameBoard.GAME_BOARD_HEIGHT)
+            x = randomInteger(0, GameBoard.GAME_BOARD_WIDTH)
+            y = randomInteger(0, GameBoard.GAME_BOARD_HEIGHT)
         }
 
-        const directions = [DirectionNorth, DirectionEast, DirectionSouth, DirectionWest]
+        return { x, y }
+    }
+
+    private getRandomDirection(baseX: number, baseY: number)
+    {
         let direction = DirectionNorth
 
-        do
+        let hasFoundGoodDirection = true
+
+        while (hasFoundGoodDirection)
         {
-            while (true)
-            {
-                try
-                {
-                    direction = directions[Math.floor(Math.random() * directions.length)]
-                    const p = this.game.gameBoard.getFieldAt(x + direction.x, y + direction.y)
-                    break
-                } catch (e)
-                {
-                    continue
-                }
-            }
-            console.log(x, y, direction)
+            ({ direction, hasFoundGoodDirection } = this.tryGetPosition(baseX, baseY, direction))
         }
-        while (!this.game.moveToField(x, y, direction, 1))
+
+        return direction
+    }
+
+    private tryGetPosition(x: number, y: number, direction: Direction)
+    {
+        const directions = [DirectionNorth, DirectionEast, DirectionSouth, DirectionWest]
+
+        try
+        {
+            direction = directions[randomInteger(0, directions.length)]
+            this.game.gameBoard.getFieldAt(x + direction.x, y + direction.y)
+            return { direction, hasFoundGoodDirection: true }
+        } catch (e)
+        {
+            return { direction, hasFoundGoodDirection: false }
+        }
     }
 
     onPlaceStateStarted(): void
     {
-        let x = 0
-        let y = 0
         console.log('Computer player places')
+        const { x, y } = this.getRandomFieldPosition(f => f.isPlayable)
 
-        while (!this.game.gameBoard.getFieldAt(x, y).isPlayable)
-        {
-            x = Math.floor(Math.random() * GameBoard.GAME_BOARD_WIDTH)
-            y = Math.floor(Math.random() * GameBoard.GAME_BOARD_HEIGHT)
-        }
-        
-        console.log('placed')
-        
         if (this.ownedPlayer === PLAYER_GREEN)
         {
             this.gameBoard.greenReserve.removeFromReserve()
-        } else {
+        } else
+        {
             this.gameBoard.redReserve.removeFromReserve()
         }
 
@@ -75,5 +90,6 @@ export class RandomPlayer extends AiController
 
     stopMoving(): void
     {
+        __dirname
     }
 }

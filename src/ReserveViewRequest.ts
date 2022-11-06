@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import { IFocus } from './IFocus'
 import { IPoolClickedListener } from './IGameBoardView'
-import { IPlayer, Player } from './Player'
+import { IPlayer } from './Player'
 import { IReserveView, ReserveView } from './ReserveView'
 
 export class ReserveViewRequest implements IReserveView
@@ -27,6 +27,10 @@ export class ReserveViewRequest implements IReserveView
 
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
+        if (this.canAccess())
+        {
+            this.reserveView.emitPoolClicked(player, reserve)
+        }
     }
 
     getFieldAt(i: number): HTMLDivElement
