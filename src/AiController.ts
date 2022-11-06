@@ -1,5 +1,5 @@
 import { Focus } from './Game'
-import { EventNewTurn, IFocus, INewTurnListener } from "./IFocus"
+import { EventNewTurn, IFocus, INewTurnListener } from './IFocus'
 import { IPlayer, Player } from './Player'
 import { GameBoardView } from './GameBoardView'
 import { IGameBoardView } from './IGameBoardView'

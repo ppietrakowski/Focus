@@ -1,9 +1,7 @@
-import { AiController, IAiController } from "./AiController";
-import { IFieldView } from "./FieldView";
-import { Focus } from "./Game";
-import { EventEnemyHasPool, IAddedToPoolListener, IEnemyHasPoolListener } from "./IFocus";
-import { IGameBoardView } from "./IGameBoardView";
-import { IPlayer, Player } from "./Player";
+import { IAiController } from './AiController'
+import { EventEnemyHasPool, IEnemyHasPoolListener } from './IFocus'
+import { IGameBoardView } from './IGameBoardView'
+import { IPlayer } from './Player'
 
 export class GameBoardController implements IEnemyHasPoolListener
 {

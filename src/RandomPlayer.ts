@@ -1,9 +1,9 @@
-import { AiController } from "./AiController";
-import { GameBoard } from "./GameBoard";
-import { DirectionEast, DirectionNorth, DirectionSouth, DirectionWest } from "./IField";
-import { IFocus } from "./IFocus";
-import { IGameBoardView } from "./IGameBoardView";
-import { IPlayer } from "./Player";
+import { AiController } from './AiController'
+import { GameBoard } from './GameBoard'
+import { DirectionEast, DirectionNorth, DirectionSouth, DirectionWest } from './IField'
+import { IFocus } from './IFocus'
+import { IGameBoardView } from './IGameBoardView'
+import { IPlayer } from './Player'
 
 
 export class RandomPlayer extends AiController

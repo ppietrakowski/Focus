@@ -1,11 +1,9 @@
 import { AiController } from './AiController'
-import { FieldView, IClickListener, IFieldView, IMouseStateListener } from './FieldView'
-import { IFocus } from "./IFocus"
+import { EventMouseLeaveField, EventMouseOverField, IFieldView, IMouseStateListener } from './FieldView'
+import { IFocus } from './IFocus'
 import { IPlayer, Player } from './Player'
 import { IGameBoardView, IPoolClickedListener } from './IGameBoardView'
-import { GameBoardView } from './GameBoardView'
 import { IReserveView } from './ReserveView'
-import { PLAYER_RED } from './Game'
 import { Direction } from './IField'
 
 
@@ -13,7 +11,7 @@ import { Direction } from './IField'
  * Class responsible for managing owning player turn.
  * Works by hook to gameBoard and IFieldView events
  */
-export default class PlayerAiController extends AiController implements IClickListener, IPoolClickedListener, IMouseStateListener
+export default class PlayerAiController extends AiController implements IPoolClickedListener, IMouseStateListener
 {
 
     private selectedField?: IFieldView
@@ -28,7 +26,8 @@ export default class PlayerAiController extends AiController implements IClickLi
 
         this.gameBoard.addPoolClickedListener(this)
 
-        this.gameBoard.each(v => v.addMouseStateListener(this))
+        this.gameBoard.each(v => v.events.on(EventMouseOverField, this.onMouseOverFieldView, this))
+        this.gameBoard.each(v => v.events.on(EventMouseLeaveField, this.onMouseLeaveFieldView, this))
     }
 
     onMouseOverFieldView(player: IPlayer, fieldView: IFieldView): void
@@ -73,18 +72,22 @@ export default class PlayerAiController extends AiController implements IClickLi
 
     private tintHoveredField(player: IPlayer, field: IFieldView)
     {
-        const { currentPlayer } = this.game
-
-        if (this.isTurnOfPlayer(this.ownedPlayer) && currentPlayer.doesOwnThisField(field.field))
+        if (this.canBeTinted(field))
         {
             field.visualizeHovered()
         }
     }
 
-    private clearTintFromHoveredField(player: IPlayer, field: IFieldView)
+    private canBeTinted(field: IFieldView)
     {
         const { currentPlayer } = this.game
-        if (this.isTurnOfPlayer(this.ownedPlayer) && currentPlayer.doesOwnThisField(field.field))
+
+        return this.isTurnOfPlayer(this.ownedPlayer) && currentPlayer.doesOwnThisField(field.field) && !this.selectedField
+    }
+
+    private clearTintFromHoveredField(player: IPlayer, field: IFieldView)
+    {
+        if (this.canBeTinted(field))
         {
             field.visualizeUnhovered()
         }
@@ -92,7 +95,7 @@ export default class PlayerAiController extends AiController implements IClickLi
 
     private hookIntoClickEvent(v: IFieldView)
     {
-        v.addClickListener(this)
+        v.addClickListener(this.onFieldViewClick, this)
     }
 
     move(): void
@@ -102,11 +105,16 @@ export default class PlayerAiController extends AiController implements IClickLi
 
     stopMoving(): void
     {
+        __dirname
     }
 
     private selectField(clickedField: IFieldView)
     {
-        this.gameBoard.erasePossibleMoves()
+        if (!this.isAbleToMoveThisField(clickedField))
+            return
+
+        if (!this.gameBoard.isSomethingSelected)
+            this.gameBoard.erasePossibleMoves()
 
         if (!this.selectedField)
         {
@@ -115,6 +123,14 @@ export default class PlayerAiController extends AiController implements IClickLi
         }
 
         this.onClickedWhenSomethingSelected(clickedField)
+    }
+
+    private isAbleToMoveThisField(clickedField: IFieldView)
+    {
+        const wasSomethingSelected = !!this.selectedField
+        const doesBelongToYou = this.ownedPlayer.doesOwnThisField(clickedField.field)
+
+        return this.isTurnOfPlayer(this.ownedPlayer) && (doesBelongToYou || wasSomethingSelected)
     }
 
     private clickedFirstTime(clickedField: IFieldView)
@@ -130,9 +146,10 @@ export default class PlayerAiController extends AiController implements IClickLi
     private selectNewField(clickedField: IFieldView)
     {
         this.selectedField = clickedField
-        this.gameBoard.renderPossibleMoves(this.selectedField)
+        clickedField.visualizeHovered()
+        console.log(clickedField.domElement.className)
 
-        this.selectedField.visualizeHovered()
+        this.gameBoard.renderPossibleMoves(this.selectedField)
     }
 
     private onClickedWhenSomethingSelected(clickedField: IFieldView)
@@ -171,16 +188,9 @@ export default class PlayerAiController extends AiController implements IClickLi
 
         const moveCount = this.selectedField.field.getDistanceToField(clickedField.field)
 
-        const isAbleToClickedField = this.game.moveToField(this.selectedField.field.x, this.selectedField.field.y, direction, moveCount)
+        this.game.moveToField(this.selectedField.field.x, this.selectedField.field.y, direction, moveCount)
 
-        if (isAbleToClickedField)
-        {
-            this.unselectField()
-            this.game.nextTurn()
-        } else
-        {
-            this.unselectField()
-        }
+        this.unselectField()
     }
 
     onPlaceStateStarted(): void
@@ -196,7 +206,7 @@ export default class PlayerAiController extends AiController implements IClickLi
         field.backupClickListeners()
 
         // use click event now for placing instead of moving
-        field.addClickListener(this)
+        field.addClickListener(this.onPlaceFieldClicked, this)
     }
 
     private onPlaceFieldClicked(field: IFieldView)
@@ -216,7 +226,7 @@ export default class PlayerAiController extends AiController implements IClickLi
 
         this.ownedPlayer.pooledPawns--
         this.game.placeField(field.field.x, field.field.y, this.ownedPlayer)
-        console.log("HERE I AM")
+        console.log('HERE I AM')
         this.resetToPlayState(this.game.getNextPlayer(this.ownedPlayer))
     }
 

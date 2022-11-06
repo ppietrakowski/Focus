@@ -1,10 +1,10 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
-import { IFocus } from "./IFocus"
+import { IFocus } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
 import { IReserveView, ReserveView } from './ReserveView'
 import { IPlayer } from './Player'
 import { ReserveViewRequest } from './ReserveViewRequest'
-import { IGameBoard } from "./IGameBoard"
+import { IGameBoard } from './IGameBoard'
 import { ForEachFieldInView, IGameBoardView, IPoolClickedListener } from './IGameBoardView'
 import { FieldViewRequest } from './FieldViewRequest'
 import { DirectionNorth, DirectionWest } from './IField'
@@ -77,7 +77,6 @@ export class GameBoardView implements IGameBoardView, IPoolClickedListener
                     e = new FieldViewRequest(e, PLAYER_GREEN)
                 else
                     e = new FieldViewRequest(e, PLAYER_RED)
-
                 this.fields.push(e)
             }
         )
@@ -103,6 +102,8 @@ export class GameBoardView implements IGameBoardView, IPoolClickedListener
 
         // east & west
         this.renderInSameLine(maxPossibleMoves, DirectionWest)
+
+        selectedField.visualizeHovered()
     }
 
     private renderInSameLine(maxPossibleMoves: number, baseDirection: { x: number, y: number })
@@ -111,6 +112,11 @@ export class GameBoardView implements IGameBoardView, IPoolClickedListener
         {
             this.selectNeighboursInRange(baseDirection, i)
         }
+    }
+
+    get isSomethingSelected()
+    {
+        return !!this.selectedField
     }
 
     private selectNeighboursInRange(baseDirection: { x: number, y: number }, maxRange: number)
@@ -124,8 +130,14 @@ export class GameBoardView implements IGameBoardView, IPoolClickedListener
         elements.forEach(v => v.visualizeHovered())
     }
 
+    unselectField(): void
+    {
+        this.selectedField = null
+    }
+
     erasePossibleMoves()
     {
         this.fields.forEach(v => v.visualizeUnhovered())
+        this.selectedField = null
     }
 }

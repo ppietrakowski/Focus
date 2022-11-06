@@ -1,4 +1,4 @@
-import { IFocus } from "./IFocus"
+import { IFocus } from './IFocus'
 import { IPoolClickedListener } from './IGameBoardView'
 import { IPlayer, Player } from './Player'
 import { IReserveView, ReserveView } from './ReserveView'

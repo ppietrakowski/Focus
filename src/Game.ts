@@ -1,9 +1,9 @@
 import { Field } from './Field'
 import { GameBoard } from './GameBoard'
-import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IAddedToPoolListener, IEnemyHasPoolListener, IFocus, IMovedListener, INewTurnListener, IVictoryListener } from './IFocus'
+import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IFocus } from './IFocus'
 import { EventFieldOvergrown, FieldState, IField } from './IField'
 
-import { IGameBoard } from "./IGameBoard"
+import { IGameBoard } from './IGameBoard'
 import { IPlayer, Player } from './Player'
 import EventEmitter from 'eventemitter3'
 
@@ -49,6 +49,11 @@ export class Focus implements IFocus
         }
     }
 
+    get currentPlayer(): IPlayer
+    {
+        return this._currentPlayer
+    }
+
     set currentPlayer(player: IPlayer)
     {
         this._currentPlayer = player
@@ -64,18 +69,18 @@ export class Focus implements IFocus
         }
 
         const toField = this.getFieldBasedOnDirectionAndMoveCount(fromField as Field, direction, howManyFieldWantMove)
-
         if (!toField.isPlayable)
         {
             return false
         }
 
-        if (!toField.moveToThisField(fromField))
+        if (!toField.moveToThisField(fromField, howManyFieldWantMove))
         {
             console.log('unable to move there')
             return false
         }
 
+        console.log(toField)
         this.events.emit(EventMovedField, x, y, fromField, toField)
 
         this.nextTurn()
@@ -84,7 +89,9 @@ export class Focus implements IFocus
 
     placeField(x: number, y: number, owner: IPlayer)
     {
+        const field = this.gameBoard.getFieldAt(x, y)
 
+        field.placeAtTop(owner.state)
     }
 
     getFieldBasedOnDirectionAndMoveCount(field: Field, direction: { x: number, y: number }, howManyFieldWantMove: number)
@@ -131,11 +138,6 @@ export class Focus implements IFocus
     {
         this._currentPlayer = this.getNextPlayer()
         this.events.emit(EventNewTurn, this._currentPlayer)
-    }
-
-    get currentPlayer(): IPlayer
-    {
-        return this._currentPlayer
     }
 
     private increaseCurrentPlayersPool()

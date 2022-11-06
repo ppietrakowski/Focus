@@ -1,10 +1,11 @@
+import EventEmitter from 'eventemitter3'
 import { FieldState, IField } from './IField'
-import { IFocus } from "./IFocus"
+import { IFocus } from './IFocus'
 import { IPlayer } from './Player'
 
 export interface IClickListener
 {
-    onFieldViewClick(fieldView: IFieldView): void
+    (fieldView: IFieldView): void
 }
 
 export interface IMouseStateListener
@@ -13,17 +14,22 @@ export interface IMouseStateListener
     onMouseLeaveFieldView(player: IPlayer, fieldView: IFieldView): void
 }
 
+export const EventClickField = 'EventClickField'
+export const EventMouseOverField = 'EventOverField'
+export const EventMouseLeaveField = 'EventMouseLeaveField'
+
 export interface IFieldView
 {
     isInRange(anotherField: IField, range: { x: number, y: number }): boolean
     visualizeHovered(): void
     visualizeUnhovered(): void
 
-    addClickListener(listener: IClickListener): void
-    addMouseStateListener(listener: IMouseStateListener): void
+    addClickListener(clickListener: IClickListener, context: any): void
+
     backupClickListeners(): void
     restoreClickListeners(): void
 
+    events: EventEmitter
     field: IField
     domElement: HTMLDivElement
 }
@@ -31,53 +37,41 @@ export interface IFieldView
 
 export class FieldView implements IFieldView
 {
-
-    static readonly FIELD_UNCLICK = 'UnClick'
-    static readonly FIELD_CLICK = 'Click'
-    static readonly FIELD_DBL_CLICK = 'DblClick'
-
-    static readonly FieldMouseOver = 'FieldMouseOver'
-    static readonly FieldMouseLeave = 'FieldMouseLeave'
-
     field: IField
+    events: EventEmitter
 
     domElement: HTMLDivElement
-    private clickListeners: IClickListener[]
-    private backedClickListeners: IClickListener[]
-
-    private _mouseStateListeners: IMouseStateListener[]
+    private _backupClickListeners: { listener: IClickListener, context: any }[]
 
     constructor(private readonly game: IFocus, field: IField)
     {
         this.field = field
+        this.events = new EventEmitter()
         this.domElement = document.createElement('div')
 
         this.domElement.className = this.getUnhoveredClassName()
-        this.clickListeners = []
-        this.backedClickListeners = []
-        this._mouseStateListeners = []
+        this._backupClickListeners = []
     }
 
-    addMouseStateListener(listener: IMouseStateListener)
+    addClickListener(clickListener: IClickListener, context: any): void
     {
-        this._mouseStateListeners.push(listener)
-    }
-
-    addClickListener(listener: IClickListener): void
-    {
-        this.clickListeners.push(listener)
+        this.events.on(EventClickField, clickListener, context)
+        this._backupClickListeners.push({ listener: clickListener, context: context })
     }
 
     backupClickListeners(): void
     {
-        this.backedClickListeners = this.clickListeners.map(v => v)
-        this.clickListeners = []
+        this.events.off(EventClickField)
     }
 
     restoreClickListeners(): void
     {
-        this.clickListeners = this.backedClickListeners.map(v => v)
-        this.backedClickListeners = []
+        this.events.off(EventClickField)
+
+        for (const listener of this._backupClickListeners)
+        {
+            this.events.on(EventClickField, listener.listener, listener.context)
+        }
     }
 
     visualizeHovered()
@@ -98,7 +92,7 @@ export class FieldView implements IFieldView
 
     onMouseLeave()
     {
-        this._mouseStateListeners.forEach(l => l.onMouseLeaveFieldView(this.game.currentPlayer, this))
+        this.events.emit(EventMouseLeaveField, this.game.currentPlayer, this)
     }
 
     private getHoveredClassName()
@@ -113,11 +107,11 @@ export class FieldView implements IFieldView
 
     onMouseOver()
     {
-        this._mouseStateListeners.forEach(l => l.onMouseOverFieldView(this.game.currentPlayer, this))
+        this.events.emit(EventMouseOverField, this.game.currentPlayer, this)
     }
 
     onClick()
     {
-        this.clickListeners.forEach(l => l.onFieldViewClick(this))
+        this.events.emit(EventClickField, this)
     }
 }

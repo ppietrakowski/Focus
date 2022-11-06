@@ -30,7 +30,7 @@ class LoggingListener implements IAddedToPoolListener, IEnemyHasPoolListener, IV
     }
     onNextTurnBegin(currentPlayer: IPlayer): void
     {
-        console.log(`Next turn`)
+        console.log('Next turn')
     }
 }
 
@@ -48,8 +48,11 @@ const playerVsPlayerButton = document.querySelector('#playerVsPlayer') as HTMLBu
 const playerVsAIButton = document.querySelector('#playerVsAI') as HTMLButtonElement
 const AIVsAIButton = document.querySelector('#AIvsAI') as HTMLButtonElement
 
-var gameBoardController = new GameBoardController(gameBoardView, new PlayerAiController(PLAYER_RED, focus, gameBoardView), new RandomPlayer(PLAYER_GREEN, focus, gameBoardView))
+const gameBoardController = new GameBoardController(gameBoardView, new PlayerAiController(PLAYER_RED, focus, gameBoardView), new PlayerAiController(PLAYER_GREEN, focus, gameBoardView))
 playerVsPlayerButton.addEventListener('click', () => gameBoard.style.visibility = 'visible')
+
+const p = gameBoardView.getFieldAt(6 + 1 * 8)
+console.log(p)
 
 function notImplementedYet(caller: any)
 {

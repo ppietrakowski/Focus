@@ -1,8 +1,8 @@
-import { IFocus } from "./IFocus";
-import { IFieldView } from './FieldView';
-import { IReserveView } from './ReserveView';
-import { IGameBoard } from "./IGameBoard";
-import { IPlayer } from "./Player";
+import { IFocus } from './IFocus'
+import { IFieldView } from './FieldView'
+import { IReserveView } from './ReserveView'
+import { IGameBoard } from './IGameBoard'
+import { IPlayer } from './Player'
 
 
 export interface ForEachFieldInView
@@ -24,13 +24,15 @@ export interface IGameBoardView
     getFieldAt(i: number): IFieldView;
 
     erasePossibleMoves(): void;
-    renderPossibleMoves(selectedField: IFieldView): void;
+    renderPossibleMoves(selectedField: IFieldView): void
     each(callback: ForEachFieldInView): void
 
 
     addPoolClickedListener(listener: IPoolClickedListener): void
     removePoolClickedListener(listener: IPoolClickedListener): void
 
-    greenReserve: IReserveView;
-    redReserve: IReserveView;
+    get isSomethingSelected(): boolean
+    
+    greenReserve: IReserveView
+    redReserve: IReserveView
 }

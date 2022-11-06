@@ -1,6 +1,8 @@
-import { FieldView, IClickListener, IFieldView, IMouseStateListener } from "./FieldView";
-import { IField } from "./IField";
-import { IPlayer } from "./Player";
+import EventEmitter from 'eventemitter3'
+import { FieldView, IClickListener, IFieldView } from './FieldView'
+import { IField } from './IField'
+import { IPlayer } from './Player'
+
 
 export class FieldViewRequest implements IFieldView
 {
@@ -9,20 +11,16 @@ export class FieldViewRequest implements IFieldView
     {
         this.domElement = this.fieldView.domElement
         this.field = this.fieldView.field
+        this.events = this.fieldView.events
 
         this.domElement.addEventListener('mouseover', () => this.onMouseOver())
         this.domElement.addEventListener('mouseleave', () => this.onMouseLeave())
         this.domElement.addEventListener('click', () => this.onClick())
     }
 
-    addMouseStateListener(listener: IMouseStateListener)
+    addClickListener(clickListener: IClickListener, context: any): void
     {
-        this.fieldView.addMouseStateListener(listener)
-    }
-
-    addClickListener(listener: IClickListener): void
-    {
-        this.fieldView.addClickListener(listener)
+        this.fieldView.addClickListener(clickListener, context)
     }
 
     backupClickListeners(): void
@@ -34,6 +32,8 @@ export class FieldViewRequest implements IFieldView
     {
         this.fieldView.restoreClickListeners()
     }
+
+    events: EventEmitter
 
     private onClick(): void
     {
