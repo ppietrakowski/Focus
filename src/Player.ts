@@ -15,7 +15,6 @@ export interface IPlayer
 
 export class Player implements IPlayer
 {
-
     pooledPawns: number
     private _state: FieldState
 

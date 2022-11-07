@@ -13,18 +13,18 @@ import EventEmitter from 'eventemitter3'
 
 export class GameBoardView implements IGameBoardView
 {
-    
+
     static readonly POOL_CLICKED = 'PoolClicked'
-    
+
     game: IFocus
     gameBoard: IGameBoard
     board: HTMLDivElement
     greenReserve: IReserveView
     redReserve: IReserveView
     events: EventEmitter
-    
-    private fields: IFieldView[]
-    private selectedField: IFieldView
+
+    private _fields: IFieldView[]
+    private _selectedField: IFieldView
 
     constructor(game: IFocus)
     {
@@ -32,7 +32,7 @@ export class GameBoardView implements IGameBoardView
         this.gameBoard = game.gameBoard
 
         this.game = game
-        this.fields = []
+        this._fields = []
 
         this.board = document.getElementsByClassName('virtualGameBoard')[0] as HTMLDivElement
 
@@ -49,12 +49,12 @@ export class GameBoardView implements IGameBoardView
         this.game.events.on(EventAddedToPool, this.addedToPool, this)
     }
 
-    private addedToPool(player: IPlayer)
+    private addedToPool()
     {
         this.greenReserve.addToReserve()
         this.redReserve.addToReserve()
     }
-    
+
 
     private onPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
@@ -73,7 +73,7 @@ export class GameBoardView implements IGameBoardView
 
     getFieldAt(i: number): IFieldView
     {
-        return this.fields[i]
+        return this._fields[i]
     }
 
     hookGuiMethods()
@@ -88,14 +88,14 @@ export class GameBoardView implements IGameBoardView
                     e = new FieldViewRequest(e, PLAYER_GREEN)
                 else
                     e = new FieldViewRequest(e, PLAYER_RED)
-                this.fields.push(e)
+                this._fields.push(e)
             }
         )
     }
 
     each(callback: ForEachFieldInView): void
     {
-        for (const child of this.fields)
+        for (const child of this._fields)
         {
             callback(child)
         }
@@ -104,7 +104,7 @@ export class GameBoardView implements IGameBoardView
 
     renderPossibleMoves(selectedField: IFieldView)
     {
-        this.selectedField = selectedField
+        this._selectedField = selectedField
         const maxPossibleMoves = selectedField.field.height
 
         // north & south
@@ -126,27 +126,27 @@ export class GameBoardView implements IGameBoardView
 
     get isSomethingSelected()
     {
-        return !!this.selectedField
+        return !!this._selectedField
     }
 
     private selectNeighboursInRange(baseDirection: { x: number, y: number }, maxRange: number)
     {
-        const { field } = this.selectedField
+        const { field } = this._selectedField
         const offset = this.game.getOffsetBasedOnDirection(field, baseDirection, maxRange)
 
-        const neighbours = this.fields.filter(v => v.isInRange(field, offset))
+        const neighbours = this._fields.filter(v => v.isInRange(field, offset))
 
         neighbours.forEach(v => v.visualizeHovered())
     }
 
     unselectField(): void
     {
-        this.selectedField = null
+        this._selectedField = null
     }
 
     erasePossibleMoves()
     {
-        this.fields.forEach(v => v.visualizeUnhovered())
-        this.selectedField = null
+        this._fields.forEach(v => v.visualizeUnhovered())
+        this._selectedField = null
     }
 }

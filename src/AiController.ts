@@ -22,19 +22,19 @@ export abstract class AiController implements IAiController
 {
 
     readonly ownedPlayer: IPlayer
-    protected gameBoardController: GameBoardController
+    protected _gameBoardController: GameBoardController
 
-    constructor(aiOwnedPlayer: IPlayer, protected readonly game: IFocus, protected readonly gameBoard: IGameBoardView)
+    constructor(aiOwnedPlayer: IPlayer, protected readonly _game: IFocus, protected readonly _gameBoard: IGameBoardView)
     {
         this.ownedPlayer = aiOwnedPlayer
-        this.gameBoard = gameBoard
+        this._gameBoard = _gameBoard
 
-        this.game.events.on(EventNewTurn, this.checkIsYourTurn, this)
+        this._game.events.on(EventNewTurn, this.checkIsYourTurn, this)
     }
 
     attachGameBoardController(controller: GameBoardController): void
     {
-        this.gameBoardController = controller
+        this._gameBoardController = controller
     }
 
     abstract move(): void
@@ -43,7 +43,7 @@ export abstract class AiController implements IAiController
 
     checkIsYourTurn(player: IPlayer)
     {
-        if (this.game.hasEnded)
+        if (this._game.hasEnded)
             return
             
         if (player == this.ownedPlayer)

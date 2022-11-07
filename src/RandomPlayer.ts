@@ -14,7 +14,6 @@ export class RandomPlayer extends AiController
     constructor(aiOwnedPlayer: IPlayer, game: IFocus, gameBoard: IGameBoardView)
     {
         super(aiOwnedPlayer, game, gameBoard)
-        console.warn(this.ownedPlayer)
     }
 
     move(): void
@@ -23,7 +22,7 @@ export class RandomPlayer extends AiController
 
         let direction = this.getRandomDirection(x, y)
 
-        while (!this.game.moveToField(x, y, direction, 1))
+        while (!this._game.moveToField(x, y, direction, 1))
         {
             direction = this.getRandomDirection(x, y)
         }
@@ -34,7 +33,7 @@ export class RandomPlayer extends AiController
         let x = 0
         let y = 0
 
-        while (!predicate(this.game.gameBoard.getFieldAt(x, y)))
+        while (!predicate(this._game.gameBoard.getFieldAt(x, y)))
         {
             x = randomInteger(0, GameBoard.GAME_BOARD_WIDTH)
             y = randomInteger(0, GameBoard.GAME_BOARD_HEIGHT)
@@ -64,7 +63,7 @@ export class RandomPlayer extends AiController
         try
         {
             direction = directions[randomInteger(0, directions.length)]
-            this.game.gameBoard.getFieldAt(x + direction.x, y + direction.y)
+            this._game.gameBoard.getFieldAt(x + direction.x, y + direction.y)
             return { direction, hasFoundGoodDirection: true }
         } catch (e)
         {
@@ -79,13 +78,13 @@ export class RandomPlayer extends AiController
 
         if (this.ownedPlayer === PLAYER_GREEN)
         {
-            this.gameBoard.greenReserve.removeFromReserve()
+            this._gameBoard.greenReserve.removeFromReserve()
         } else
         {
-            this.gameBoard.redReserve.removeFromReserve()
+            this._gameBoard.redReserve.removeFromReserve()
         }
 
-        this.game.placeField(x, y, this.ownedPlayer)
+        this._game.placeField(x, y, this.ownedPlayer)
     }
 
     stopMoving(): void

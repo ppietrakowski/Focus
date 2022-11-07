@@ -9,12 +9,12 @@ export class FieldViewRequest implements IFieldView
     readonly events: EventEmitter
     field: IField
     domElement: HTMLDivElement
-    
-    constructor(private readonly fieldView: IFieldView, private readonly owningPlayer: IPlayer)
+
+    constructor(private readonly _fieldView: IFieldView, private readonly _owningPlayer: IPlayer)
     {
-        this.domElement = this.fieldView.domElement
-        this.field = this.fieldView.field
-        this.events = this.fieldView.events
+        this.domElement = this._fieldView.domElement
+        this.field = this._fieldView.field
+        this.events = this._fieldView.events
 
         this.domElement.addEventListener('mouseover', () => this.onMouseOver())
         this.domElement.addEventListener('mouseleave', () => this.onMouseLeave())
@@ -23,58 +23,56 @@ export class FieldViewRequest implements IFieldView
 
     addClickListener(clickListener: IClickListener, context: any, backup?: boolean): void
     {
-        this.fieldView.addClickListener(clickListener, context, backup)
+        this._fieldView.addClickListener(clickListener, context, backup)
     }
 
     backupClickListeners(): void
     {
-        this.fieldView.backupClickListeners()
+        this._fieldView.backupClickListeners()
     }
 
     restoreClickListeners(): void
     {
-        this.fieldView.restoreClickListeners()
+        this._fieldView.restoreClickListeners()
     }
 
 
     private onClick(): void
     {
-        if (this.fieldView instanceof FieldView)
+        if (this._fieldView instanceof FieldView)
         {
-            this.fieldView.onClick()
+            this._fieldView.onClick()
         }
     }
 
     private onMouseLeave(): void
     {
-        if (this.fieldView instanceof FieldView)
+        if (this._fieldView instanceof FieldView)
         {
-            this.fieldView.onMouseLeave()
+            this._fieldView.onMouseLeave()
         }
     }
 
     private onMouseOver(): void
     {
-        if (this.fieldView instanceof FieldView)
+        if (this._fieldView instanceof FieldView)
         {
-            this.fieldView.onMouseOver()
+            this._fieldView.onMouseOver()
         }
     }
 
-    
-
     isInRange(anotherField: IField, range: { x: number; y: number; }): boolean
     {
-        return this.fieldView.isInRange(anotherField, range)
+        return this._fieldView.isInRange(anotherField, range)
     }
 
     visualizeHovered(): void
     {
-        this.fieldView.visualizeHovered()
+        this._fieldView.visualizeHovered()
     }
 
     visualizeUnhovered(): void
     {
-        this.fieldView.visualizeUnhovered()
+        this._fieldView.visualizeUnhovered()
     }
 }

@@ -43,8 +43,8 @@ export class FieldView implements IFieldView
 {
     field: IField
     readonly events: EventEmitter
-
     domElement: HTMLDivElement
+
     private _backupClickListeners: IClickListenerBackup[]
 
     constructor(private readonly game: IFocus, field: IField)

@@ -33,12 +33,13 @@ export class ReserveView implements IReserveView
     
     events: EventEmitter
     reserveFields: HTMLDivElement[]
-    private lastReserved: number
+    
+    private _howManyReserveHas: number
 
-    constructor(private readonly reserveBar: HTMLDivElement, readonly owner: IPlayer)
+    constructor(private readonly _reserveBar: HTMLDivElement, readonly owner: IPlayer)
     {
         this.events = new EventEmitter()
-        const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn')
+        const reserveElements = _reserveBar.getElementsByClassName('reserveEmptyPawn')
 
         this.reserveFields = []
 
@@ -47,7 +48,7 @@ export class ReserveView implements IReserveView
             this.reserveFields.push(reserveElements[i] as HTMLDivElement)
         }
 
-        this.lastReserved = 0
+        this._howManyReserveHas = 0
     }
 
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
@@ -72,8 +73,8 @@ export class ReserveView implements IReserveView
             return false
         }
 
-        this.reserveFields[this.lastReserved].className = getClassNameOfElement(this.owner)
-        this.lastReserved++
+        this.reserveFields[this._howManyReserveHas].className = getClassNameOfElement(this.owner)
+        this._howManyReserveHas++
         return true
     }
 
@@ -84,14 +85,14 @@ export class ReserveView implements IReserveView
             return this.triedToUseEmptyPool()
         }
 
-        this.reserveFields[this.lastReserved].className = 'reserveEmptyPawn'
-        this.lastReserved--
+        this.reserveFields[this._howManyReserveHas].className = 'reserveEmptyPawn'
+        this._howManyReserveHas--
         return true
     }
 
     triedToUseEmptyPool()
     {
-        this.lastReserved = Math.max(this.lastReserved, 0)
+        this._howManyReserveHas = Math.max(this._howManyReserveHas, 0)
 
         console.warn('Trying to click unexisting item in reserve')
         return false
@@ -99,6 +100,6 @@ export class ReserveView implements IReserveView
 
     isSomethingInPool()
     {
-        return this.reserveFields[this.lastReserved] && this.owner.hasAnyPool
+        return this.reserveFields[this._howManyReserveHas] && this.owner.hasAnyPool
     }
 }

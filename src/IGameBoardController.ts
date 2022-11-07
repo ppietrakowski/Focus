@@ -8,12 +8,17 @@ export class GameBoardController implements IEnemyHasPoolListener
 
     static readonly MOVE_AVAILABLE = 'MoveAvailable'
 
-    constructor(private readonly gameBoardView: IGameBoardView, private readonly playerA: IAiController, private readonly playerB: IAiController)
+    constructor(private readonly _gameBoardView: IGameBoardView, private readonly _playerA: IAiController, private readonly _playerB: IAiController)
     {
-        playerA.attachGameBoardController(this)
-        playerB.attachGameBoardController(this)
+        _playerA.attachGameBoardController(this)
+        _playerB.attachGameBoardController(this)
 
         this.game.events.on(EventEnemyHasPool, this.onEnemyHasPool, this)
+    }
+
+    get game()
+    {
+        return this._gameBoardView.game
     }
 
     onEnemyHasPool(enemy: IPlayer): void
@@ -28,25 +33,18 @@ export class GameBoardController implements IEnemyHasPoolListener
         this.switchToPoolState(enemy)
     }
 
-    get game()
-    {
-        return this.gameBoardView.game
-    }
-
     switchToPoolState(player: IPlayer)
     {
         console.log(player)
 
-        if (player === this.playerA.ownedPlayer)
+        if (player === this._playerA.ownedPlayer)
         {
-            this.placePoolState(player, this.playerA)
+            this.placePoolState(player, this._playerA)
         } else
         {
-            this.placePoolState(player, this.playerB)
+            this.placePoolState(player, this._playerB)
         }
     }
-
-    private playerWhoPlace: IPlayer
 
     placePoolState(player: IPlayer, aicontroller: IAiController)
     {

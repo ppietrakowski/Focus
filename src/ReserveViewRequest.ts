@@ -9,40 +9,40 @@ export class ReserveViewRequest implements IReserveView
     readonly owner: IPlayer
     events: EventEmitter
 
-    constructor(private readonly reserveView: IReserveView, private readonly game: IFocus)
+    constructor(private readonly _reserveView: IReserveView, private readonly _game: IFocus)
     {
-        this.events = reserveView.events
-        this.owner = this.reserveView.owner
+        this.events = _reserveView.events
+        this.owner = this._reserveView.owner
 
-        if (reserveView instanceof ReserveView)
+        if (_reserveView instanceof ReserveView)
         {
-            reserveView.reserveFields.forEach(v => v.addEventListener('click', () => this.broadcastClickMessage()))
+            _reserveView.reserveFields.forEach(v => v.addEventListener('click', () => this.broadcastClickMessage()))
         }
     }
 
     addPoolClickedListener(listener: IPoolClickedListener, context: any): void
     {
-        this.reserveView.addPoolClickedListener(listener, context)
+        this._reserveView.addPoolClickedListener(listener, context)
     }
 
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
         if (this.canAccess())
         {
-            this.reserveView.emitPoolClicked(player, reserve)
+            this._reserveView.emitPoolClicked(player, reserve)
         }
     }
 
     getFieldAt(i: number): HTMLDivElement
     {
-        return this.reserveView.getFieldAt(i)
+        return this._reserveView.getFieldAt(i)
     }
 
     addToReserve()
     {
         if (this.canAccess())
         {
-            return this.reserveView.addToReserve()
+            return this._reserveView.addToReserve()
         }
 
         return false
@@ -52,7 +52,7 @@ export class ReserveViewRequest implements IReserveView
     {
         if (this.canAccess())
         {
-            return this.reserveView.removeFromReserve()
+            return this._reserveView.removeFromReserve()
         }
 
         return false
@@ -62,12 +62,12 @@ export class ReserveViewRequest implements IReserveView
     {
         if (this.canAccess())
         {
-            this.reserveView.emitPoolClicked(this.owner, this)
+            this._reserveView.emitPoolClicked(this.owner, this)
         }
     }
 
     canAccess()
     {
-        return this.game.currentPlayer === this.owner
+        return this._game.currentPlayer === this.owner
     }
 }
