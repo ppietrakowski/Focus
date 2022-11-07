@@ -2,6 +2,7 @@ import { EventNewTurn, IFocus } from './IFocus'
 import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
 import { IAiController, IGameBoardController } from './IGameBoardController'
+import { FieldState } from './IField'
 
 
 export abstract class AiController implements IAiController
@@ -23,7 +24,7 @@ export abstract class AiController implements IAiController
         this._gameBoardController = controller
     }
 
-    abstract move(): void
+    abstract move(): Promise<void>
     abstract onPlaceStateStarted(): void
     stopMoving(): void
     {
@@ -38,10 +39,20 @@ export abstract class AiController implements IAiController
             
         if (player == this.ownedPlayer)
         {
-            this.move()
+            setTimeout(() => this.move(), 50)
         } else
         {
             this.stopMoving()
         }
     }
+}
+
+function getPlayerName(player: IPlayer) {
+
+    if (player.state & FieldState.Green)
+        return 'Green'
+    else if (player.state & FieldState.Red)
+        return 'Red'
+    
+    return String(undefined).toUpperCase()
 }

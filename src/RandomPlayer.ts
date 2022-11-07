@@ -16,7 +16,7 @@ export class RandomPlayer extends AiController
         super(aiOwnedPlayer, game, gameBoard)
     }
 
-    move(): void
+    move(): Promise<void>
     {
         const { x, y } = this.getRandomFieldPosition(f => this.ownedPlayer.doesOwnThisField(f))
 
@@ -26,6 +26,8 @@ export class RandomPlayer extends AiController
         {
             direction = this.getRandomDirection(x, y)
         }
+
+        return Promise.resolve()
     }
 
     private getRandomFieldPosition(predicate: IPredicate<IField>)

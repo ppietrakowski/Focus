@@ -12,7 +12,7 @@ const focus = new Focus()
 
 const gameBoardView = new GameBoardView(focus)
 
-class LoggingListener implements IAddedToPoolListener, IEnemyHasPoolListener, IVictoryListener, INewTurnListener
+class LoggingListener
 {
     onAddedToPool(toWhichPlayer: IPlayer): void
     {
@@ -42,6 +42,7 @@ focus.events.on(EventNewTurn, logging.onNextTurnBegin, logging)
 
 const gameBoard = document.querySelector('.gameBoard') as HTMLDivElement
 gameBoard.style.visibility = 'hidden'
+gameBoard.style.opacity = '0'
 
 const playerVsPlayerButton = document.querySelector('#playerVsPlayer') as HTMLButtonElement
 const playerVsAIButton = document.querySelector('#playerVsAI') as HTMLButtonElement
@@ -49,14 +50,22 @@ const AIVsAIButton = document.querySelector('#AIvsAI') as HTMLButtonElement
 
 //const gameBoardController = new GameBoardController(gameBoardView, new PlayerAiController(PLAYER_RED, focus, gameBoardView), new PlayerAiController(PLAYER_GREEN, focus, gameBoardView))
 playerVsPlayerButton.addEventListener('click', () => gameBoard.style.visibility = 'visible')
+playerVsPlayerButton.addEventListener('click', () => gameBoard.style.opacity = '1.0')
 playerVsPlayerButton.addEventListener('click', () => new GameBoardController(gameBoardView, new PlayerAiController(PLAYER_RED, focus, gameBoardView), new PlayerAiController(PLAYER_GREEN, focus, gameBoardView)))
 
 playerVsAIButton.addEventListener('click', () => gameBoard.style.visibility = 'visible')
+playerVsAIButton.addEventListener('click', () => gameBoard.style.opacity = '1.0')
 playerVsAIButton.addEventListener('click', () => new GameBoardController(gameBoardView, new PlayerAiController(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView)))
 
-function notImplementedYet(caller: any)
-{
-    console.warn(caller, '# not implemented yet')
-}
+AIVsAIButton.addEventListener('click', () => gameBoard.style.visibility = 'visible')
+AIVsAIButton.addEventListener('click', runAiVsAiGame)
 
-AIVsAIButton.addEventListener('click', () => notImplementedYet('AIVsAIButton'))
+function runAiVsAiGame(evt: MouseEvent)
+{
+    gameBoard.style.visibility = 'visible'
+    gameBoard.style.opacity = '1.0'
+
+    const controller = new GameBoardController(gameBoardView, new MinMaxAiPlayerController(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView))
+
+    setTimeout(() => controller.start(), 1000)
+}
