@@ -12,18 +12,25 @@ interface AiMove
     gameBoardAfterSuchThing: IGameBoard
 }
 
+interface BestMove
+{
+    bestMove: Move
+    value: number
+}
+
 export class MinMaxAiPlayerController extends AiController
 {
     constructor(aiOwnedPlayer: IPlayer, _game: IFocus, _gameBoard: IGameBoardView)
     {
         super(aiOwnedPlayer, _game, _gameBoard)
-        const availableMoves = this.getAvailableMoves(_gameBoard.gameBoard)
-        console.warn(availableMoves)
     }
 
     move(): void
     {
-        this.minMax(this._gameBoard.gameBoard, 3, true)
+        const { bestMove } = this.minMax(this._gameBoard.gameBoard, 3, true) as BestMove
+
+        if (bestMove)
+            this._game.moveToField(bestMove.fromX, bestMove.fromY, bestMove.direction, bestMove.moveCount)
     }
 
     onPlaceStateStarted(): void
@@ -31,48 +38,67 @@ export class MinMaxAiPlayerController extends AiController
     {
     }
 
-    private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean)
+    private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, move?: Move)
     {
-        if (depth === 0 || this._game.hasEnded)
+        if (depth === 0 || this._gameBoard.gameBoard.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0)
             return this.evaluateMove(board)
 
         if (isMaximizingPlayer)
         {
             let maxEval = -Infinity
 
-            for (let i = 0; i < board.length(); i++)
+            const moves = this.getAvailableMoves(board)
+            let bestMove = moves[0].move
+
+            for (const move of moves)
             {
-                const evaluation = this.minMax(board, depth - 1, false)
-                maxEval = Math.max(evaluation, maxEval)
+                const current = this.minMax(move.gameBoardAfterSuchThing, depth - 1, false, move.move)
+                if (current.value > maxEval)
+                {
+                    maxEval = current.value
+                    bestMove = move.move
+                }
             }
 
-            return maxEval
-        } else {
-            let minEval = -Infinity
+            return { bestMove, value: maxEval }
+        } else
+        {
+            let minEval = Infinity
 
-            for (let i = 0; i < board.length(); i++)
+            const moves = this.getAvailableMoves(board)
+            let bestMove = moves[0].move
+
+            for (const move of moves)
             {
-                const evaluation = this.minMax(board, depth - 1, true)
-                minEval = Math.min(evaluation, minEval)
+                const current = this.minMax(move.gameBoardAfterSuchThing, depth - 1, true, move.move)
+
+                if (current.value < minEval)
+                {
+                    minEval = current.value
+                    bestMove = move.move
+                }
             }
 
-            return minEval
+            return { bestMove, value: minEval }
         }
     }
 
     private evaluateMove(board: IGameBoard)
     {
         const controlledByYou = board.countPlayersFields(this.ownedPlayer)
+        
         const controlledByEnemy = board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer))
-
+        
         const ratio = controlledByYou / controlledByEnemy
-
+        
         const controlledInReserveByYou = this.ownedPlayer.pooledPawns
         const controlledInReserveByEnemy = this._game.getNextPlayer(this.ownedPlayer).pooledPawns
 
-        const ratioInReserve = controlledInReserveByYou / controlledInReserveByEnemy
-        
-        return Math.floor(4 * ratio + 3 * ratioInReserve)
+        let ratioInReserve = controlledInReserveByYou / controlledInReserveByEnemy
+        if (controlledInReserveByYou === 0 || controlledInReserveByEnemy === 0)
+            ratioInReserve = 0
+
+        return { value: Math.floor(4 * ratio + 3 * ratioInReserve) }
     }
 
     private getAvailableMoves(board: IGameBoard): AiMove[]
@@ -81,22 +107,23 @@ export class MinMaxAiPlayerController extends AiController
 
         const yourFields: IField[] = []
 
-        this._gameBoard.gameBoard.each(v => {
+        this._gameBoard.gameBoard.each(v =>
+        {
             if (this.ownedPlayer.doesOwnThisField(v))
                 yourFields.push(v)
         })
 
         moves = yourFields.flatMap(v => this._game.getLegalMovesFromField(v.x, v.y))
 
-        const aiMoves: AiMove[]  = moves.map(move => {
+        const aiMoves: AiMove[] = moves.map(move =>
+        {
 
             const fieldFrom = board.getFieldAt(move.fromX, move.fromY)
             const fieldTo = board.getFieldAt(move.fromX + move.direction.x * move.moveCount, move.fromY + move.direction.y * move.moveCount)
 
             const gameBoardAfterSuchThing = board.getBoardAfterMove(fieldFrom, fieldTo)
 
-
-            return {gameBoardAfterSuchThing, move}
+            return { gameBoardAfterSuchThing, move }
         })
 
         return aiMoves
