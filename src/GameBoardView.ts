@@ -1,5 +1,5 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
-import { EventAddedToPool, IFocus } from './IFocus'
+import { EventAddedToPool, EventMovedField, IFocus } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
 import { ReserveView } from './ReserveView'
 import { IReserveView, EventPoolClicked } from './IReserveView'
@@ -48,7 +48,7 @@ export class GameBoardView implements IGameBoardView
         this.redReserve.addPoolClickedListener(this.onPoolClicked, this)
 
         this.game.events.on(EventAddedToPool, this.addedToPool, this)
-
+        this.game.events.on(EventMovedField, () => this.erasePossibleMoves())
         this.gameBoard.each(
             element =>
             {

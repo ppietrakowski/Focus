@@ -45,7 +45,8 @@ export default class PlayerAiController extends AiController
     {
         if (this.isTurnOfPlayer(player))
         {
-            if (this._usedPool) {
+            if (this._usedPool)
+            {
                 reserve.addToReserve()
                 this._usedPool = false
                 return
@@ -106,9 +107,9 @@ export default class PlayerAiController extends AiController
         fieldView.addClickListener(this.onFieldViewClick, this, true)
     }
 
-    move(): void
+    move(): Promise<void>
     {
-        console.log('player move')
+        return Promise.resolve()
     }
 
     stopMoving(): void
