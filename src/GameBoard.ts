@@ -1,5 +1,5 @@
 import { Field } from './Field'
-import { IField } from './IField'
+import { Direction, IField } from './IField'
 
 import board from './board.json'
 import { IPlayer } from './Player'
@@ -43,9 +43,39 @@ export class GameBoard implements IGameBoard
 
     constructor()
     {
-        const { elements } = board
-
         this._fields = []
+
+        const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
+
+        for (let i = 0; i < maxSize; i++)
+        {
+            this._fields[i] = new Field(FieldState.Empty, (i % GameBoard.GAME_BOARD_WIDTH), Math.floor(i / GameBoard.GAME_BOARD_WIDTH))
+        }
+    }
+
+    getBoardAfterMove(fromField: IField, toField: IField): IGameBoard
+    {
+        const gameBoard = new GameBoard()
+
+        const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
+
+        for (let i = 0; i < maxSize; i++)
+        {
+            gameBoard._fields[i] = new Field(this._fields[i].state, this._fields[i].x, this._fields[i].y)
+        }
+
+        const field = gameBoard.getFieldAt(fromField.x, fromField.y)
+        const outField = gameBoard.getFieldAt(toField.x, toField.y)
+
+        outField.moveToThisField(field)
+
+        return gameBoard
+    }
+
+    static loadFromJSON(json: any)
+    {
+        const board = new GameBoard()
+        const { elements } = json
 
         const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
 
@@ -54,8 +84,10 @@ export class GameBoard implements IGameBoard
 
         for (let i = 0; i < maxSize; i++)
         {
-            this.addNewFieldFromJson(elements, i)
+            board.addNewFieldFromJson(elements, i)
         }
+
+        return board
     }
 
     each(callback: ForEachCallback)
@@ -82,6 +114,11 @@ export class GameBoard implements IGameBoard
     countPlayersFields(player: IPlayer)
     {
         return this._fields.filter(v => player.doesOwnThisField(v)).length
+    }
+
+    length(): number
+    {
+        return this._fields.length
     }
 
     private addNewFieldFromJson(json: any, fieldId: number)

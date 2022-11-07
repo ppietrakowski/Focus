@@ -25,7 +25,11 @@ export abstract class AiController implements IAiController
 
     abstract move(): void
     abstract onPlaceStateStarted(): void
-    abstract stopMoving(): void
+    stopMoving(): void
+    {
+        this._game
+    }
+    
 
     checkIsYourTurn(player: IPlayer)
     {

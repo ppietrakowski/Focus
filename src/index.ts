@@ -5,6 +5,7 @@ import { GameBoardController } from './GameBoardController'
 import { IPlayer } from './Player'
 import PlayerAiController from './PlayerAiController'
 import { RandomPlayer } from './RandomPlayer'
+import { MinMaxAiPlayerController } from './MinMaxAiPlayerController'
 
 
 const focus = new Focus()
@@ -51,7 +52,7 @@ playerVsPlayerButton.addEventListener('click', () => gameBoard.style.visibility 
 playerVsPlayerButton.addEventListener('click', () => new GameBoardController(gameBoardView, new PlayerAiController(PLAYER_RED, focus, gameBoardView), new PlayerAiController(PLAYER_GREEN, focus, gameBoardView)))
 
 playerVsAIButton.addEventListener('click', () => gameBoard.style.visibility = 'visible')
-playerVsAIButton.addEventListener('click', () => new GameBoardController(gameBoardView, new PlayerAiController(PLAYER_RED, focus, gameBoardView), new RandomPlayer(PLAYER_GREEN, focus, gameBoardView)))
+playerVsAIButton.addEventListener('click', () => new GameBoardController(gameBoardView, new PlayerAiController(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView)))
 
 function notImplementedYet(caller: any)
 {
