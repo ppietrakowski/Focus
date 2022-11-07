@@ -3,7 +3,7 @@ export function randomInteger(min?: number, max?: number) {
     min = min || 0
     max = max || Number.MAX_SAFE_INTEGER
 
-    return Math.floor(Math.random() * (max - min + 1) + min)
+    return Math.floor(Math.random() * (max - min) + min)
 }
 
 export function randomBoolean() {

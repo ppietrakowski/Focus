@@ -15,6 +15,13 @@ export class GameBoardController implements IGameBoardController
         this.game.events.on(EventEnemyHasPool, this.onEnemyHasPool, this)
     }
 
+    async start(): Promise<void>
+    {
+        await this._playerA.move()
+
+        return Promise.resolve()
+    }
+
     get game()
     {
         return this._gameBoardView.game
@@ -23,7 +30,7 @@ export class GameBoardController implements IGameBoardController
     private onEnemyHasPool(enemy: IPlayer): void
     {
         this.game.setHasPoolToPut()
-        
+
         if (this.game.currentPlayer !== enemy)
             this.game.nextTurn()
 
@@ -32,8 +39,6 @@ export class GameBoardController implements IGameBoardController
 
     switchToPoolState(player: IPlayer)
     {
-        console.log(player)
-
         if (player === this._playerA.ownedPlayer)
         {
             this.placePoolState(player, this._playerA)
