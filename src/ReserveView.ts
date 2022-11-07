@@ -1,6 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import { FieldState } from './IField'
 import { IPoolClickedListener } from './IGameBoardView'
+import { EventPoolClicked, IReserveView } from './IReserveView'
 import { IPlayer } from './Player'
 
 const CLASSES_OF_ELEMENTS: string[] = []
@@ -15,20 +16,6 @@ function getClassNameOfElement(player: IPlayer)
 {
     return CLASSES_OF_ELEMENTS[player.state]
 }
-
-export interface IReserveView
-{
-    addToReserve(): void
-    removeFromReserve(): boolean
-    getFieldAt(i: number): HTMLDivElement
-    addPoolClickedListener(listener: IPoolClickedListener, context: any): void
-    emitPoolClicked(player: IPlayer, reserve: IReserveView): void
-
-    readonly events: EventEmitter
-    readonly owner: IPlayer
-}
-
-export const EventPoolClicked = 'PoolClicked'
 
 export class ReserveView implements IReserveView
 {

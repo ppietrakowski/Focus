@@ -11,8 +11,6 @@ const focus = new Focus()
 
 const gameBoardView = new GameBoardView(focus)
 
-gameBoardView.hookGuiMethods()
-
 class LoggingListener implements IAddedToPoolListener, IEnemyHasPoolListener, IVictoryListener, INewTurnListener
 {
     onAddedToPool(toWhichPlayer: IPlayer): void

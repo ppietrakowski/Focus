@@ -37,8 +37,8 @@ export const EventNewTurn = 'NewTurn'
 
 export interface IFocus
 {
-    events: EventEmitter
-    gameBoard: IGameBoard
+    readonly events: EventEmitter
+    readonly gameBoard: IGameBoard
 
     moveToField(x: number, y: number, direction: { x: number; y: number; }, howManyFieldWantMove: number): boolean
     placeField(x: number, y: number, owner: IPlayer): void

@@ -1,28 +1,14 @@
-import { Focus } from './Game'
-import { EventNewTurn, IFocus, INewTurnListener } from './IFocus'
-import { IPlayer, Player } from './Player'
-import { GameBoardView } from './GameBoardView'
+import { EventNewTurn, IFocus } from './IFocus'
+import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
-import { GameBoardController } from './GameBoardController'
+import { IAiController, IGameBoardController } from './IGameBoardController'
 
-export interface IAiController
-{
-    move(): void
-    stopMoving(): void
-    checkIsYourTurn(player: IPlayer): void
-
-    attachGameBoardController(controller: GameBoardController): void
-
-    onPlaceStateStarted(): void
-
-    readonly ownedPlayer: IPlayer
-}
 
 export abstract class AiController implements IAiController
 {
 
     readonly ownedPlayer: IPlayer
-    protected _gameBoardController: GameBoardController
+    protected _gameBoardController: IGameBoardController
 
     constructor(aiOwnedPlayer: IPlayer, protected readonly _game: IFocus, protected readonly _gameBoard: IGameBoardView)
     {
@@ -32,7 +18,7 @@ export abstract class AiController implements IAiController
         this._game.events.on(EventNewTurn, this.checkIsYourTurn, this)
     }
 
-    attachGameBoardController(controller: GameBoardController): void
+    attachGameBoardController(controller: IGameBoardController): void
     {
         this._gameBoardController = controller
     }

@@ -12,10 +12,10 @@ export const PLAYER_GREEN = new Player(FieldState.Green)
 
 export class Focus implements IFocus
 {
-    events: EventEmitter
-    gameBoard: IGameBoard
-    hasPoolToPut: boolean
-
+    readonly events: EventEmitter
+    readonly gameBoard: IGameBoard
+    
+    private _hasPoolToPut: boolean
     private _currentPlayer: IPlayer
     private _hasEnded = false
 
@@ -24,7 +24,7 @@ export class Focus implements IFocus
         this.events = new EventEmitter()
         this.gameBoard = new GameBoard()
         this._currentPlayer = PLAYER_RED
-        this.hasPoolToPut = false
+        this._hasPoolToPut = false
 
         this.events.on(EventMovedField, this.onMoveField, this)
 
@@ -81,7 +81,7 @@ export class Focus implements IFocus
 
         if (!toField.moveToThisField(fromField, howManyFieldWantMove))
         {
-            console.log('unable to move there')
+            console.warn('unable to move there')
             return false
         }
 
@@ -146,10 +146,10 @@ export class Focus implements IFocus
 
     nextTurn()
     {
-        if (this.hasPoolToPut)
+        if (this._hasPoolToPut)
         {    
             this._currentPlayer = this.getNextPlayer()
-            this.hasPoolToPut = false
+            this._hasPoolToPut = false
             return
         }
 
@@ -163,7 +163,7 @@ export class Focus implements IFocus
 
     setHasPoolToPut(): void
     {
-        this.hasPoolToPut = true
+        this._hasPoolToPut = true
     }
 
     private increaseCurrentPlayersPool()

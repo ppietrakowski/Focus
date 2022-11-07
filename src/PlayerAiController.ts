@@ -1,9 +1,9 @@
 import { AiController } from './AiController'
 import { EventMouseLeaveField, EventMouseOverField, IFieldView } from './FieldView'
 import { IFocus } from './IFocus'
-import { IPlayer, Player } from './Player'
+import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
-import { IReserveView } from './ReserveView'
+import { IReserveView } from './IReserveView'
 import { Direction } from './IField'
 
 

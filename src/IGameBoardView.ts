@@ -1,6 +1,6 @@
 import { IFocus } from './IFocus'
 import { IFieldView } from './FieldView'
-import { IReserveView } from './ReserveView'
+import { IReserveView } from './IReserveView'
 import { IGameBoard } from './IGameBoard'
 import { IPlayer } from './Player'
 import EventEmitter from 'eventemitter3'

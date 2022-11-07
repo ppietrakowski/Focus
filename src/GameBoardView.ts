@@ -1,13 +1,14 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
 import { EventAddedToPool, IFocus } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
-import { EventPoolClicked, IReserveView, ReserveView } from './ReserveView'
+import { ReserveView } from './ReserveView'
+import { IReserveView, EventPoolClicked } from './IReserveView'
 import { IPlayer } from './Player'
-import { ReserveViewRequest } from './ReserveViewRequest'
+import { ReserveViewOnPlayerTurnDecorator } from './ReserveViewOnPlayerTurnDecorator'
 import { IGameBoard } from './IGameBoard'
 import { ForEachFieldInView, IGameBoardView, IPoolClickedListener } from './IGameBoardView'
-import { FieldViewRequest } from './FieldViewRequest'
-import { DirectionNorth, DirectionWest } from './IField'
+import { FieldViewDecorator } from './FieldViewDecorator'
+import { Direction, DirectionNorth, DirectionWest } from './IField'
 import EventEmitter from 'eventemitter3'
 
 
@@ -40,13 +41,27 @@ export class GameBoardView implements IGameBoardView
         this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0] as HTMLDivElement, PLAYER_RED)
 
         this.greenReserve.addToReserve()
-        this.greenReserve = new ReserveViewRequest(this.greenReserve, this.game)
-        this.redReserve = new ReserveViewRequest(this.redReserve, this.game)
+        this.greenReserve = new ReserveViewOnPlayerTurnDecorator(this.greenReserve, this.game)
+        this.redReserve = new ReserveViewOnPlayerTurnDecorator(this.redReserve, this.game)
 
         this.greenReserve.addPoolClickedListener(this.onPoolClicked, this)
         this.redReserve.addPoolClickedListener(this.onPoolClicked, this)
 
         this.game.events.on(EventAddedToPool, this.addedToPool, this)
+
+        this.gameBoard.each(
+            element =>
+            {
+                let e: IFieldView = new FieldView(this.game, element)
+                this.board.appendChild(e.domElement)
+
+                if (PLAYER_GREEN.doesOwnThisField(e.field))
+                    e = new FieldViewDecorator(e, PLAYER_GREEN)
+                else
+                    e = new FieldViewDecorator(e, PLAYER_RED)
+                this._fields.push(e)
+            }
+        )
     }
 
     private addedToPool()
@@ -76,23 +91,6 @@ export class GameBoardView implements IGameBoardView
         return this._fields[i]
     }
 
-    hookGuiMethods()
-    {
-        this.gameBoard.each(
-            element =>
-            {
-                let e: IFieldView = new FieldView(this.game, element)
-                this.board.appendChild(e.domElement)
-
-                if (PLAYER_GREEN.doesOwnThisField(e.field))
-                    e = new FieldViewRequest(e, PLAYER_GREEN)
-                else
-                    e = new FieldViewRequest(e, PLAYER_RED)
-                this._fields.push(e)
-            }
-        )
-    }
-
     each(callback: ForEachFieldInView): void
     {
         for (const child of this._fields)
@@ -115,7 +113,7 @@ export class GameBoardView implements IGameBoardView
         selectedField.visualizeHovered()
     }
 
-    private renderInSameLine(maxPossibleMoves: number, baseDirection: { x: number, y: number })
+    private renderInSameLine(maxPossibleMoves: number, baseDirection: Direction)
     {
         for (let i = 1; i <= maxPossibleMoves; i++)
         {
@@ -128,7 +126,7 @@ export class GameBoardView implements IGameBoardView
         return !!this._selectedField
     }
 
-    private selectNeighboursInRange(baseDirection: { x: number, y: number }, maxRange: number)
+    private selectNeighboursInRange(baseDirection: Direction, maxRange: number)
     {
         const { field } = this._selectedField
         const offset = this.game.getOffsetBasedOnDirection(field, baseDirection, maxRange)
@@ -136,11 +134,6 @@ export class GameBoardView implements IGameBoardView
         const neighbours = this._fields.filter(v => v.isInRange(field, offset))
 
         neighbours.forEach(v => v.visualizeHovered())
-    }
-
-    unselectField(): void
-    {
-        this._selectedField = null
     }
 
     erasePossibleMoves()

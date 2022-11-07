@@ -2,9 +2,10 @@ import EventEmitter from 'eventemitter3'
 import { IFocus } from './IFocus'
 import { IPoolClickedListener } from './IGameBoardView'
 import { IPlayer } from './Player'
-import { IReserveView, ReserveView } from './ReserveView'
+import { ReserveView } from './ReserveView'
+import { IReserveView } from './IReserveView'
 
-export class ReserveViewRequest implements IReserveView
+export class ReserveViewOnPlayerTurnDecorator implements IReserveView
 {
     readonly owner: IPlayer
     readonly events: EventEmitter
@@ -58,7 +59,7 @@ export class ReserveViewRequest implements IReserveView
         return false
     }
 
-    broadcastClickMessage()
+    private broadcastClickMessage()
     {
         if (this.canAccess())
         {
@@ -66,7 +67,7 @@ export class ReserveViewRequest implements IReserveView
         }
     }
 
-    canAccess()
+    private canAccess()
     {
         return this._game.currentPlayer === this.owner
     }

@@ -1,10 +1,10 @@
 import EventEmitter from 'eventemitter3'
-import { FieldView, IClickListener, IFieldView } from './FieldView'
+import { EventClickField, EventMouseLeaveField, EventMouseOverField, FieldView, IClickListener, IFieldView } from './FieldView'
 import { IField } from './IField'
 import { IPlayer } from './Player'
 
 
-export class FieldViewRequest implements IFieldView
+export class FieldViewDecorator implements IFieldView
 {
     readonly events: EventEmitter
     field: IField
@@ -39,26 +39,17 @@ export class FieldViewRequest implements IFieldView
 
     private onClick(): void
     {
-        if (this._fieldView instanceof FieldView)
-        {
-            this._fieldView.onClick()
-        }
+        this.events.emit(EventClickField, this)
     }
 
     private onMouseLeave(): void
     {
-        if (this._fieldView instanceof FieldView)
-        {
-            this._fieldView.onMouseLeave()
-        }
+        this.events.emit(EventMouseLeaveField, this._owningPlayer, this)
     }
 
     private onMouseOver(): void
     {
-        if (this._fieldView instanceof FieldView)
-        {
-            this._fieldView.onMouseOver()
-        }
+        this.events.emit(EventMouseOverField, this._owningPlayer, this)
     }
 
     isInRange(anotherField: IField, range: { x: number; y: number; }): boolean

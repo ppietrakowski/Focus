@@ -1,11 +1,10 @@
-import { IAiController } from './AiController'
 import { EventEnemyHasPool } from './IFocus'
+import { IAiController, IGameBoardController } from './IGameBoardController'
 import { IGameBoardView } from './IGameBoardView'
 import { IPlayer } from './Player'
 
-export class GameBoardController
+export class GameBoardController implements IGameBoardController
 {
-
     static readonly MOVE_AVAILABLE = 'MoveAvailable'
 
     constructor(private readonly _gameBoardView: IGameBoardView, private readonly _playerA: IAiController, private readonly _playerB: IAiController)

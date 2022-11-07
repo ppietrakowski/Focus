@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import { FieldState, IField } from './IField'
+import { Direction, FieldState, IField } from './IField'
 import { IFocus } from './IFocus'
 import { IPlayer } from './Player'
 
@@ -94,15 +94,10 @@ export class FieldView implements IFieldView
         this.domElement.className = this.getUnhoveredClassName()
     }
 
-    isInRange(anotherField: IField, range: { x: number, y: number })
+    isInRange(anotherField: IField, range: Direction)
     {
         return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) &&
             (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
-    }
-
-    onMouseLeave()
-    {
-        this.events.emit(EventMouseLeaveField, this.game.currentPlayer, this)
     }
 
     private getHoveredClassName()
@@ -113,15 +108,5 @@ export class FieldView implements IFieldView
     private getUnhoveredClassName()
     {
         return (this.field.state & FieldState.Red) ? 'playerRedField' : (this.field.state & FieldState.Green) ? 'playerGreenField' : 'emptyField'
-    }
-
-    onMouseOver()
-    {
-        this.events.emit(EventMouseOverField, this.game.currentPlayer, this)
-    }
-
-    onClick()
-    {
-        this.events.emit(EventClickField, this)
     }
 }
