@@ -1,15 +1,19 @@
 import EventEmitter from 'eventemitter3'
 import { FieldState } from './IField'
 import { IPoolClickedListener } from './IGameBoardView'
-import { IPlayer, Player } from './Player'
+import { IPlayer } from './Player'
 
+const CLASSES_OF_ELEMENTS: string[] = []
+
+CLASSES_OF_ELEMENTS[FieldState.Red] = 'reserveRedPawn'
+CLASSES_OF_ELEMENTS[FieldState.Green] = 'reserveGreenPawn'
+
+CLASSES_OF_ELEMENTS[FieldState.Empty] = 'reserveGreenPawn'
+CLASSES_OF_ELEMENTS[FieldState.Unplayable] = 'reserveGreenPawn'
 
 function getClassNameOfElement(player: IPlayer)
 {
-    return (player.state & FieldState.Red) ?
-        'reserveRedPawn'
-        : (player.state & FieldState.Green) ?
-            'reserveGreenPawn' : 'reserveEmptyPawn'
+    return CLASSES_OF_ELEMENTS[player.state]
 }
 
 export interface IReserveView
@@ -20,7 +24,7 @@ export interface IReserveView
     addPoolClickedListener(listener: IPoolClickedListener, context: any): void
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
 
-    events: EventEmitter
+    readonly events: EventEmitter
     readonly owner: IPlayer
 }
 
@@ -29,11 +33,11 @@ export const EventPoolClicked = 'PoolClicked'
 export class ReserveView implements IReserveView
 {
 
-    static POOL_CLICKED = 'poolClicked'
+    static readonly POOL_CLICKED = 'poolClicked'
     
-    events: EventEmitter
+    readonly events: EventEmitter
     reserveFields: HTMLDivElement[]
-    
+
     private _howManyReserveHas: number
 
     constructor(private readonly _reserveBar: HTMLDivElement, readonly owner: IPlayer)
@@ -85,12 +89,12 @@ export class ReserveView implements IReserveView
             return this.triedToUseEmptyPool()
         }
 
-        this.reserveFields[this._howManyReserveHas].className = 'reserveEmptyPawn'
+        this.reserveFields[this._howManyReserveHas].className = CLASSES_OF_ELEMENTS[FieldState.Empty]
         this._howManyReserveHas--
         return true
     }
 
-    triedToUseEmptyPool()
+    private triedToUseEmptyPool()
     {
         this._howManyReserveHas = Math.max(this._howManyReserveHas, 0)
 
@@ -98,7 +102,7 @@ export class ReserveView implements IReserveView
         return false
     }
 
-    isSomethingInPool()
+    private isSomethingInPool()
     {
         return this.reserveFields[this._howManyReserveHas] && this.owner.hasAnyPool
     }

@@ -30,6 +30,7 @@ export class Focus implements IFocus
 
         this.gameBoard.each(v => v.events.on(EventFieldOvergrown, this.onOverGrownField, this))
     }
+    
 
     private onOverGrownField(field: IField, stateThatWasPoped: FieldState): void
     {
@@ -96,7 +97,8 @@ export class Focus implements IFocus
         const field = this.gameBoard.getFieldAt(x, y)
 
         field.placeAtTop(owner.state)
-        owner.pooledPawns--
+        if (owner instanceof Player)
+            owner.decreasePool()
 
         // placing is just one move
         this.nextTurn()
@@ -159,9 +161,16 @@ export class Focus implements IFocus
         this.events.emit(EventNewTurn, this._currentPlayer)
     }
 
+    setHasPoolToPut(): void
+    {
+        this.hasPoolToPut = true
+    }
+
     private increaseCurrentPlayersPool()
     {
-        this.currentPlayer.pooledPawns++
+        if (this._currentPlayer instanceof Player)
+            this._currentPlayer.increasePool()
+
         this.events.emit(EventAddedToPool, this._currentPlayer)
     }
 

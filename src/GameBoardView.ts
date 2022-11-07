@@ -101,7 +101,6 @@ export class GameBoardView implements IGameBoardView
         }
     }
 
-
     renderPossibleMoves(selectedField: IFieldView)
     {
         this._selectedField = selectedField

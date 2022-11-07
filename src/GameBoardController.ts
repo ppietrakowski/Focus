@@ -1,9 +1,9 @@
 import { IAiController } from './AiController'
-import { EventEnemyHasPool, IEnemyHasPoolListener } from './IFocus'
+import { EventEnemyHasPool } from './IFocus'
 import { IGameBoardView } from './IGameBoardView'
 import { IPlayer } from './Player'
 
-export class GameBoardController implements IEnemyHasPoolListener
+export class GameBoardController
 {
 
     static readonly MOVE_AVAILABLE = 'MoveAvailable'
@@ -21,12 +21,10 @@ export class GameBoardController implements IEnemyHasPoolListener
         return this._gameBoardView.game
     }
 
-    onEnemyHasPool(enemy: IPlayer): void
+    private onEnemyHasPool(enemy: IPlayer): void
     {
-        console.log('ff')
+        this.game.setHasPoolToPut()
         
-        this.game.hasPoolToPut = true
-
         if (this.game.currentPlayer !== enemy)
             this.game.nextTurn()
 
@@ -56,7 +54,6 @@ export class GameBoardController implements IEnemyHasPoolListener
         if (player.hasAnyPool)
         {
             aicontroller.onPlaceStateStarted()
-            this.game.hasPoolToPut = false
         }
     }
 }

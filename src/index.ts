@@ -1,7 +1,7 @@
 import { Focus, PLAYER_GREEN, PLAYER_RED } from './Game'
 import { GameBoardView } from './GameBoardView'
 import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory, IAddedToPoolListener, IEnemyHasPoolListener, INewTurnListener, IVictoryListener } from './IFocus'
-import { GameBoardController } from './IGameBoardController'
+import { GameBoardController } from './GameBoardController'
 import { IPlayer } from './Player'
 import PlayerAiController from './PlayerAiController'
 import { RandomPlayer } from './RandomPlayer'

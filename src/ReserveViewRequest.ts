@@ -7,7 +7,7 @@ import { IReserveView, ReserveView } from './ReserveView'
 export class ReserveViewRequest implements IReserveView
 {
     readonly owner: IPlayer
-    events: EventEmitter
+    readonly events: EventEmitter
 
     constructor(private readonly _reserveView: IReserveView, private readonly _game: IFocus)
     {

@@ -3,7 +3,7 @@ import { EventNewTurn, IFocus, INewTurnListener } from './IFocus'
 import { IPlayer, Player } from './Player'
 import { GameBoardView } from './GameBoardView'
 import { IGameBoardView } from './IGameBoardView'
-import { GameBoardController } from './IGameBoardController'
+import { GameBoardController } from './GameBoardController'
 
 export interface IAiController
 {

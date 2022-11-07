@@ -16,7 +16,7 @@ export default class PlayerAiController extends AiController
     private _selectedField?: IFieldView
     private _usedPool = false
 
-    constructor(player: Player, game: IFocus, gameBoard: IGameBoardView)
+    constructor(player: IPlayer, game: IFocus, gameBoard: IGameBoardView)
     {
         super(player, game, gameBoard)
 
@@ -30,18 +30,18 @@ export default class PlayerAiController extends AiController
         this._gameBoard.each(v => v.events.on(EventMouseLeaveField, this.onMouseLeaveFieldView, this))
     }
 
-    onMouseOverFieldView(player: IPlayer, fieldView: IFieldView): void
+    private onMouseOverFieldView(player: IPlayer, fieldView: IFieldView): void
     {
         this.tintHoveredField(player, fieldView)
     }
 
-    onMouseLeaveFieldView(player: IPlayer, fieldView: IFieldView): void
+    private onMouseLeaveFieldView(player: IPlayer, fieldView: IFieldView): void
     {
         this.clearTintFromHoveredField(player, fieldView)
     }
 
 
-    onPoolClicked(player: IPlayer, reserve: IReserveView): void
+    private onPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
         if (this.isTurnOfPlayer(player))
         {
@@ -59,7 +59,7 @@ export default class PlayerAiController extends AiController
         }
     }
 
-    onFieldViewClick(fieldView: IFieldView): void
+    private onFieldViewClick(fieldView: IFieldView): void
     {
         try
         {
@@ -78,7 +78,7 @@ export default class PlayerAiController extends AiController
         return currentPlayer === player
     }
 
-    private tintHoveredField(player: IPlayer, field: IFieldView)
+    private tintHoveredField(_player: IPlayer, field: IFieldView)
     {
         if (this.canBeTinted(field))
         {
@@ -93,7 +93,7 @@ export default class PlayerAiController extends AiController
         return this.isTurnOfPlayer(this.ownedPlayer) && currentPlayer.doesOwnThisField(field.field) && !this._selectedField
     }
 
-    private clearTintFromHoveredField(player: IPlayer, field: IFieldView)
+    private clearTintFromHoveredField(_player: IPlayer, field: IFieldView)
     {
         if (this.canBeTinted(field))
         {
@@ -101,9 +101,9 @@ export default class PlayerAiController extends AiController
         }
     }
 
-    private hookIntoClickEvent(v: IFieldView)
+    private hookIntoClickEvent(fieldView: IFieldView)
     {
-        v.addClickListener(this.onFieldViewClick, this, true)
+        fieldView.addClickListener(this.onFieldViewClick, this, true)
     }
 
     move(): void
@@ -164,7 +164,7 @@ export default class PlayerAiController extends AiController
     {
 
         // respond for double click
-        if (this.wasDoubleClicked(clickedField))
+        if (this.selectedFieldWasDoubleClicked(clickedField))
         {
             this.unselectField()
             return
@@ -184,7 +184,7 @@ export default class PlayerAiController extends AiController
         this.moveToField(clickedField, direction)
     }
 
-    private wasDoubleClicked(clickedField: IFieldView)
+    private selectedFieldWasDoubleClicked(clickedField: IFieldView)
     {
         return this._selectedField === clickedField
     }
