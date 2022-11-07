@@ -25,6 +25,7 @@ export class Focus implements IFocus
     {
         this.events = new EventEmitter()
         this.gameBoard = GameBoard.loadFromJSON(board)
+
         this._currentPlayer = PLAYER_RED
         this._hasPoolToPut = false
 
@@ -131,7 +132,6 @@ export class Focus implements IFocus
             return false
         }
 
-        console.log(toField)
         this.events.emit(EventMovedField, x, y, fromField, toField)
 
         this.nextTurn()

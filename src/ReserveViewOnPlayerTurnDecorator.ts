@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3'
 import { IFocus } from './IFocus'
 import { IPoolClickedListener } from './IGameBoardView'
-import { IPlayer } from './Player'
+import { EventPoolDecreased, EventPoolIncreased, IPlayer } from './Player'
 import { ReserveView } from './ReserveView'
 import { IReserveView } from './IReserveView'
 
@@ -19,6 +19,9 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView
         {
             _reserveView.reserveFields.forEach(v => v.addEventListener('click', () => this.broadcastClickMessage()))
         }
+
+        this.owner.events.on(EventPoolIncreased, this.addToReserve, this)
+        this.owner.events.on(EventPoolDecreased, this.removeFromReserve, this)
     }
 
     addPoolClickedListener(listener: IPoolClickedListener, context: any): void

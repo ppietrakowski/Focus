@@ -6,6 +6,8 @@ import { IPlayer } from './Player'
 import PlayerAiController from './PlayerAiController'
 import { RandomPlayer } from './RandomPlayer'
 import { MinMaxAiPlayerController } from './MinMaxAiPlayerController'
+import { IAiController, IGameBoardController } from './IGameBoardController'
+import { FieldState } from './IField'
 
 
 const focus = new Focus()
@@ -25,7 +27,7 @@ class LoggingListener
     }
     onVictory(victoriousPlayer: IPlayer): void
     {
-        console.log(`${JSON.stringify(victoriousPlayer)} won`)
+        console.log(`${victoriousPlayer.state === FieldState.Green ? 'Green' : 'Red'} won`)
     }
     onNextTurnBegin(currentPlayer: IPlayer): void
     {
@@ -60,12 +62,21 @@ playerVsAIButton.addEventListener('click', () => new GameBoardController(gameBoa
 AIVsAIButton.addEventListener('click', () => gameBoard.style.visibility = 'visible')
 AIVsAIButton.addEventListener('click', runAiVsAiGame)
 
+const randomPlayerChoose = document.querySelector('#random') as HTMLDivElement
+const minMaxPlayerChoose = document.querySelector('#minMax') as HTMLDivElement
+
 function runAiVsAiGame(evt: MouseEvent)
 {
     gameBoard.style.visibility = 'visible'
     gameBoard.style.opacity = '1.0'
 
-    const controller = new GameBoardController(gameBoardView, new MinMaxAiPlayerController(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView))
+    let controller: IGameBoardController
 
-    setTimeout(() => controller.start(), 1000)
+    randomPlayerChoose.style.visibility = 'visible'
+    minMaxPlayerChoose.style.visibility = 'visible'
+
+    randomPlayerChoose.addEventListener('click', e => controller = new GameBoardController(gameBoardView, new RandomPlayer(PLAYER_RED, focus, gameBoardView), new RandomPlayer(PLAYER_GREEN, focus, gameBoardView)))
+    randomPlayerChoose.addEventListener('click', e => setTimeout(() => controller.start(), 1000))
+    minMaxPlayerChoose.addEventListener('click', e => controller = new GameBoardController(gameBoardView, new MinMaxAiPlayerController(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView)))
+    minMaxPlayerChoose.addEventListener('click', e => setTimeout(() => controller.start(), 1000))
 }

@@ -48,13 +48,13 @@ export class MinMaxAiPlayerController extends AiController
     {
         const { x, y } = this.getRandomFieldPosition(f => f.isPlayable)
 
-        if (this.ownedPlayer === PLAYER_GREEN)
-        {
-            this._gameBoard.greenReserve.removeFromReserve()
-        } else
-        {
-            this._gameBoard.redReserve.removeFromReserve()
-        }
+        // if (this.ownedPlayer === PLAYER_GREEN)
+        // {
+        //     this._gameBoard.greenReserve.removeFromReserve()
+        // } else
+        // {
+        //     this._gameBoard.redReserve.removeFromReserve()
+        // }
 
         this._game.placeField(x, y, this.ownedPlayer)
     }

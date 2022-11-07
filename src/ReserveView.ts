@@ -4,16 +4,26 @@ import { IPoolClickedListener } from './IGameBoardView'
 import { EventPoolClicked, IReserveView } from './IReserveView'
 import { IPlayer } from './Player'
 
-const CLASSES_OF_ELEMENTS: string[] = []
 
-CLASSES_OF_ELEMENTS[FieldState.Red] = 'reserveRedPawn'
-CLASSES_OF_ELEMENTS[FieldState.Green] = 'reserveGreenPawn'
 
-CLASSES_OF_ELEMENTS[FieldState.Empty] = 'reserveGreenPawn'
-CLASSES_OF_ELEMENTS[FieldState.Unplayable] = 'reserveGreenPawn'
-
-function getClassNameOfElement(player: IPlayer)
+function getClassNameOfElement(player: IPlayer | FieldState)
 {
+    const CLASSES_OF_ELEMENTS: string[] = []
+
+    for (let i = 0; i <= FieldState.Green; i++)
+    {
+        CLASSES_OF_ELEMENTS.push('reserveEmptyPawn')
+    }
+
+    CLASSES_OF_ELEMENTS[FieldState.Red] = 'reserveRedPawn'
+    CLASSES_OF_ELEMENTS[FieldState.Green] = 'reserveGreenPawn'
+
+    CLASSES_OF_ELEMENTS[FieldState.Empty] = 'reserveEmptyPawn'
+    CLASSES_OF_ELEMENTS[FieldState.Unplayable] = 'reserveEmptyPawn'
+
+    if (typeof player == 'number')
+        return CLASSES_OF_ELEMENTS[player]
+
     return CLASSES_OF_ELEMENTS[player.state]
 }
 
@@ -21,7 +31,7 @@ export class ReserveView implements IReserveView
 {
 
     static readonly POOL_CLICKED = 'poolClicked'
-    
+
     readonly events: EventEmitter
     reserveFields: HTMLDivElement[]
 
@@ -76,7 +86,7 @@ export class ReserveView implements IReserveView
             return this.triedToUseEmptyPool()
         }
 
-        this.reserveFields[this._howManyReserveHas].className = CLASSES_OF_ELEMENTS[FieldState.Empty]
+        this.reserveFields[this._howManyReserveHas].className = getClassNameOfElement(FieldState.Empty)
         this._howManyReserveHas--
         return true
     }

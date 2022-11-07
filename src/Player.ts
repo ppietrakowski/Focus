@@ -1,9 +1,11 @@
+import EventEmitter from 'eventemitter3'
 import { FieldState } from './IField'
 import { IField } from './IField'
 
 
 export interface IPlayer
 {
+    readonly events: EventEmitter
     get state(): FieldState
     get hasAnyPool(): boolean
     get pooledPawns(): number
@@ -12,15 +14,20 @@ export interface IPlayer
     possessField(field: IField): void
 }
 
+export const EventPoolDecreased = 'PoolDecreased'
+export const EventPoolIncreased = 'PoolIncreased'
+
 export class Player implements IPlayer
 {
     private _pooledPawns: number
     private _state: FieldState
+    readonly events: EventEmitter
 
     constructor(state: number)
     {
         this._state = state
         this._pooledPawns = 0
+        this.events = new EventEmitter()
     }
 
     get state(): FieldState
@@ -41,11 +48,13 @@ export class Player implements IPlayer
     increasePool()
     {
         this._pooledPawns++
+        this.events.emit(EventPoolIncreased)
     }
 
     decreasePool()
     {
         this._pooledPawns--
+        this.events.emit(EventPoolDecreased)
     }
 
     doesOwnThisField(field: number | IField)

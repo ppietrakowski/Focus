@@ -39,7 +39,7 @@ export abstract class AiController implements IAiController
             
         if (player == this.ownedPlayer)
         {
-            setTimeout(() => this.move(), 50)
+            setTimeout(() => this.move(), 66)
         } else
         {
             this.stopMoving()

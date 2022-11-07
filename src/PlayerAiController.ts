@@ -53,10 +53,7 @@ export default class PlayerAiController extends AiController
             }
 
             this._usedPool = !this._usedPool
-            if (reserve.removeFromReserve())
-            {
-                this._gameBoardController.placePoolState(this.ownedPlayer, this)
-            }
+            this._gameBoardController.placePoolState(this.ownedPlayer, this)
         }
     }
 

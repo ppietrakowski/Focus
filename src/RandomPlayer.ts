@@ -3,7 +3,7 @@ import { PLAYER_GREEN } from './Game'
 import { GameBoard } from './GameBoard'
 import { IPredicate, randomInteger } from './GameUtils'
 import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, IField } from './IField'
-import { IFocus } from './IFocus'
+import { IFocus, Move } from './IFocus'
 import { IGameBoardView } from './IGameBoardView'
 import { IPlayer } from './Player'
 
@@ -18,14 +18,20 @@ export class RandomPlayer extends AiController
 
     move(): Promise<void>
     {
-        const { x, y } = this.getRandomFieldPosition(f => this.ownedPlayer.doesOwnThisField(f))
+        let moves: Move[] = []
 
-        let direction = this.getRandomDirection(x, y)
+        const yourFields: IField[] = []
 
-        while (!this._game.moveToField(x, y, direction, 1))
+        this._gameBoard.gameBoard.each(v =>
         {
-            direction = this.getRandomDirection(x, y)
-        }
+            if (this.ownedPlayer.doesOwnThisField(v))
+                yourFields.push(v)
+        })
+
+        moves = yourFields.flatMap(v => this._game.getLegalMovesFromField(v.x, v.y))
+
+        const randomMove = moves[randomInteger(0, moves.length)]
+        this._game.moveToField(randomMove.fromX, randomMove.fromY, randomMove.direction, randomMove.moveCount)
 
         return Promise.resolve()
     }
@@ -78,13 +84,13 @@ export class RandomPlayer extends AiController
         console.log('Computer player places')
         const { x, y } = this.getRandomFieldPosition(f => f.isPlayable)
 
-        if (this.ownedPlayer === PLAYER_GREEN)
-        {
-            this._gameBoard.greenReserve.removeFromReserve()
-        } else
-        {
-            this._gameBoard.redReserve.removeFromReserve()
-        }
+        // if (this.ownedPlayer === PLAYER_GREEN)
+        // {
+        //     this._gameBoard.greenReserve.removeFromReserve()
+        // } else
+        // {
+        //     this._gameBoard.redReserve.removeFromReserve()
+        // }
 
         this._game.placeField(x, y, this.ownedPlayer)
     }
