@@ -101,7 +101,7 @@ export class MinMaxAiPlayerController extends AiController
         if (controlledInReserveByYou === 0 || controlledInReserveByEnemy === 0)
             ratioInReserve = 0
 
-        return { value: Math.floor(4 * ratio + 3 * ratioInReserve) }
+        return { value: 4 * ratio + 3 * ratioInReserve }
     }
 
     private getAvailableMoves(board: IGameBoard): AiMove[]
