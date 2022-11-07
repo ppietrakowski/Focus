@@ -89,8 +89,11 @@ export class MinMaxAiPlayerController extends AiController
         
         const controlledByEnemy = board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer))
         
-        const ratio = controlledByYou / controlledByEnemy
+        let ratio = controlledByYou / controlledByEnemy
         
+        if (Number.isNaN(ratio))
+            ratio = 0
+
         const controlledInReserveByYou = this.ownedPlayer.pooledPawns
         const controlledInReserveByEnemy = this._game.getNextPlayer(this.ownedPlayer).pooledPawns
 
