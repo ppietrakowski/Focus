@@ -1,11 +1,13 @@
 import { Field } from './Field'
 import { GameBoard } from './GameBoard'
-import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IFocus } from './IFocus'
-import { EventFieldOvergrown, FieldState, IField } from './IField'
+import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IFocus, Move } from './IFocus'
+import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, EventFieldOvergrown, FieldState, IField } from './IField'
 
 import { IGameBoard } from './IGameBoard'
 import { IPlayer, Player } from './Player'
 import EventEmitter from 'eventemitter3'
+
+import board from './board.json'
 
 export const PLAYER_RED = new Player(FieldState.Red)
 export const PLAYER_GREEN = new Player(FieldState.Green)
@@ -14,7 +16,7 @@ export class Focus implements IFocus
 {
     readonly events: EventEmitter
     readonly gameBoard: IGameBoard
-    
+
     private _hasPoolToPut: boolean
     private _currentPlayer: IPlayer
     private _hasEnded = false
@@ -22,7 +24,7 @@ export class Focus implements IFocus
     constructor()
     {
         this.events = new EventEmitter()
-        this.gameBoard = new GameBoard()
+        this.gameBoard = GameBoard.loadFromJSON(board)
         this._currentPlayer = PLAYER_RED
         this._hasPoolToPut = false
 
@@ -30,7 +32,51 @@ export class Focus implements IFocus
 
         this.gameBoard.each(v => v.events.on(EventFieldOvergrown, this.onOverGrownField, this))
     }
-    
+
+    private getMovesFromDirection(field: IField, x: number, y: number, direction: Direction)
+    {
+        const moves: Move[] = []
+        for (let moveCount = 1; moveCount <= field.height; moveCount++)
+        {
+            const isMoveLegal = this.isMoveLegal(x, y, direction, moveCount)
+            if (isMoveLegal)
+            {
+                moves.push({direction: direction, fromX: x, fromY: y, moveCount: moveCount})
+            }
+        }
+        return moves
+    }
+
+    getLegalMovesFromField(x: number, y: number): Move[]
+    {
+        const field = this.gameBoard.getFieldAt(x, y)
+        let moves: Move[] = []
+
+        // north moves
+        moves = moves.concat(this.getMovesFromDirection(field, x, y, DirectionNorth))
+        moves = moves.concat(this.getMovesFromDirection(field, x, y, DirectionEast))
+        moves = moves.concat(this.getMovesFromDirection(field, x, y, DirectionWest))
+        moves = moves.concat(this.getMovesFromDirection(field, x, y, DirectionSouth))
+
+        return moves
+    }
+
+    isMoveLegal(x: number, y: number, direction: Direction, moveCount: number): boolean
+    {
+        const field = this.gameBoard.getFieldAt(x, y)
+
+        const offset = this.getOffsetBasedOnDirection(field, direction, moveCount)
+
+        try
+        {
+            const fieldFromOffset = this.gameBoard.getFieldAt(x + offset.x, y + offset.y)
+            return fieldFromOffset.isPlayable
+        }
+        catch (e)
+        {
+            return false
+        }
+    }
 
     private onOverGrownField(field: IField, stateThatWasPoped: FieldState): void
     {
@@ -147,7 +193,7 @@ export class Focus implements IFocus
     nextTurn()
     {
         if (this._hasPoolToPut)
-        {    
+        {
             this._currentPlayer = this.getNextPlayer()
             this._hasPoolToPut = false
             return
@@ -156,7 +202,7 @@ export class Focus implements IFocus
         if (this.hasEnded)
             return
 
-        
+
         this._currentPlayer = this.getNextPlayer()
         this.events.emit(EventNewTurn, this._currentPlayer)
     }
@@ -178,7 +224,7 @@ export class Focus implements IFocus
     {
         return this._hasEnded
     }
-    
+
 
     private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer)
     {

@@ -1,5 +1,5 @@
 import EventEmitter from 'eventemitter3'
-import { IField } from './IField'
+import { Direction, IField } from './IField'
 import { IGameBoard } from './IGameBoard'
 import { IPlayer } from './Player'
 
@@ -29,6 +29,14 @@ export interface INewTurnListener
     onNextTurnBegin(currentPlayer: IPlayer): void
 }
 
+export interface Move
+{
+    direction: Direction,
+    moveCount: number
+    fromX: number
+    fromY: number
+}
+
 export const EventVictory = 'Victory'
 export const EventMovedField = 'MovedField'
 export const EventAddedToPool = 'AddedToPool'
@@ -50,5 +58,7 @@ export interface IFocus
     set currentPlayer(player: IPlayer)
     get hasEnded(): boolean
 
+    isMoveLegal(x: number, y: number, direction: Direction, moveCount: number): boolean
+    getLegalMovesFromField(x: number, y: number): Move[]
     setHasPoolToPut(): void
 }
