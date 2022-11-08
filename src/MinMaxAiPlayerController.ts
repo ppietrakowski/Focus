@@ -31,7 +31,7 @@ export class MinMaxAiPlayerController extends AiController
         const { bestMove } = this.minMax(this._gameBoard.gameBoard, 2, true) as BestMove
 
 
-        if (randomBoolean() && this.ownedPlayer.pooledPawns > 0) {
+        if (this.ownedPlayer.hasAnyPool && randomBoolean()) {
             this.onPlaceStateStarted()
             return
         }
@@ -47,9 +47,9 @@ export class MinMaxAiPlayerController extends AiController
         this._game.placeField(x, y, this.ownedPlayer)
     }
 
-    private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, move?: Move)
+    private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean)
     {
-        if (depth === 0 || this._gameBoard.gameBoard.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0)
+        if (depth === 0 || board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0)
             return this.evaluateMove(board)
 
         if (isMaximizingPlayer)
@@ -61,7 +61,7 @@ export class MinMaxAiPlayerController extends AiController
 
             for (const move of moves)
             {
-                const current = this.minMax(move.gameBoardAfterSuchThing, depth - 1, false, move.move)
+                const current = this.minMax(move.gameBoardAfterSuchThing, depth - 1, false)
                 if (current.value > maxEval)
                 {
                     maxEval = current.value
@@ -79,7 +79,7 @@ export class MinMaxAiPlayerController extends AiController
 
             for (const move of moves)
             {
-                const current = this.minMax(move.gameBoardAfterSuchThing, depth - 1, true, move.move)
+                const current = this.minMax(move.gameBoardAfterSuchThing, depth - 1, true)
 
                 if (current.value < minEval)
                 {

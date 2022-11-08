@@ -8,6 +8,7 @@ import { RandomPlayer } from './RandomPlayer'
 import { MinMaxAiPlayerController } from './MinMaxAiPlayerController'
 import { IGameBoardController } from './IGameBoardController'
 import { FieldState } from './IField'
+import { getPlayerName } from './AiController'
 
 
 const focus = new Focus()
@@ -16,26 +17,34 @@ const gameBoardView = new GameBoardView(focus)
 
 class LoggingListener
 {
+    useLogging = true
+
     onAddedToPool(toWhichPlayer: IPlayer): void
     {
-        console.log('added to pool')
+        if (this.useLogging)
+            console.log('added to pool')
     }
 
     onEnemyHasPool(enemy: IPlayer): void
     {
-        console.log('Should place pawn')
+        if (this.useLogging)
+            console.log('Should place pawn')
     }
     onVictory(victoriousPlayer: IPlayer): void
     {
-        console.log(`${victoriousPlayer.state === FieldState.Green ? 'Green' : 'Red'} won`)
+        if (this.useLogging)
+            console.log(`${getPlayerName(victoriousPlayer)} won`)
     }
     onNextTurnBegin(currentPlayer: IPlayer): void
     {
-        console.log('Next turn')
+        if (this.useLogging)
+            console.log('Next turn')
     }
 }
 
 const logging = new LoggingListener()
+
+logging.useLogging = false
 
 focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
 focus.events.on(EventVictory, logging.onVictory, logging)
