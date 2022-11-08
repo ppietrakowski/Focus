@@ -62,21 +62,12 @@ playerVsAIButton.addEventListener('click', () => new GameBoardController(gameBoa
 AIVsAIButton.addEventListener('click', () => gameBoard.style.visibility = 'visible')
 AIVsAIButton.addEventListener('click', runAiVsAiGame)
 
-const randomPlayerChoose = document.querySelector('#random') as HTMLDivElement
-const minMaxPlayerChoose = document.querySelector('#minMax') as HTMLDivElement
-
 function runAiVsAiGame()
 {
     gameBoard.style.visibility = 'visible'
     gameBoard.style.opacity = '1.0'
 
-    let controller: IGameBoardController
+    const controller = new GameBoardController(gameBoardView, new RandomPlayer(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView))
 
-    randomPlayerChoose.style.visibility = 'visible'
-    minMaxPlayerChoose.style.visibility = 'visible'
-
-    randomPlayerChoose.addEventListener('click', e => controller = new GameBoardController(gameBoardView, new RandomPlayer(PLAYER_RED, focus, gameBoardView), new RandomPlayer(PLAYER_GREEN, focus, gameBoardView)))
-    randomPlayerChoose.addEventListener('click', e => setTimeout(() => controller.start(), 1000))
-    minMaxPlayerChoose.addEventListener('click', e => controller = new GameBoardController(gameBoardView, new MinMaxAiPlayerController(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView)))
-    minMaxPlayerChoose.addEventListener('click', e => setTimeout(() => controller.start(), 1000))
+    setTimeout(() => controller.start(), 1000)
 }
