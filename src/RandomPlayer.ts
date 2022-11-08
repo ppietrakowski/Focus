@@ -14,7 +14,7 @@ export class RandomPlayer extends AiController
         super(aiOwnedPlayer, game, gameBoard)
     }
 
-    move(): Promise<void>
+    move(): void
     {
         let moves: Move[] = []
 
@@ -28,15 +28,16 @@ export class RandomPlayer extends AiController
 
         moves = yourFields.flatMap(v => this._game.getLegalMovesFromField(v.x, v.y))
 
-        const randomMove = moves[randomInteger(0, moves.length)]
-        this._game.moveToField(randomMove.fromX, randomMove.fromY, randomMove.direction, randomMove.moveCount)
-
-        return Promise.resolve()
+        const randomMove = moves[randomInteger(0, moves.length)] || null
+        if (randomMove !== null)
+        {
+            this._game.moveToField(randomMove.fromX, randomMove.fromY, randomMove.direction, randomMove.moveCount)
+        }
     }
 
     onPlaceStateStarted(): void
     {
-        console.log(`Computer player${getPlayerName(this.ownedPlayer)} places`)
+        console.log(`Computer player(${getPlayerName(this.ownedPlayer)}) places`)
         const { x, y } = this.getRandomFieldPosition(f => f.isPlayable)
 
         this._game.placeField(x, y, this.ownedPlayer)
