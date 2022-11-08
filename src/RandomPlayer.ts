@@ -1,8 +1,6 @@
-import { AiController } from './AiController'
-import { PLAYER_GREEN } from './Game'
-import { GameBoard } from './GameBoard'
-import { IPredicate, randomInteger } from './GameUtils'
-import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, IField } from './IField'
+import { AiController, getPlayerName } from './AiController'
+import { randomInteger } from './GameUtils'
+import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { IGameBoardView } from './IGameBoardView'
 import { IPlayer } from './Player'
@@ -36,67 +34,11 @@ export class RandomPlayer extends AiController
         return Promise.resolve()
     }
 
-    private getRandomFieldPosition(predicate: IPredicate<IField>)
-    {
-        let x = 0
-        let y = 0
-
-        while (!predicate(this._game.gameBoard.getFieldAt(x, y)))
-        {
-            x = randomInteger(0, GameBoard.GAME_BOARD_WIDTH)
-            y = randomInteger(0, GameBoard.GAME_BOARD_HEIGHT)
-        }
-
-        return { x, y }
-    }
-
-    private getRandomDirection(baseX: number, baseY: number)
-    {
-        let direction = DirectionNorth
-
-        let hasFoundGoodDirection = true
-
-        while (hasFoundGoodDirection)
-        {
-            ({ direction, hasFoundGoodDirection } = this.tryGetPosition(baseX, baseY, direction))
-        }
-
-        return direction
-    }
-
-    private tryGetPosition(x: number, y: number, direction: Direction)
-    {
-        const directions = [DirectionNorth, DirectionEast, DirectionSouth, DirectionWest]
-
-        try
-        {
-            direction = directions[randomInteger(0, directions.length)]
-            this._game.gameBoard.getFieldAt(x + direction.x, y + direction.y)
-            return { direction, hasFoundGoodDirection: true }
-        } catch (e)
-        {
-            return { direction, hasFoundGoodDirection: false }
-        }
-    }
-
     onPlaceStateStarted(): void
     {
-        console.log('Computer player places')
+        console.log(`Computer player${getPlayerName(this.ownedPlayer)} places`)
         const { x, y } = this.getRandomFieldPosition(f => f.isPlayable)
 
-        // if (this.ownedPlayer === PLAYER_GREEN)
-        // {
-        //     this._gameBoard.greenReserve.removeFromReserve()
-        // } else
-        // {
-        //     this._gameBoard.redReserve.removeFromReserve()
-        // }
-
         this._game.placeField(x, y, this.ownedPlayer)
-    }
-
-    stopMoving(): void
-    {
-        __dirname
     }
 }

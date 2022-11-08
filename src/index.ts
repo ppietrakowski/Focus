@@ -1,12 +1,12 @@
 import { Focus, PLAYER_GREEN, PLAYER_RED } from './Game'
 import { GameBoardView } from './GameBoardView'
-import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory, IAddedToPoolListener, IEnemyHasPoolListener, INewTurnListener, IVictoryListener } from './IFocus'
+import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory } from './IFocus'
 import { GameBoardController } from './GameBoardController'
 import { IPlayer } from './Player'
 import PlayerAiController from './PlayerAiController'
 import { RandomPlayer } from './RandomPlayer'
 import { MinMaxAiPlayerController } from './MinMaxAiPlayerController'
-import { IAiController, IGameBoardController } from './IGameBoardController'
+import { IGameBoardController } from './IGameBoardController'
 import { FieldState } from './IField'
 
 
@@ -65,7 +65,7 @@ AIVsAIButton.addEventListener('click', runAiVsAiGame)
 const randomPlayerChoose = document.querySelector('#random') as HTMLDivElement
 const minMaxPlayerChoose = document.querySelector('#minMax') as HTMLDivElement
 
-function runAiVsAiGame(evt: MouseEvent)
+function runAiVsAiGame()
 {
     gameBoard.style.visibility = 'visible'
     gameBoard.style.opacity = '1.0'

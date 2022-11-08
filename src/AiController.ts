@@ -2,7 +2,9 @@ import { EventNewTurn, IFocus } from './IFocus'
 import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
 import { IAiController, IGameBoardController } from './IGameBoardController'
-import { FieldState } from './IField'
+import { FieldState, IField } from './IField'
+import { IPredicate, randomInteger } from './GameUtils'
+import { GameBoard } from './GameBoard'
 
 
 export abstract class AiController implements IAiController
@@ -24,7 +26,7 @@ export abstract class AiController implements IAiController
         this._gameBoardController = controller
     }
 
-    abstract move(): Promise<void>
+    abstract move(): void
     abstract onPlaceStateStarted(): void
     stopMoving(): void
     {
@@ -45,9 +47,23 @@ export abstract class AiController implements IAiController
             this.stopMoving()
         }
     }
+
+    protected getRandomFieldPosition(predicate: IPredicate<IField>)
+    {
+        let x = 0
+        let y = 0
+
+        while (!predicate(this._game.gameBoard.getFieldAt(x, y)))
+        {
+            x = randomInteger(0, GameBoard.GAME_BOARD_WIDTH)
+            y = randomInteger(0, GameBoard.GAME_BOARD_HEIGHT)
+        }
+
+        return { x, y }
+    }
 }
 
-function getPlayerName(player: IPlayer) {
+export function getPlayerName(player: IPlayer) {
 
     if (player.state & FieldState.Green)
         return 'Green'

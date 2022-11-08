@@ -1,8 +1,6 @@
 import { AiController } from './AiController'
-import { PLAYER_GREEN } from './Game'
-import { GameBoard } from './GameBoard'
-import { IPredicate, randomBoolean, randomInteger } from './GameUtils'
-import { Direction, IField } from './IField'
+import { randomBoolean } from './GameUtils'
+import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
@@ -28,7 +26,7 @@ export class MinMaxAiPlayerController extends AiController
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    move(): Promise<void>
+    move(): void
     {
         const { bestMove } = this.minMax(this._gameBoard.gameBoard, 2, true) as BestMove
 
@@ -40,21 +38,11 @@ export class MinMaxAiPlayerController extends AiController
 
         if (bestMove)
             this._game.moveToField(bestMove.fromX, bestMove.fromY, bestMove.direction, bestMove.moveCount)
-
-        return Promise.resolve()
     }
 
     onPlaceStateStarted(): void
     {
         const { x, y } = this.getRandomFieldPosition(f => f.isPlayable)
-
-        // if (this.ownedPlayer === PLAYER_GREEN)
-        // {
-        //     this._gameBoard.greenReserve.removeFromReserve()
-        // } else
-        // {
-        //     this._gameBoard.redReserve.removeFromReserve()
-        // }
 
         this._game.placeField(x, y, this.ownedPlayer)
     }
@@ -151,19 +139,5 @@ export class MinMaxAiPlayerController extends AiController
         })
 
         return aiMoves
-    }
-    
-    private getRandomFieldPosition(predicate: IPredicate<IField>)
-    {
-        let x = 0
-        let y = 0
-
-        while (!predicate(this._game.gameBoard.getFieldAt(x, y)))
-        {
-            x = randomInteger(0, GameBoard.GAME_BOARD_WIDTH)
-            y = randomInteger(0, GameBoard.GAME_BOARD_HEIGHT)
-        }
-
-        return { x, y }
     }
 }

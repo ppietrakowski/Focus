@@ -2,7 +2,7 @@ import { IPlayer } from './Player'
 
 export interface IAiController
 {
-    move(): Promise<void>
+    move(): void
     stopMoving(): void
     checkIsYourTurn(player: IPlayer): void
 
@@ -15,7 +15,7 @@ export interface IAiController
 
 export interface IGameBoardController
 {
-    start(): Promise<void>
+    start(): void
     switchToPoolState(player: IPlayer): void
     placePoolState(player: IPlayer, aicontroller: IAiController): void
 }

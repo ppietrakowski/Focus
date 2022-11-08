@@ -15,11 +15,9 @@ export class GameBoardController implements IGameBoardController
         this.game.events.on(EventEnemyHasPool, this.onEnemyHasPool, this)
     }
 
-    async start(): Promise<void>
+    start(): void
     {
-        await this._playerA.move()
-
-        return Promise.resolve()
+        this._playerA.move()
     }
 
     get game()
