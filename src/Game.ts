@@ -1,7 +1,7 @@
 import { Field } from './Field'
 import { GameBoard } from './GameBoard'
-import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IFocus, Move } from './IFocus'
-import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, EventFieldOvergrown, FieldState, IField } from './IField'
+import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IFocus } from './IFocus'
+import { EventFieldOvergrown, FieldState, IField } from './IField'
 
 import { IGameBoard } from './IGameBoard'
 import { IPlayer, Player } from './Player'
@@ -32,51 +32,6 @@ export class Focus implements IFocus
         this.events.on(EventMovedField, this.onMoveField, this)
 
         this.gameBoard.each(v => v.events.on(EventFieldOvergrown, this.onOverGrownField, this))
-    }
-
-    private getMovesFromDirection(field: IField, x: number, y: number, direction: Direction)
-    {
-        const moves: Move[] = []
-        for (let moveCount = 1; moveCount <= field.height; moveCount++)
-        {
-            const isMoveLegal = this.isMoveLegal(x, y, direction, moveCount)
-            if (isMoveLegal)
-            {
-                moves.push({direction: direction, fromX: x, fromY: y, moveCount: moveCount})
-            }
-        }
-        return moves
-    }
-
-    getLegalMovesFromField(x: number, y: number): Move[]
-    {
-        const field = this.gameBoard.getFieldAt(x, y)
-        let moves: Move[] = []
-
-        // north moves
-        moves = moves.concat(this.getMovesFromDirection(field, x, y, DirectionNorth))
-        moves = moves.concat(this.getMovesFromDirection(field, x, y, DirectionEast))
-        moves = moves.concat(this.getMovesFromDirection(field, x, y, DirectionWest))
-        moves = moves.concat(this.getMovesFromDirection(field, x, y, DirectionSouth))
-
-        return moves
-    }
-
-    isMoveLegal(x: number, y: number, direction: Direction, moveCount: number): boolean
-    {
-        const field = this.gameBoard.getFieldAt(x, y)
-
-        const offset = this.getOffsetBasedOnDirection(field, direction, moveCount)
-
-        try
-        {
-            const fieldFromOffset = this.gameBoard.getFieldAt(x + offset.x, y + offset.y)
-            return fieldFromOffset.isPlayable
-        }
-        catch (e)
-        {
-            return false
-        }
     }
 
     private onOverGrownField(field: IField, stateThatWasPoped: FieldState): void

@@ -58,7 +58,5 @@ export interface IFocus
     set currentPlayer(player: IPlayer)
     get hasEnded(): boolean
 
-    isMoveLegal(x: number, y: number, direction: Direction, moveCount: number): boolean
-    getLegalMovesFromField(x: number, y: number): Move[]
     setHasPoolToPut(): void
 }

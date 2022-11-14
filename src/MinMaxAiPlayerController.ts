@@ -5,6 +5,7 @@ import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
+import { getLegalMovesFromField } from './LegalMovesFactory'
 import { IPlayer } from './Player'
 
 
@@ -105,7 +106,7 @@ export class MinMaxAiPlayerController extends AiController
                 yourFields.push(v)
         })
 
-        moves = yourFields.flatMap(v => this._game.getLegalMovesFromField(v.x, v.y))
+        moves = yourFields.flatMap(v => getLegalMovesFromField(board, v.x, v.y))
 
         const aiMoves: AiMove[] = moves.map(move =>
         {

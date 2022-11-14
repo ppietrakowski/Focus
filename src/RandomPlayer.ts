@@ -3,6 +3,7 @@ import { randomInteger } from './GameUtils'
 import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { IGameBoardView } from './IGameBoardView'
+import { getLegalMovesFromField } from './LegalMovesFactory'
 import { IPlayer } from './Player'
 
 
@@ -26,7 +27,7 @@ export class RandomPlayer extends AiController
                 yourFields.push(v)
         })
 
-        moves = yourFields.flatMap(v => this._game.getLegalMovesFromField(v.x, v.y))
+        moves = yourFields.flatMap(v => getLegalMovesFromField(this._gameBoard.gameBoard, v.x, v.y))
 
         const randomMove = moves[randomInteger(0, moves.length)] || null
         if (randomMove !== null)
