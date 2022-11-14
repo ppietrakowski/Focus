@@ -44,7 +44,7 @@ function getMovesFromDirection(board: IGameBoard, field: IField, x: number, y: n
         const isLegalMove = isMoveLegal(board, x, y, direction, moveCount)
         if (isLegalMove)
         {
-            moves.push({direction: direction, fromX: x, fromY: y, moveCount: moveCount})
+            moves.push({direction: direction, x: x, y: y, moveCount: moveCount})
         }
     }
     return moves

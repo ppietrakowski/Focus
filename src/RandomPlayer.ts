@@ -32,7 +32,7 @@ export class RandomPlayer extends AiController
         const randomMove = moves[randomInteger(0, moves.length)] || null
         if (randomMove !== null)
         {
-            this._game.moveToField(randomMove.fromX, randomMove.fromY, randomMove.direction, randomMove.moveCount)
+            this._game.moveToField(randomMove.x, randomMove.y, randomMove.direction, randomMove.moveCount)
         }
     }
 

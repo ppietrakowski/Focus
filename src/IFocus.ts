@@ -33,8 +33,8 @@ export interface Move
 {
     direction: Direction,
     moveCount: number
-    fromX: number
-    fromY: number
+    x: number
+    y: number
 }
 
 export const EventVictory = 'Victory'

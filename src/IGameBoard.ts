@@ -10,4 +10,5 @@ export interface IGameBoard
     length(): number
 
     getBoardAfterMove(fromField: IField, toField: IField): IGameBoard
+    getBoardAfterPlace(x: number, y: number, player: IPlayer): IGameBoard
 }

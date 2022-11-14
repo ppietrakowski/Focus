@@ -53,6 +53,16 @@ export class GameBoard implements IGameBoard
         }
     }
 
+    getBoardAfterPlace(x: number, y: number, player: IPlayer): IGameBoard
+    {
+        const gameBoard = new GameBoard()
+
+        const f = gameBoard.getFieldAt(x, y)
+        f.placeAtTop(player.state)
+
+        return gameBoard
+    }
+
     getBoardAfterMove(fromField: IField, toField: IField): IGameBoard
     {
         const gameBoard = new GameBoard()
