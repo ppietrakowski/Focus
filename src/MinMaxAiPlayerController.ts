@@ -30,7 +30,7 @@ export class MinMaxAiPlayerController extends AiController
 
     move(): void
     {
-        const { bestMove } = this.minMax(this._gameBoard.gameBoard, 2, true) as BestMove
+        const { bestMove } = this.minMax(this._gameBoard.gameBoard, 3, true) as BestMove
 
 
         if (this.ownedPlayer.hasAnyPool && randomBoolean()) {
@@ -61,13 +61,13 @@ export class MinMaxAiPlayerController extends AiController
             const moves = this.getAvailableMoves(board)
             let bestMove = moves[0].move
 
-            for (const move of moves)
+            for (let i = 0; i < moves.length; i++)
             {
-                const current = this.minMax(move.gameBoardAfterSuchThing, depth - 1, false)
+                const current = this.minMax(moves[i].gameBoardAfterSuchThing, depth - 1, false)
                 if (current.value > maxEval)
                 {
                     maxEval = current.value
-                    bestMove = move.move
+                    bestMove = moves[i].move
                 }
             }
 
@@ -79,14 +79,14 @@ export class MinMaxAiPlayerController extends AiController
             const moves = this.getAvailableMoves(board)
             let bestMove = moves[0].move
 
-            for (const move of moves)
+            for (let i = 0; i < moves.length; i++)
             {
-                const current = this.minMax(move.gameBoardAfterSuchThing, depth - 1, true)
+                const current = this.minMax(moves[i].gameBoardAfterSuchThing, depth - 1, true)
 
                 if (current.value < minEval)
                 {
                     minEval = current.value
-                    bestMove = move.move
+                    bestMove = moves[i].move
                 }
             }
 

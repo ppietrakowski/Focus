@@ -55,7 +55,7 @@ export function getLegalMovesFromField(board: IGameBoard, x: number, y: number):
     const field = board.getFieldAt(x, y)
     let moves: Move[] = []
 
-    // north moves
+    // accumulate all moves in all directions
     moves = moves.concat(getMovesFromDirection(board, field, x, y, DirectionNorth))
     moves = moves.concat(getMovesFromDirection(board, field, x, y, DirectionEast))
     moves = moves.concat(getMovesFromDirection(board, field, x, y, DirectionWest))
