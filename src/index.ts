@@ -76,7 +76,7 @@ function runAiVsAiGame()
     gameBoard.style.visibility = 'visible'
     gameBoard.style.opacity = '1.0'
 
-    const controller = new GameBoardController(gameBoardView, new RandomPlayer(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView))
+    const controller = new GameBoardController(gameBoardView, new MinMaxAiPlayerController(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView))
 
     setTimeout(() => controller.start(), 1000)
 }

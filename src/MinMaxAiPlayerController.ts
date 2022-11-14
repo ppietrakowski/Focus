@@ -153,6 +153,8 @@ export class MinMaxAiPlayerController extends AiController
             }))
         }
 
+        aiMoves.sort((a, b) => evaluateMove(a.gameBoardAfterSuchThing, this.ownedPlayer, this._game).value - evaluateMove(b.gameBoardAfterSuchThing, this.ownedPlayer, this._game).value)
+
         return aiMoves
     }
 }
