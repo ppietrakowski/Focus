@@ -1,4 +1,5 @@
 import { AiController } from './AiController'
+import { evaluateMove } from './EvaluationFunction'
 import { randomBoolean } from './GameUtils'
 import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
@@ -50,7 +51,7 @@ export class MinMaxAiPlayerController extends AiController
     private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean)
     {
         if (depth === 0 || board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0)
-            return this.evaluateMove(board)
+            return evaluateMove(board, this.ownedPlayer, this._game)
 
         if (isMaximizingPlayer)
         {
@@ -90,27 +91,6 @@ export class MinMaxAiPlayerController extends AiController
 
             return { bestMove, value: minEval }
         }
-    }
-
-    private evaluateMove(board: IGameBoard)
-    {
-        const controlledByYou = board.countPlayersFields(this.ownedPlayer)
-        
-        const controlledByEnemy = board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer))
-        
-        let ratio = controlledByYou / controlledByEnemy
-        
-        if (Number.isNaN(ratio))
-            ratio = 0
-
-        const controlledInReserveByYou = this.ownedPlayer.pooledPawns
-        const controlledInReserveByEnemy = this._game.getNextPlayer(this.ownedPlayer).pooledPawns
-
-        let ratioInReserve = controlledInReserveByYou / controlledInReserveByEnemy
-        if (controlledInReserveByYou === 0 || controlledInReserveByEnemy === 0)
-            ratioInReserve = 0
-
-        return { value: 4 * ratio + 3 * ratioInReserve }
     }
 
     private getAvailableMoves(board: IGameBoard): AiMove[]
