@@ -2,9 +2,9 @@ import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
 import { GameBoard } from './GameBoard'
 import { randomBoolean } from './GameUtils'
-import { IField } from './IField'
+import { FieldState, IField } from './IField'
 import { IFocus, Move } from './IFocus'
-import { IGameBoard } from './IGameBoard'
+import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
 import { getLegalMovesFromField } from './LegalMovesFactory'
 import { IPlayer } from './Player'
@@ -58,16 +58,17 @@ export class MinMaxAiPlayerController extends AiController
         this._game.placeField(x, y, this.ownedPlayer)
     }
 
-    private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean): { value: number } | BestMove
+    private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, afterPlaceMove?: AfterPlaceMove): { value: number } | BestMove
     {
         if (depth === 0 || board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0)
-            return evaluateMove(board, this.ownedPlayer, this._game)
+            return evaluateMove(board, afterPlaceMove, this.ownedPlayer, this._game)
 
         if (isMaximizingPlayer)
         {
             let maxEval = -Infinity
 
-            const moves = this.getAvailableMoves(board)
+            const movesAndCount = this.getAvailableMoves(board)
+            const moves = movesAndCount.aiMoves
             let bestMove = moves[0].move
             let x = 0
             let y = 0
@@ -75,7 +76,7 @@ export class MinMaxAiPlayerController extends AiController
 
             for (let i = 0; i < moves.length; i++)
             {
-                const current = this.minMax(moves[i].gameBoardAfterSuchThing, depth - 1, false)
+                const current = this.minMax(moves[i].gameBoardAfterSuchThing, depth - 1, false, movesAndCount.afterPlaceMoves[i])
                 if (current.value > maxEval)
                 {
                     maxEval = current.value
@@ -91,7 +92,9 @@ export class MinMaxAiPlayerController extends AiController
         {
             let minEval = Infinity
 
-            const moves = this.getAvailableMoves(board)
+            const movesAndCount = this.getAvailableMoves(board)
+            const moves = movesAndCount.aiMoves
+
             let bestMove = moves[0].move
             let x = 0
             let y = 0
@@ -99,7 +102,7 @@ export class MinMaxAiPlayerController extends AiController
 
             for (let i = 0; i < moves.length; i++)
             {
-                const current = this.minMax(moves[i].gameBoardAfterSuchThing, depth - 1, true)
+                const current = this.minMax(moves[i].gameBoardAfterSuchThing, depth - 1, true, movesAndCount.afterPlaceMoves[i])
 
                 if (current.value < minEval)
                 {
@@ -115,7 +118,7 @@ export class MinMaxAiPlayerController extends AiController
         }
     }
 
-    private getAvailableMoves(board: IGameBoard): AiMove[]
+    private getAvailableMoves(board: IGameBoard)
     {
         let moves: Move[] = []
 
@@ -132,7 +135,7 @@ export class MinMaxAiPlayerController extends AiController
 
         moves = yourFields.flatMap(v => getLegalMovesFromField(board, v.x, v.y))
 
-        let aiMoves: AiMove[] = moves.map(move =>
+        const aiMoves: AiMove[] = moves.map(move =>
         {
 
             const fieldFrom = board.getFieldAt(move.x, move.y)
@@ -143,18 +146,21 @@ export class MinMaxAiPlayerController extends AiController
             return { gameBoardAfterSuchThing, move, shouldPlaceSomething: false, x: 0, y: 0 }
         })
 
-        if (this.ownedPlayer.pooledPawns > 0)
+        const afterPlaceMoves: AfterPlaceMove[] = []
+
+        enemyFields.forEach(v =>
         {
-            aiMoves = aiMoves.concat(enemyFields.map(v =>
-            {
-                const gameBoard = board.getBoardAfterPlace(v.x, v.y, this.ownedPlayer)
+            const afterPlaceMove = board.getBoardAfterPlace(v.x, v.y, this.ownedPlayer)
 
-                return { shouldPlaceSomething: true, x: v.x, y: v.y, gameBoardAfterSuchThing: gameBoard }
-            }))
-        }
+            if (this.ownedPlayer.state === FieldState.Green && afterPlaceMove.greenCount > 0)
+                aiMoves.push({ shouldPlaceSomething: true, x: v.x, y: v.y, gameBoardAfterSuchThing: afterPlaceMove.gameBoard })
+            else if (this.ownedPlayer.state === FieldState.Red && afterPlaceMove.redCount > 0)
+                aiMoves.push({ shouldPlaceSomething: true, x: v.x, y: v.y, gameBoardAfterSuchThing: afterPlaceMove.gameBoard })
 
-        aiMoves.sort((a, b) => evaluateMove(a.gameBoardAfterSuchThing, this.ownedPlayer, this._game).value - evaluateMove(b.gameBoardAfterSuchThing, this.ownedPlayer, this._game).value)
+            afterPlaceMoves[aiMoves.length - 1] = afterPlaceMove
+        })
 
-        return aiMoves
+
+        return {aiMoves, afterPlaceMoves}
     }
 }

@@ -2,6 +2,13 @@ import { Direction, IField } from './IField'
 import { IPlayer } from './Player'
 import { ForEachCallback } from './GameBoard'
 
+export interface AfterPlaceMove
+{
+    gameBoard: IGameBoard
+    redCount: number
+    greenCount: number
+}
+
 export interface IGameBoard
 {
     each(callback: ForEachCallback): void
@@ -10,5 +17,5 @@ export interface IGameBoard
     length(): number
 
     getBoardAfterMove(fromField: IField, toField: IField): IGameBoard
-    getBoardAfterPlace(x: number, y: number, player: IPlayer): IGameBoard
+    getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
 }

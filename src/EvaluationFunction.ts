@@ -1,8 +1,9 @@
-import { IFocus } from "./IFocus"
-import { IGameBoard } from "./IGameBoard"
-import { IPlayer } from "./Player"
+import { FieldState } from './IField'
+import { IFocus } from './IFocus'
+import { AfterPlaceMove, IGameBoard } from './IGameBoard'
+import { IPlayer } from './Player'
 
-export function evaluateMove(board: IGameBoard, player: IPlayer, game: IFocus) 
+export function evaluateMove(board: IGameBoard, afterPlaceMove: AfterPlaceMove, player: IPlayer, game: IFocus) 
 {
     const controlledByYou = board.countPlayersFields(player)
 
@@ -13,11 +14,24 @@ export function evaluateMove(board: IGameBoard, player: IPlayer, game: IFocus)
     if (Number.isNaN(ratio))
         ratio = 0
 
-    const controlledInReserveByYou = player.pooledPawns
-    const controlledInReserveByEnemy = game.getNextPlayer(player).pooledPawns
+    let controlledInReserveByYou = 0
+    let controlledInReserveByEnemy = 0
+
+    if (afterPlaceMove)
+    {
+        if (player.state === FieldState.Red)
+        {
+            controlledInReserveByYou = afterPlaceMove.redCount
+            controlledInReserveByEnemy = afterPlaceMove.greenCount
+        } else 
+        {
+            controlledInReserveByYou = afterPlaceMove.greenCount
+            controlledInReserveByEnemy = afterPlaceMove.redCount
+        }
+    }
 
     let ratioInReserve = controlledInReserveByYou / controlledInReserveByEnemy
-    if (controlledInReserveByYou === 0 || controlledInReserveByEnemy === 0)
+    if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0
 
     return { value: 4 * ratio + 3 * ratioInReserve }

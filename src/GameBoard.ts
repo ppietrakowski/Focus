@@ -1,9 +1,9 @@
 import { Field } from './Field'
-import { Direction, IField } from './IField'
+import { Direction, EventFieldOvergrown, IField } from './IField'
 
 import board from './board.json'
-import { IPlayer } from './Player'
-import { IGameBoard } from './IGameBoard'
+import { IPlayer, Player } from './Player'
+import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { FieldState } from './IField'
 
 
@@ -53,14 +53,30 @@ export class GameBoard implements IGameBoard
         }
     }
 
-    getBoardAfterPlace(x: number, y: number, player: IPlayer): IGameBoard
+    getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
     {
         const gameBoard = new GameBoard()
 
         const f = gameBoard.getFieldAt(x, y)
+
+        let redCount = 0
+        let greenCount = 0
+        
+        f.events.on(EventFieldOvergrown, (field: IField, state: FieldState) => {
+            if (state == FieldState.Green && field.state === player.state)
+            {
+                greenCount++
+            }
+
+            if (state == FieldState.Red && field.state === player.state)
+            {
+                redCount++
+            }
+        })
+
         f.placeAtTop(player.state)
 
-        return gameBoard
+        return {gameBoard, redCount, greenCount}
     }
 
     getBoardAfterMove(fromField: IField, toField: IField): IGameBoard
