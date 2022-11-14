@@ -99,7 +99,7 @@ export class MinMaxAiPlayerController extends AiController
 
         const yourFields: IField[] = []
 
-        this._gameBoard.gameBoard.each(v =>
+        board.each(v =>
         {
             if (this.ownedPlayer.doesOwnThisField(v))
                 yourFields.push(v)
