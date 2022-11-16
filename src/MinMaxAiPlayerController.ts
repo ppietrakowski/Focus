@@ -13,7 +13,7 @@ import { IPlayer } from './Player'
 interface AiMove
 {
     move?: Move
-    gameBoardAfterSuchThing: IGameBoard
+    gameBoardAfterMove: IGameBoard
     shouldPlaceSomething?: boolean
     x?: number
     y?: number
@@ -76,7 +76,7 @@ export class MinMaxAiPlayerController extends AiController
 
             for (let i = 0; i < moves.length; i++)
             {
-                const current = this.minMax(moves[i].gameBoardAfterSuchThing, depth - 1, false, movesAndCount.afterPlaceMoves[i])
+                const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, false, movesAndCount.afterPlaceMoves[i])
                 if (current.value > maxEval)
                 {
                     maxEval = current.value
@@ -102,7 +102,7 @@ export class MinMaxAiPlayerController extends AiController
 
             for (let i = 0; i < moves.length; i++)
             {
-                const current = this.minMax(moves[i].gameBoardAfterSuchThing, depth - 1, true, movesAndCount.afterPlaceMoves[i])
+                const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, true, movesAndCount.afterPlaceMoves[i])
 
                 if (current.value < minEval)
                 {
@@ -141,9 +141,9 @@ export class MinMaxAiPlayerController extends AiController
             const fieldFrom = board.getFieldAt(move.x, move.y)
             const fieldTo = board.getFieldAt(move.x + move.direction.x * move.moveCount, move.y + move.direction.y * move.moveCount)
 
-            const gameBoardAfterSuchThing = board.getBoardAfterMove(fieldFrom, fieldTo)
+            const gameBoardAfterMove = board.getBoardAfterMove(fieldFrom, fieldTo)
 
-            return { gameBoardAfterSuchThing, move, shouldPlaceSomething: false, x: 0, y: 0 }
+            return { gameBoardAfterMove, move, shouldPlaceSomething: false, x: 0, y: 0 } as AiMove
         })
 
         const afterPlaceMoves: AfterPlaceMove[] = []
@@ -153,14 +153,14 @@ export class MinMaxAiPlayerController extends AiController
             const afterPlaceMove = board.getBoardAfterPlace(v.x, v.y, this.ownedPlayer)
 
             if (this.ownedPlayer.state === FieldState.Green && afterPlaceMove.greenCount > 0)
-                aiMoves.push({ shouldPlaceSomething: true, x: v.x, y: v.y, gameBoardAfterSuchThing: afterPlaceMove.gameBoard })
+                aiMoves.push({ shouldPlaceSomething: true, x: v.x, y: v.y, gameBoardAfterMove: afterPlaceMove.gameBoard })
             else if (this.ownedPlayer.state === FieldState.Red && afterPlaceMove.redCount > 0)
-                aiMoves.push({ shouldPlaceSomething: true, x: v.x, y: v.y, gameBoardAfterSuchThing: afterPlaceMove.gameBoard })
+                aiMoves.push({ shouldPlaceSomething: true, x: v.x, y: v.y, gameBoardAfterMove: afterPlaceMove.gameBoard })
 
             afterPlaceMoves[aiMoves.length - 1] = afterPlaceMove
         })
 
 
-        return {aiMoves, afterPlaceMoves}
+        return { aiMoves, afterPlaceMoves }
     }
 }
