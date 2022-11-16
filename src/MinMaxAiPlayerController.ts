@@ -37,7 +37,7 @@ export class MinMaxAiPlayerController extends AiController
 
     move(): void
     {
-        const bestMove = this.minMax(this._gameBoard.gameBoard, 3, true) as BestMove
+        const bestMove = this.minMax(this._gameBoard.gameBoard, 2, true) as BestMove
 
         if (bestMove.shouldPlaceSomething)
         {

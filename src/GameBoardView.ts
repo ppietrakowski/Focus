@@ -66,8 +66,10 @@ export class GameBoardView implements IGameBoardView
 
     private addedToPool()
     {
-        this.greenReserve.addToReserve()
-        this.redReserve.addToReserve()
+        if (this.game.currentPlayer === PLAYER_GREEN)
+            this.greenReserve.addToReserve()
+        else
+            this.redReserve.addToReserve()
     }
 
 

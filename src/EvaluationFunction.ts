@@ -28,6 +28,10 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AfterPlaceMove, 
             controlledInReserveByYou = afterPlaceMove.greenCount
             controlledInReserveByEnemy = afterPlaceMove.redCount
         }
+    } else if(board === game.gameBoard)
+    {
+        controlledInReserveByYou = player.pooledPawns
+        controlledInReserveByEnemy = game.getNextPlayer(player).pooledPawns
     }
 
     let ratioInReserve = controlledInReserveByYou / controlledInReserveByEnemy
