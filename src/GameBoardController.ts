@@ -1,4 +1,4 @@
-import { EventEnemyHasPool } from './IFocus'
+import { EventEnemyHasPool, EventVictory } from './IFocus'
 import { IAiController, IGameBoardController } from './IGameBoardController'
 import { IGameBoardView } from './IGameBoardView'
 import { IPlayer } from './Player'
@@ -13,6 +13,7 @@ export class GameBoardController implements IGameBoardController
         _playerB.attachGameBoardController(this)
 
         this.game.events.on(EventEnemyHasPool, this.onEnemyHasPool, this)
+        this.game.events.on(EventVictory, () => _gameBoardView.erasePossibleMoves())
     }
 
     start(): void

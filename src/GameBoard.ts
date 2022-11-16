@@ -101,7 +101,6 @@ export class GameBoard implements IGameBoard
         outField.events.on(EventFieldOvergrown, (field: IField, state: FieldState) => {
             if (state === player.state)
             {
-                const p = player as Player
                 if (player === PLAYER_GREEN)
                     greenCount++
                 else

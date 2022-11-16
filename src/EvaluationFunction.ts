@@ -1,4 +1,4 @@
-import { FieldState } from './IField'
+import { FieldState, IField } from './IField'
 import { IFocus } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { AiMove } from './MinMaxAiPlayerController'
@@ -35,9 +35,28 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
         controlledInReserveByEnemy = game.getNextPlayer(player).pooledPawns
     }
 
-    let ratioInReserve = controlledInReserveByYou / controlledInReserveByEnemy
+    let ratioInReserve = controlledInReserveByEnemy / controlledInReserveByYou
     if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0
 
-    return { value: 4 * ratio + 3 * ratioInReserve }
+    const enemyFields: IField[] = []
+
+    board.each(v =>
+    {
+        if (!player.doesOwnThisField(v))
+            enemyFields.push(v)
+    })
+
+    const value = enemyFields.reduce(
+        (accumulated, value) =>
+        {
+            accumulated += value.height
+            
+            return accumulated
+        }, 0
+    )
+
+    const evalValue =  4 * ratio + 5 * ratioInReserve + value * 3
+
+    return evalValue
 }

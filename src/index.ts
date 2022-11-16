@@ -43,7 +43,7 @@ class LoggingListener
 }
 
 const logging = new LoggingListener()
-logging.useLogging = false
+logging.useLogging = true
 
 focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
 focus.events.on(EventVictory, logging.onVictory, logging)
