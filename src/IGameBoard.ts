@@ -16,6 +16,6 @@ export interface IGameBoard
     countPlayersFields(player: IPlayer): number
     length(): number
 
-    getBoardAfterMove(fromField: IField, toField: IField): IGameBoard
+    getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): AfterPlaceMove
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
 }

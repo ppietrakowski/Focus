@@ -36,7 +36,7 @@ export class Focus implements IFocus
 
     private onOverGrownField(field: IField, stateThatWasPoped: FieldState): void
     {
-        if (stateThatWasPoped === this.currentPlayer.state)
+        if (this.currentPlayer.doesOwnThisField(stateThatWasPoped))
             this.increaseCurrentPlayersPool()
     }
 
@@ -100,7 +100,7 @@ export class Focus implements IFocus
         field.placeAtTop(owner.state)
         if (owner instanceof Player)
             owner.decreasePool()
-
+        
         // placing is just one move
         this.nextTurn()
     }
@@ -171,8 +171,6 @@ export class Focus implements IFocus
     {
         if (this._currentPlayer instanceof Player)
             this._currentPlayer.increasePool()
-
-        this.events.emit(EventAddedToPool, this._currentPlayer)
     }
 
     get hasEnded(): boolean

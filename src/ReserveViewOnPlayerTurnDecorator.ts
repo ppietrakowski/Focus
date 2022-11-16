@@ -44,6 +44,9 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView
 
     addToReserve()
     {
+        if (this._reserveView instanceof ReserveView)
+            this._reserveView.emptyAllFields()
+
         if (this.canAccess())
         {
             return this._reserveView.addToReserve()
@@ -54,10 +57,16 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView
 
     removeFromReserve()
     {
-        if (this.canAccess())
-        {
-            return this._reserveView.removeFromReserve()
-        }
+        console.log('removed from reserve')
+        console.log(this.owner.pooledPawns)
+        if (this._reserveView instanceof ReserveView)
+            this._reserveView.emptyAllFields()
+
+
+        //if (this.canAccess())
+        //{
+        return this._reserveView.removeFromReserve()
+        //}
 
         return false
     }

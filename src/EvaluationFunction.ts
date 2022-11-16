@@ -1,9 +1,10 @@
 import { FieldState } from './IField'
 import { IFocus } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
+import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
-export function evaluateMove(board: IGameBoard, afterPlaceMove: AfterPlaceMove, player: IPlayer, game: IFocus) 
+export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: IPlayer, game: IFocus) 
 {
     const controlledByYou = board.countPlayersFields(player)
 
@@ -28,7 +29,7 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AfterPlaceMove, 
             controlledInReserveByYou = afterPlaceMove.greenCount
             controlledInReserveByEnemy = afterPlaceMove.redCount
         }
-    } else if(board === game.gameBoard)
+    } else
     {
         controlledInReserveByYou = player.pooledPawns
         controlledInReserveByEnemy = game.getNextPlayer(player).pooledPawns

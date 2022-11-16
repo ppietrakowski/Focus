@@ -5,6 +5,7 @@ import board from './board.json'
 import { IPlayer, Player } from './Player'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { FieldState } from './IField'
+import { PLAYER_GREEN } from './Game'
 
 
 interface BoardState
@@ -79,7 +80,7 @@ export class GameBoard implements IGameBoard
         return {gameBoard, redCount, greenCount}
     }
 
-    getBoardAfterMove(fromField: IField, toField: IField): IGameBoard
+    getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): AfterPlaceMove
     {
         const gameBoard = new GameBoard()
 
@@ -93,9 +94,24 @@ export class GameBoard implements IGameBoard
         const field = gameBoard.getFieldAt(fromField.x, fromField.y)
         const outField = gameBoard.getFieldAt(toField.x, toField.y)
 
+
+        let greenCount = 0
+        let redCount = 0
+
+        outField.events.on(EventFieldOvergrown, (field: IField, state: FieldState) => {
+            if (state === player.state)
+            {
+                const p = player as Player
+                if (player === PLAYER_GREEN)
+                    greenCount++
+                else
+                    redCount++
+            }
+        })
+
         outField.moveToThisField(field)
 
-        return gameBoard
+        return {gameBoard, redCount, greenCount}
     }
 
     static loadFromJSON(json: any)

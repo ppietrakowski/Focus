@@ -44,7 +44,7 @@ export class Field implements IField
 
     private reduceOverGrown() 
     {
-        while (this.height > MaxTowerHeight) 
+        while (this.isOvergrown) 
         {
             const fieldState = this._underThisField.pop()
             this.events.emit(EventFieldOvergrown, this, fieldState)
@@ -147,7 +147,7 @@ export class Field implements IField
 
     get isOvergrown()
     {
-        return this.height >= MaxTowerHeight
+        return this.height > MaxTowerHeight
     }
 
     get isEmpty()

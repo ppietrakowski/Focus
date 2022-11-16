@@ -1,30 +1,23 @@
 import EventEmitter from 'eventemitter3'
+import { Field } from './Field'
 import { FieldState } from './IField'
 import { IPoolClickedListener } from './IGameBoardView'
 import { EventPoolClicked, IReserveView } from './IReserveView'
-import { IPlayer } from './Player'
-
+import { IPlayer, Player } from './Player'
 
 
 function getClassNameOfElement(player: IPlayer | FieldState)
 {
-    const CLASSES_OF_ELEMENTS: string[] = []
-
-    for (let i = 0; i <= FieldState.Green; i++)
-    {
-        CLASSES_OF_ELEMENTS.push('reserveEmptyPawn')
-    }
-
-    CLASSES_OF_ELEMENTS[FieldState.Red] = 'reserveRedPawn'
-    CLASSES_OF_ELEMENTS[FieldState.Green] = 'reserveGreenPawn'
-
-    CLASSES_OF_ELEMENTS[FieldState.Empty] = 'reserveEmptyPawn'
-    CLASSES_OF_ELEMENTS[FieldState.Unplayable] = 'reserveEmptyPawn'
-
-    if (typeof player == 'number')
-        return CLASSES_OF_ELEMENTS[player]
-
-    return CLASSES_OF_ELEMENTS[player.state]
+    let state = player
+    if (player instanceof Player)
+        state = player.state
+    
+    if (state === FieldState.Red)
+        return 'reserveRedPawn'
+    else if (state === FieldState.Green)
+        return 'reserveGreenPawn'
+    
+    return 'reserveEmptyPawn'
 }
 
 export class ReserveView implements IReserveView
@@ -52,6 +45,10 @@ export class ReserveView implements IReserveView
         this._howManyReserveHas = 0
     }
 
+    emptyAllFields()
+    {
+        this.reserveFields.forEach(v => v.className = getClassNameOfElement(FieldState.Empty))
+    }
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
         this.events.emit(EventPoolClicked, player, reserve)
@@ -69,25 +66,45 @@ export class ReserveView implements IReserveView
 
     addToReserve()
     {
-        if (!this.isSomethingInPool())
+        this.emptyAllFields()
+        if (this._howManyReserveHas >= this.reserveFields.length)
         {
             return false
         }
 
-        this.reserveFields[this._howManyReserveHas].className = getClassNameOfElement(this.owner)
-        this._howManyReserveHas++
+        this._howManyReserveHas = this.owner.pooledPawns
+
+        for (let i = 0; i < this._howManyReserveHas; i++)
+        {
+            this.reserveFields[i].className = getClassNameOfElement(this.owner)
+        }
+
         return true
     }
 
     removeFromReserve()
     {
+        this.emptyAllFields()
         if (!this.isSomethingInPool())
         {
             return this.triedToUseEmptyPool()
         }
 
-        this.reserveFields[this._howManyReserveHas].className = getClassNameOfElement(FieldState.Empty)
-        this._howManyReserveHas--
+        this._howManyReserveHas = this.owner.pooledPawns
+
+        if (this._howManyReserveHas > this.reserveFields.length)
+        {
+            console.warn('What reserve has oversize in REMOVE function ?')
+            this._howManyReserveHas = this.reserveFields.length
+        }
+
+        const ownerClassName = getClassNameOfElement(this.owner)
+
+        for (let i = 0; i < this._howManyReserveHas; i++)
+        {
+            this.reserveFields[i].className = ownerClassName
+        }
+
         return true
     }
 
@@ -101,6 +118,6 @@ export class ReserveView implements IReserveView
 
     private isSomethingInPool()
     {
-        return this.reserveFields[this._howManyReserveHas] && this.owner.hasAnyPool
+        return this.owner.hasAnyPool
     }
 }

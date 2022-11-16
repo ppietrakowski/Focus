@@ -40,14 +40,12 @@ export class GameBoardView implements IGameBoardView
         this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0] as HTMLDivElement, PLAYER_GREEN)
         this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0] as HTMLDivElement, PLAYER_RED)
 
-        this.greenReserve.addToReserve()
         this.greenReserve = new ReserveViewOnPlayerTurnDecorator(this.greenReserve, this.game)
         this.redReserve = new ReserveViewOnPlayerTurnDecorator(this.redReserve, this.game)
 
         this.greenReserve.addPoolClickedListener(this.onPoolClicked, this)
         this.redReserve.addPoolClickedListener(this.onPoolClicked, this)
 
-        this.game.events.on(EventAddedToPool, this.addedToPool, this)
         this.game.events.on(EventMovedField, () => this.erasePossibleMoves())
         this.gameBoard.each(
             element =>
@@ -63,15 +61,6 @@ export class GameBoardView implements IGameBoardView
             }
         )
     }
-
-    private addedToPool()
-    {
-        if (this.game.currentPlayer === PLAYER_GREEN)
-            this.greenReserve.addToReserve()
-        else
-            this.redReserve.addToReserve()
-    }
-
 
     private onPoolClicked(player: IPlayer, reserve: IReserveView): void
     {
