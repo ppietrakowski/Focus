@@ -4,6 +4,13 @@ import EventEmitter from 'eventemitter3'
 
 export const MaxTowerHeight = 5
 
+export const FIELD_EVENTS = new EventEmitter()
+
+export interface IOvergrown
+{
+    (field: IField, popedState: FieldState): void
+}
+
 export class Field implements IField 
 {
     private _state: FieldState
@@ -11,7 +18,7 @@ export class Field implements IField
     private _x: number
     private _y: number
 
-    readonly events: EventEmitter
+    public overgrownCallback: IOvergrown
 
     constructor(state: FieldState, x: number, y: number) 
     {
@@ -19,8 +26,6 @@ export class Field implements IField
         this._underThisField = []
         this._x = x
         this._y = y
-        
-        this.events = new EventEmitter()
     }
 
     moveToThisField(fromWhichField: IField, additionalDistance?: number) 
@@ -37,17 +42,19 @@ export class Field implements IField
         // one move is just a changing of state
         this._underThisField = this.getNewUnderElements(fromWhichField, additionalDistance - 1)
         this._state = oldState
-    
+
         this.reduceOverGrown()
+        
         return true
     }
 
-    private reduceOverGrown() 
+    reduceOverGrown() 
     {
         while (this.isOvergrown) 
         {
             const fieldState = this._underThisField.pop()
-            this.events.emit(EventFieldOvergrown, this, fieldState)
+            if (this.overgrownCallback)
+                this.overgrownCallback(this, fieldState)
         }
     }
 

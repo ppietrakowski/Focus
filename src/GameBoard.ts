@@ -40,77 +40,97 @@ export class GameBoard implements IGameBoard
     static readonly GAME_BOARD_WIDTH = 8
     static readonly GAME_BOARD_HEIGHT = 8
 
-    private _fields: IField[]
+    private _fields: IField[][]
 
     constructor()
     {
         this._fields = []
 
-        const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
 
-        for (let i = 0; i < maxSize; i++)
+        for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++)
         {
-            this._fields[i] = new Field(FieldState.Empty, (i % GameBoard.GAME_BOARD_WIDTH), Math.floor(i / GameBoard.GAME_BOARD_WIDTH))
+            this._fields[x] = []
+
+            for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++)
+            {
+                this._fields[x][y] = new Field(FieldState.Empty, x, y)
+            }
         }
+
+        this.redPlayerPawnCount = 0
+        this.greenPlayerPawnCount = 0
     }
+
+    redPlayerPawnCount: number
+    greenPlayerPawnCount: number
 
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
     {
         const gameBoard = new GameBoard()
 
-        const f = gameBoard.getFieldAt(x, y)
+        const f = gameBoard.getFieldAt(x, y) as Field
 
-        let redCount = 0
-        let greenCount = 0
-        
-        f.events.on(EventFieldOvergrown, (field: IField, state: FieldState) => {
+        gameBoard.greenPlayerPawnCount = this.greenPlayerPawnCount
+        gameBoard.redPlayerPawnCount = this.redPlayerPawnCount
+
+        f.overgrownCallback = (field: IField, state: FieldState) =>
+        {
             if (state == FieldState.Green && field.state === player.state)
             {
-                greenCount++
+                gameBoard.greenPlayerPawnCount++
             }
 
             if (state == FieldState.Red && field.state === player.state)
             {
-                redCount++
+                gameBoard.redPlayerPawnCount++
             }
-        })
+        }
 
         f.placeAtTop(player.state)
 
-        return {gameBoard, redCount, greenCount}
+        return { gameBoard, redCount: gameBoard.redPlayerPawnCount, greenCount: gameBoard.greenPlayerPawnCount }
     }
 
     getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): AfterPlaceMove
     {
         const gameBoard = new GameBoard()
 
-        const maxSize = GameBoard.GAME_BOARD_HEIGHT * GameBoard.GAME_BOARD_WIDTH
-
-        for (let i = 0; i < maxSize; i++)
+        for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++)
         {
-            gameBoard._fields[i] = new Field(this._fields[i].state, this._fields[i].x, this._fields[i].y)
+            for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++)
+            {
+                gameBoard._fields[x][y] = new Field(this._fields[x][y].state, x, y)
+            }
         }
 
-        const field = gameBoard.getFieldAt(fromField.x, fromField.y)
-        const outField = gameBoard.getFieldAt(toField.x, toField.y)
+        const field = gameBoard.getFieldAt(fromField.x, fromField.y) as Field
+        const outField = gameBoard.getFieldAt(toField.x, toField.y) as Field
+
+        gameBoard.greenPlayerPawnCount = this.greenPlayerPawnCount
+        gameBoard.redPlayerPawnCount = this.redPlayerPawnCount
+        
 
 
-        let greenCount = 0
-        let redCount = 0
-
-        outField.events.on(EventFieldOvergrown, (field: IField, state: FieldState) => {
+        outField.overgrownCallback = (field: IField, state: FieldState) =>
+        {
             if (state === player.state)
             {
-                if (player === PLAYER_GREEN)
-                    greenCount++
-                else
-                    redCount++
+                if (state == FieldState.Green)
+                {
+                    gameBoard.greenPlayerPawnCount++
+                }
+
+                if (state == FieldState.Red)
+                {
+                    gameBoard.redPlayerPawnCount++
+                }
             }
-        })
+        }
+
 
         outField.moveToThisField(field)
 
-        return {gameBoard, redCount, greenCount}
+        return { gameBoard, redCount: gameBoard.redPlayerPawnCount, greenCount: gameBoard.greenPlayerPawnCount }
     }
 
     static loadFromJSON(json: any)
@@ -133,12 +153,12 @@ export class GameBoard implements IGameBoard
 
     each(callback: ForEachCallback)
     {
-        for (let i = 0; i < this._fields.length; i++)
+        for (let x = 0; x < this._fields.length; x++)
         {
-            const x = (i % GameBoard.GAME_BOARD_WIDTH)
-            const y = Math.floor(i / GameBoard.GAME_BOARD_WIDTH)
-
-            callback(this._fields[i], x, y)
+            for (let y = 0; y < this._fields[x].length; y++)
+            {
+                callback(this._fields[x][y], x, y)
+            }
         }
     }
 
@@ -149,12 +169,17 @@ export class GameBoard implements IGameBoard
             throw new Error(`point (${x}, ${y}) is out of bounds`)
         }
 
-        return this._fields[x + y * GameBoard.GAME_BOARD_WIDTH] || null
+        return this._fields[x][y] || null
     }
 
     countPlayersFields(player: IPlayer)
     {
-        return this._fields.filter(v => player.doesOwnThisField(v)).length
+        return this._fields.reduce((accumulated, value) =>
+        {
+            value.filter(v => player.doesOwnThisField(v)).forEach(v => accumulated++)
+
+            return accumulated
+        }, 0)
     }
 
     length(): number
@@ -166,12 +191,15 @@ export class GameBoard implements IGameBoard
     {
         const field = json.find((v: BoardState) => v.id === fieldId) || null
 
+        const x = (fieldId % GameBoard.GAME_BOARD_WIDTH)
+        const y = Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)
+
         if (field === null)
         {
-            throw new Error(`Missing object at (${(fieldId % GameBoard.GAME_BOARD_WIDTH)}, ${Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)}) id=${fieldId}`)
+            throw new Error(`Missing object at (${x}, ${y}) id=${fieldId}`)
         }
 
-        this._fields[fieldId] = new Field(boardToStateMask(json[fieldId].state), (fieldId % GameBoard.GAME_BOARD_WIDTH), Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH))
+        this._fields[x][y] = new Field(boardToStateMask(json[fieldId].state), x, y)
     }
 
     private isOutOfBoundsInXAxis(x: number)

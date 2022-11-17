@@ -1,8 +1,11 @@
 import { FieldState, IField } from './IField'
-import { IFocus } from './IFocus'
+import { IFocus, Move } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
+import { getLegalMovesFromField, getNeighbours } from './LegalMovesFactory'
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
+
+
 
 export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: IPlayer, game: IFocus) 
 {
@@ -31,32 +34,37 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
         }
     } else
     {
-        controlledInReserveByYou = player.pooledPawns
-        controlledInReserveByEnemy = game.getNextPlayer(player).pooledPawns
+        if (player.state === FieldState.Red)
+        {
+            controlledInReserveByYou = board.redPlayerPawnCount
+            controlledInReserveByEnemy = board.greenPlayerPawnCount
+        } else 
+        {
+            controlledInReserveByEnemy = board.redPlayerPawnCount
+            controlledInReserveByYou = board.greenPlayerPawnCount
+        }
     }
 
     let ratioInReserve = controlledInReserveByEnemy / controlledInReserveByYou
     if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0
 
-    const enemyFields: IField[] = []
+    const yourFields: IField[] = []
 
     board.each(v =>
     {
-        if (!player.doesOwnThisField(v))
-            enemyFields.push(v)
+        if (player.doesOwnThisField(v))
+            yourFields.push(v)
     })
 
-    const value = enemyFields.reduce(
-        (accumulated, value) =>
-        {
-            accumulated += value.height
-            
-            return accumulated
-        }, 0
-    )
+    
+    const neighbours: IField[] = yourFields.flatMap(v => getNeighbours(board, v.x, v.y, v.height))
 
-    const evalValue =  4 * ratio + 5 * ratioInReserve + value * 3
+    // try to choose fields with the highest height
+    neighbours.sort((a, b) => a.height - b.height)
 
+    const valueFromNeighbours = neighbours[0] ? neighbours[0].height : 0
+
+    const evalValue = 5 * ratio + 3 * ratioInReserve + valueFromNeighbours * 1
     return evalValue
 }

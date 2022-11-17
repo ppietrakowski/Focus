@@ -32,8 +32,6 @@ export const DirectionWest = { x: -1, y: 0 }
 
 export interface IField 
 {
-    readonly events: EventEmmiter
-
     /**
     * Moves from argument field to this field
     * It return false, if is not possible to move to this field

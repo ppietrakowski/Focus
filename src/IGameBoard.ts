@@ -11,6 +11,9 @@ export interface AfterPlaceMove
 
 export interface IGameBoard
 {
+    redPlayerPawnCount: number
+    greenPlayerPawnCount: number
+
     each(callback: ForEachCallback): void
     getFieldAt(x: number, y: number): IField
     countPlayersFields(player: IPlayer): number
@@ -18,4 +21,25 @@ export interface IGameBoard
 
     getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): AfterPlaceMove
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
+}
+
+export function getAllFieldBelongingToPlayer(board: IGameBoard, player: IPlayer)
+{
+    const fields: IField[] = []
+
+    for (let x = 0; x < 8; x++)
+    {
+        for (let y = 0; y < 8; y++) 
+        {
+            const f = board.getFieldAt(x, y)
+
+            if (f.isEmpty || !f.isPlayable)
+                continue
+
+            if (player.doesOwnThisField(f))
+                fields.push(f)
+        }
+    }
+
+    return fields
 }

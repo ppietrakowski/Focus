@@ -1,4 +1,5 @@
-import { AiController } from './AiController'
+import { debug } from 'webpack'
+import { AiController, getPlayerName } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
 import { GameBoard } from './GameBoard'
@@ -39,6 +40,25 @@ type JustMinMaxValue = {
     value: number
 }
 
+type comparatorPlaceMoveType = {
+    afterPlaceMove: AfterPlaceMove
+    x: number
+    y: number
+}
+
+let ownedPlayer: IPlayer = null
+let _game: IFocus = null
+
+function availablePlaceMovesComparator(a: comparatorPlaceMoveType, b: comparatorPlaceMoveType)
+{
+    return evaluateMove(a.afterPlaceMove.gameBoard, null, ownedPlayer, _game) - evaluateMove(b.afterPlaceMove.gameBoard, null, ownedPlayer, _game)
+}
+
+function aiMoveComparator(a: AiMove, b: AiMove)
+{
+    return evaluateMove(a.gameBoardAfterMove, a, ownedPlayer, _game) - evaluateMove(b.gameBoardAfterMove, b, ownedPlayer, _game)
+}
+
 export class MinMaxAiPlayerController extends AiController
 {
     constructor(aiOwnedPlayer: IPlayer, _game: IFocus, _gameBoard: IGameBoardView)
@@ -48,11 +68,13 @@ export class MinMaxAiPlayerController extends AiController
 
     move(): void
     {
-        const bestMove = this.minMax(this._gameBoard.gameBoard, 3, true, this.ownedPlayer) as BestMove
-        console.log(bestMove.value)
+        const bestMove = this.minMax(this._gameBoard.gameBoard, 2, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
         if (!bestMove.shouldPlaceSomething && !bestMove.bestMove)
         {
-            console.error('somethin\' gone wrong minmax')
+            const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
+            console.log(v)
+            console.log(bestMove)
+            console.log(this._game.gameBoard)
             return
         }
 
@@ -84,11 +106,13 @@ export class MinMaxAiPlayerController extends AiController
         enemyFields.forEach(v =>
         {
             const afterPlaceMove = this._game.gameBoard.getBoardAfterPlace(v.x, v.y, this.ownedPlayer)
-
             availablePlaceMoves.push({ afterPlaceMove, x: v.x, y: v.y })
         })
 
-        availablePlaceMoves.sort((a, b) => evaluateMove(a.afterPlaceMove.gameBoard, null, this.ownedPlayer, this._game) - evaluateMove(b.afterPlaceMove.gameBoard, null, this.ownedPlayer, this._game))
+        ownedPlayer = this.ownedPlayer
+        _game = this._game
+
+        availablePlaceMoves.sort(availablePlaceMovesComparator)
 
         const best = availablePlaceMoves[0]
 
@@ -120,7 +144,7 @@ export class MinMaxAiPlayerController extends AiController
         let greenCount = 0
         let shouldPlaceSomething = false
 
-        const assignNewValue = (current: number, i: number) =>
+        const assignNewValue = function (current: number, i: number)
         {
             evaluation = current
             bestMove = moves[i].move
@@ -131,9 +155,14 @@ export class MinMaxAiPlayerController extends AiController
             greenCount = moves[i].greenCount
         }
 
+        _game = this._game
+        ownedPlayer = _game.getNextPlayer(player)
+
+        //moves.sort(aiMoveComparator)
+
         for (let i = 0; i < moves.length; i++)
         {
-            const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, this._game.getNextPlayer(player), movesAndCount.aiMoves[i]) as number
+            const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, ownedPlayer, movesAndCount.aiMoves[i]) as number
 
             if (isMaximizingPlayer)
             {
@@ -143,9 +172,7 @@ export class MinMaxAiPlayerController extends AiController
                     val = val.value
 
                 if (val > evaluation)
-                {
-                    assignNewValue(val, i)
-                }
+                    assignNewValue(val,  i)
             } else
             {
                 let val = current as any
@@ -154,9 +181,7 @@ export class MinMaxAiPlayerController extends AiController
                     val = val.value
 
                 if (val < evaluation)
-                {
                     assignNewValue(val, i)
-                }
             }
         }
 

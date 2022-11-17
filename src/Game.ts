@@ -1,4 +1,4 @@
-import { Field } from './Field'
+import { Field, FIELD_EVENTS } from './Field'
 import { GameBoard } from './GameBoard'
 import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IFocus } from './IFocus'
 import { EventFieldOvergrown, FieldState, IField } from './IField'
@@ -31,7 +31,12 @@ export class Focus implements IFocus
 
         this.events.on(EventMovedField, this.onMoveField, this)
 
-        this.gameBoard.each(v => v.events.on(EventFieldOvergrown, this.onOverGrownField, this))
+        this.gameBoard.each(v => {
+            const f = v as Field
+            f.overgrownCallback = (f, p) => this.onOverGrownField(f, p)
+            console.log(f.overgrownCallback)
+        })
+
     }
 
     private onOverGrownField(field: IField, stateThatWasPoped: FieldState): void
@@ -99,8 +104,13 @@ export class Focus implements IFocus
 
         field.placeAtTop(owner.state)
         if (owner instanceof Player)
-            owner.decreasePool()
-        
+        {
+            if (owner === PLAYER_GREEN)
+                this.gameBoard.greenPlayerPawnCount--
+            else
+                this.gameBoard.redPlayerPawnCount--
+        }
+
         // placing is just one move
         this.nextTurn()
     }
@@ -169,8 +179,10 @@ export class Focus implements IFocus
 
     private increaseCurrentPlayersPool()
     {
-        if (this._currentPlayer instanceof Player)
-            this._currentPlayer.increasePool()
+        if (this._currentPlayer instanceof Player && PLAYER_GREEN === this._currentPlayer)
+            this.gameBoard.greenPlayerPawnCount++
+        else if (this._currentPlayer instanceof Player && PLAYER_RED === this._currentPlayer)
+            this.gameBoard.redPlayerPawnCount++
     }
 
     get hasEnded(): boolean

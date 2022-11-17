@@ -37,8 +37,8 @@ export class GameBoardView implements IGameBoardView
 
         this.board = document.getElementsByClassName('virtualGameBoard')[0] as HTMLDivElement
 
-        this.greenReserve = new ReserveView(document.getElementsByClassName('reserveGreen')[0] as HTMLDivElement, PLAYER_GREEN)
-        this.redReserve = new ReserveView(document.getElementsByClassName('reserveRed')[0] as HTMLDivElement, PLAYER_RED)
+        this.greenReserve = new ReserveView(game, document.getElementsByClassName('reserveGreen')[0] as HTMLDivElement, PLAYER_GREEN)
+        this.redReserve = new ReserveView(game, document.getElementsByClassName('reserveRed')[0] as HTMLDivElement, PLAYER_RED)
 
         this.greenReserve = new ReserveViewOnPlayerTurnDecorator(this.greenReserve, this.game)
         this.redReserve = new ReserveViewOnPlayerTurnDecorator(this.redReserve, this.game)

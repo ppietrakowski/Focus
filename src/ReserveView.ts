@@ -1,6 +1,8 @@
 import EventEmitter from 'eventemitter3'
 import { Field } from './Field'
+import { PLAYER_RED } from './Game'
 import { FieldState } from './IField'
+import { IFocus } from './IFocus'
 import { IPoolClickedListener } from './IGameBoardView'
 import { EventPoolClicked, IReserveView } from './IReserveView'
 import { IPlayer, Player } from './Player'
@@ -30,7 +32,7 @@ export class ReserveView implements IReserveView
 
     private _howManyReserveHas: number
 
-    constructor(private readonly _reserveBar: HTMLDivElement, readonly owner: IPlayer)
+    constructor(private readonly _game: IFocus, private readonly _reserveBar: HTMLDivElement, readonly owner: IPlayer)
     {
         this.events = new EventEmitter()
         const reserveElements = _reserveBar.getElementsByClassName('reserveEmptyPawn')
@@ -72,8 +74,11 @@ export class ReserveView implements IReserveView
             return false
         }
 
-        this._howManyReserveHas = this.owner.pooledPawns
-
+        if (this.owner === PLAYER_RED)
+            this._howManyReserveHas = this._game.gameBoard.redPlayerPawnCount
+        else
+            this._howManyReserveHas = this._game.gameBoard.greenPlayerPawnCount
+            
         for (let i = 0; i < this._howManyReserveHas; i++)
         {
             this.reserveFields[i].className = getClassNameOfElement(this.owner)
