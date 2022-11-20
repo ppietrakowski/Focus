@@ -125,7 +125,7 @@ export class MinMaxAiPlayerController extends AiController
 
         let bestMove = moves[0]
 
-        const assignNewValue = function (current: BestMove, i: number)
+        const assignNewValue = function (current: BestMove)
         {
             evaluation = current.value
             bestMove = current.bestMove
@@ -137,16 +137,16 @@ export class MinMaxAiPlayerController extends AiController
        
         for (let i = 0; i < moves.length; i++)
         {
-            const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, ownedPlayer, movesAndCount.aiMoves[i])
+            const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, player, movesAndCount.aiMoves[i])
 
             if (isMaximizingPlayer)
             {
                 if (current.value > evaluation)
-                    assignNewValue(current, i)
+                    assignNewValue(current)
             } else
             {
                 if (current.value < evaluation)
-                    assignNewValue(current, i)
+                    assignNewValue(current)
             }
         }
 

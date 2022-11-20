@@ -9,53 +9,48 @@ import { IPlayer } from './Player'
 
 export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: IPlayer, game: IFocus) 
 {
-    const controlledByYou = board.countPlayersFields(player)
+    let controlledByYou = 0
 
-    const controlledByEnemy = board.countPlayersFields(game.getNextPlayer(player))
+    let controlledByEnemy = 0
 
-    let ratio = controlledByYou - controlledByEnemy
 
-    if (Number.isNaN(ratio))
-        ratio = 0
 
     let controlledInReserveByYou = 0
     let controlledInReserveByEnemy = 0
 
-    if (afterPlaceMove.move)
+
+    if (player.state === FieldState.Red)
     {
-        if (player.state === FieldState.Red)
-        {
-            controlledInReserveByYou = afterPlaceMove.move.redPawns
-            controlledInReserveByEnemy = afterPlaceMove.move.greenPawns
-        } else 
-        {
-            controlledInReserveByYou = afterPlaceMove.move.greenPawns
-            controlledInReserveByEnemy = afterPlaceMove.move.greenPawns
-        }
-    } else
+        controlledInReserveByYou = board.redPlayerPawnCount
+        controlledInReserveByEnemy = board.greenPlayerPawnCount
+    } else 
     {
-        if (player.state === FieldState.Red)
-        {
-            controlledInReserveByYou = board.redPlayerPawnCount
-            controlledInReserveByEnemy = board.greenPlayerPawnCount
-        } else 
-        {
-            controlledInReserveByEnemy = board.redPlayerPawnCount
-            controlledInReserveByYou = board.greenPlayerPawnCount
-        }
+        controlledInReserveByEnemy = board.redPlayerPawnCount
+        controlledInReserveByYou = board.greenPlayerPawnCount
     }
+
 
     let ratioInReserve = controlledInReserveByYou - controlledInReserveByEnemy
     if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0
 
     const yourFields: IField[] = []
+    const enemyFields: IField[] = []
 
     board.each(v =>
     {
         if (player.doesOwnThisField(v))
             yourFields.push(v)
+        else if (game.getNextPlayer(player).doesOwnThisField(v))
+        {
+            enemyFields.push(v)
+        }
     })
+
+    controlledByYou = yourFields.reduce((accumulated, current) => accumulated + current.height, 0)
+    controlledByEnemy = enemyFields.reduce((accumulated, current) => accumulated + current.height, 0)
+    const ratio = controlledByYou - controlledByEnemy
+
 
     let heightOfNeighbour = 1
 
@@ -71,8 +66,7 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
         {
         }
     }
-    
-    
-    const evalValue = 15 * ratio + 10 * ratioInReserve + heightOfNeighbour * 30
+
+    const evalValue = 15 * ratio + 5 * ratioInReserve + controlledByYou
     return evalValue
 }
