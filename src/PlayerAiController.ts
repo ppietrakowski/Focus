@@ -47,7 +47,7 @@ export default class PlayerAiController extends AiController
         {
             if (this._usedPool)
             {
-                reserve.addToReserve()
+                reserve.addToReserve(player)
                 this._usedPool = false
                 return
             }

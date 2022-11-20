@@ -36,11 +36,11 @@ export interface BestMove
     greenCount: number
 }
 
-type JustMinMaxValue = {
+export type JustMinMaxValue = {
     value: number
 }
 
-type comparatorPlaceMoveType = {
+export type comparatorPlaceMoveType = {
     afterPlaceMove: AfterPlaceMove
     x: number
     y: number
@@ -52,11 +52,6 @@ let _game: IFocus = null
 function availablePlaceMovesComparator(a: comparatorPlaceMoveType, b: comparatorPlaceMoveType)
 {
     return evaluateMove(a.afterPlaceMove.gameBoard, null, ownedPlayer, _game) - evaluateMove(b.afterPlaceMove.gameBoard, null, ownedPlayer, _game)
-}
-
-function aiMoveComparator(a: AiMove, b: AiMove)
-{
-    return evaluateMove(a.gameBoardAfterMove, a, ownedPlayer, _game) - evaluateMove(b.gameBoardAfterMove, b, ownedPlayer, _game)
 }
 
 export class MinMaxAiPlayerController extends AiController
@@ -80,7 +75,7 @@ export class MinMaxAiPlayerController extends AiController
 
         if (bestMove.shouldPlaceSomething)
         {
-            console.log(`${bestMove.x}, ${bestMove.y}`)
+            console.log(`placed at ${bestMove.x}, ${bestMove.y}`)
             this._game.placeField(bestMove.x, bestMove.y, this.ownedPlayer)
         }
         else
@@ -111,8 +106,6 @@ export class MinMaxAiPlayerController extends AiController
 
         ownedPlayer = this.ownedPlayer
         _game = this._game
-
-        availablePlaceMoves.sort(availablePlaceMovesComparator)
 
         const best = availablePlaceMoves[0]
 

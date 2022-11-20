@@ -1,7 +1,7 @@
-import { FieldState, IField } from './IField'
+import { FieldState, getDirectionFromOffset, IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
-import { getLegalMovesFromField, getNeighbours } from './LegalMovesFactory'
+import { getLegalMovesFromField, getNeighbours, getOffsetBasedOnDirection } from './LegalMovesFactory'
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
@@ -57,14 +57,23 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
             yourFields.push(v)
     })
 
-    
-    const neighbours: IField[] = yourFields.flatMap(v => getNeighbours(board, v.x, v.y, v.height))
+    let heightOfNeighbour = 1
 
-    // try to choose fields with the highest height
-    neighbours.sort((a, b) => a.height - b.height)
+    if (afterPlaceMove && afterPlaceMove.move)
+    {
+        const offset = getOffsetBasedOnDirection(board.getFieldAt(afterPlaceMove.move.x, afterPlaceMove.move.y), afterPlaceMove.move.direction, afterPlaceMove.move.moveCount)
 
-    const valueFromNeighbours = neighbours[0] ? neighbours[0].height : 0
 
-    const evalValue = 5 * ratio + 3 * ratioInReserve + valueFromNeighbours * 1
+        try
+        {
+            heightOfNeighbour = board.getFieldAt(offset.x, offset.y).height
+        } catch (e)
+        {
+            __dirname
+        }
+
+    }
+
+    const evalValue = 5 * ratio + 8 * ratioInReserve + heightOfNeighbour * 2
     return evalValue
 }

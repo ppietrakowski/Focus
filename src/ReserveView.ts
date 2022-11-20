@@ -58,6 +58,7 @@ export class ReserveView implements IReserveView
 
     addPoolClickedListener(listener: IPoolClickedListener, context: any): void
     {
+        console.log('clicked')
         this.events.on(EventPoolClicked, listener, context)
     }
 
@@ -66,19 +67,22 @@ export class ReserveView implements IReserveView
         return this.reserveFields[i]
     }
 
-    addToReserve()
+    addToReserve(toWhichPlayer: IPlayer)
     {
         this.emptyAllFields()
         if (this._howManyReserveHas >= this.reserveFields.length)
         {
+            console.log('what happened')
             return false
         }
+
+        console.log(this._game.gameBoard)
 
         if (this.owner === PLAYER_RED)
             this._howManyReserveHas = this._game.gameBoard.redPlayerPawnCount
         else
             this._howManyReserveHas = this._game.gameBoard.greenPlayerPawnCount
-            
+
         for (let i = 0; i < this._howManyReserveHas; i++)
         {
             this.reserveFields[i].className = getClassNameOfElement(this.owner)
@@ -95,7 +99,10 @@ export class ReserveView implements IReserveView
             return this.triedToUseEmptyPool()
         }
 
-        this._howManyReserveHas = this.owner.pooledPawns
+        if (this.owner === PLAYER_RED)
+            this._howManyReserveHas = this._game.gameBoard.redPlayerPawnCount
+        else
+            this._howManyReserveHas = this._game.gameBoard.greenPlayerPawnCount
 
         if (this._howManyReserveHas > this.reserveFields.length)
         {

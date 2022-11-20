@@ -1,13 +1,15 @@
 import { Field, FIELD_EVENTS } from './Field'
 import { GameBoard } from './GameBoard'
 import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IFocus } from './IFocus'
-import { EventFieldOvergrown, FieldState, IField } from './IField'
+import { Direction, EventFieldOvergrown, FieldState, IField } from './IField'
 
 import { IGameBoard } from './IGameBoard'
 import { IPlayer, Player } from './Player'
 import EventEmitter from 'eventemitter3'
 
 import board from './board.json'
+import { getPlayerName } from './AiController'
+import { debugLog } from './DebugUtils'
 
 export const PLAYER_RED = new Player(FieldState.Red)
 export const PLAYER_GREEN = new Player(FieldState.Green)
@@ -34,7 +36,6 @@ export class Focus implements IFocus
         this.gameBoard.each(v => {
             const f = v as Field
             f.overgrownCallback = (f, p) => this.onOverGrownField(f, p)
-            console.log(f.overgrownCallback)
         })
 
     }
@@ -115,7 +116,7 @@ export class Focus implements IFocus
         this.nextTurn()
     }
 
-    getFieldBasedOnDirectionAndMoveCount(field: Field, direction: { x: number, y: number }, howManyFieldWantMove: number)
+    getFieldBasedOnDirectionAndMoveCount(field: Field, direction: Direction, howManyFieldWantMove: number)
     {
         const offset = this.getOffsetBasedOnDirection(field, direction, howManyFieldWantMove)
         const foundField = this.gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
@@ -123,7 +124,7 @@ export class Focus implements IFocus
         return foundField
     }
 
-    getOffsetBasedOnDirection(field: IField, direction: { x: number, y: number }, howManyFieldWantMove: number)
+    getOffsetBasedOnDirection(field: IField, direction: Direction, howManyFieldWantMove: number)
     {
         let mult = howManyFieldWantMove
 
@@ -179,10 +180,13 @@ export class Focus implements IFocus
 
     private increaseCurrentPlayersPool()
     {
+        debugLog(`${getPlayerName(this._currentPlayer)} has ${this._currentPlayer === PLAYER_GREEN ? this.gameBoard.greenPlayerPawnCount :this.gameBoard.redPlayerPawnCount}`)
         if (this._currentPlayer instanceof Player && PLAYER_GREEN === this._currentPlayer)
             this.gameBoard.greenPlayerPawnCount++
         else if (this._currentPlayer instanceof Player && PLAYER_RED === this._currentPlayer)
             this.gameBoard.redPlayerPawnCount++
+
+        this.events.emit(EventAddedToPool, this._currentPlayer)
     }
 
     get hasEnded(): boolean

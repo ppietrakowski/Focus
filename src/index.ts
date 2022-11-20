@@ -9,6 +9,7 @@ import { MinMaxAiPlayerController } from './MinMaxAiPlayerController'
 import { IGameBoardController } from './IGameBoardController'
 import { FieldState } from './IField'
 import { getPlayerName } from './AiController'
+import { NegaMaxPlayer } from './NegaMaxAiPlayerController'
 
 
 const focus = new Focus()
@@ -22,7 +23,7 @@ class LoggingListener
     onAddedToPool(toWhichPlayer: IPlayer): void
     {
         if (this.useLogging)
-            console.log('added to pool')
+            console.log('added to pool ', getPlayerName(toWhichPlayer))
     }
 
     onEnemyHasPool(enemy: IPlayer): void
@@ -33,7 +34,7 @@ class LoggingListener
     onVictory(victoriousPlayer: IPlayer): void
     {
         if (this.useLogging)
-            console.log(`${getPlayerName(victoriousPlayer)} won`)
+            console.log(`${getPlayerName(victoriousPlayer)} won ${victoriousPlayer.pooledPawns}`)
     }
     onNextTurnBegin(currentPlayer: IPlayer): void
     {
@@ -75,7 +76,7 @@ function runAiVsAiGame()
     gameBoard.style.visibility = 'visible'
     gameBoard.style.opacity = '1.0'
 
-    const controller = new GameBoardController(gameBoardView, new MinMaxAiPlayerController(PLAYER_RED, focus, gameBoardView), new MinMaxAiPlayerController(PLAYER_GREEN, focus, gameBoardView))
+    const controller = new GameBoardController(gameBoardView, new NegaMaxPlayer(PLAYER_RED, focus, gameBoardView), new NegaMaxPlayer(PLAYER_GREEN, focus, gameBoardView))
 
     setTimeout(() => controller.start(), 1000)
 }

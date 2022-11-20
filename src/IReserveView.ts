@@ -4,7 +4,7 @@ import { IPlayer } from './Player'
 
 export interface IReserveView
 {
-    addToReserve(): void
+    addToReserve(toWhichPlayer: IPlayer): void
     removeFromReserve(): boolean
     getFieldAt(i: number): HTMLDivElement
     addPoolClickedListener(listener: IPoolClickedListener, context: any): void

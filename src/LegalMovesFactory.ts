@@ -7,7 +7,7 @@ import { AfterPlaceMove, getAllFieldBelongingToPlayer, IGameBoard } from './IGam
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
-function getOffsetBasedOnDirection(field: IField, direction: { x: number, y: number }, howManyFieldWantMove: number)
+export function getOffsetBasedOnDirection(field: IField, direction: { x: number, y: number }, howManyFieldWantMove: number)
 {
     let mult = howManyFieldWantMove
 
