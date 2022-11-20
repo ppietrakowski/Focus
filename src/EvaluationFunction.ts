@@ -63,15 +63,12 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
     {
         const offset = getOffsetBasedOnDirection(board.getFieldAt(afterPlaceMove.move.x, afterPlaceMove.move.y), afterPlaceMove.move.direction, afterPlaceMove.move.moveCount)
 
-
         try
         {
             heightOfNeighbour = board.getFieldAt(offset.x, offset.y).height
         } catch (e)
         {
-            __dirname
         }
-
     }
 
     const evalValue = 5 * ratio + 8 * ratioInReserve + heightOfNeighbour * 2
