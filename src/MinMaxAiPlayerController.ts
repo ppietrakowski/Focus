@@ -11,8 +11,6 @@ import { IGameBoardView } from './IGameBoardView'
 import { getAvailableMoves, getLegalMovesFromField } from './LegalMovesFactory'
 import { IPlayer } from './Player'
 
-let once = true
-
 export interface AiMove
 {
     move?: Move
@@ -52,7 +50,7 @@ export class MinMaxAiPlayerController extends AiController
 
     move(): void
     {
-        const { bestMove } = this.minMax(this._gameBoard.gameBoard, 2, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
+        const { bestMove } = this.minMax(this._gameBoard.gameBoard, 1, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
 
         if (!bestMove.move.shouldPlaceSomething && !bestMove)
         {
@@ -111,7 +109,7 @@ export class MinMaxAiPlayerController extends AiController
     {
         const movesAndCount = getAvailableMoves(board, player)
         
-        if (depth === 0 || board.countPlayersFields(this._game.getNextPlayer(player)) === 0)
+        if (depth === 0 || (movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
             return { value: evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
 
         let evaluation = -Infinity
@@ -136,13 +134,7 @@ export class MinMaxAiPlayerController extends AiController
         _game = this._game
         ownedPlayer = _game.getNextPlayer(player)
 
-        //moves.sort(aiMoveComparator)
-
-        if (once)
-        {
-            console.log(moves)
-            once = false
-        }
+       
         for (let i = 0; i < moves.length; i++)
         {
             const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, ownedPlayer, movesAndCount.aiMoves[i])

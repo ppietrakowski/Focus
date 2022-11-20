@@ -73,6 +73,6 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
     }
     
     
-    const evalValue = 15 * ratio + 10 * ratioInReserve + heightOfNeighbour * 4
+    const evalValue = 15 * ratio + 10 * ratioInReserve + heightOfNeighbour * 30
     return evalValue
 }
