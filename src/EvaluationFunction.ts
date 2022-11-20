@@ -13,7 +13,7 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
 
     const controlledByEnemy = board.countPlayersFields(game.getNextPlayer(player))
 
-    let ratio = controlledByYou / controlledByEnemy
+    let ratio = controlledByYou - controlledByEnemy
 
     if (Number.isNaN(ratio))
         ratio = 0
@@ -21,16 +21,16 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
     let controlledInReserveByYou = 0
     let controlledInReserveByEnemy = 0
 
-    if (afterPlaceMove)
+    if (afterPlaceMove.move)
     {
         if (player.state === FieldState.Red)
         {
-            controlledInReserveByYou = afterPlaceMove.redCount
-            controlledInReserveByEnemy = afterPlaceMove.greenCount
+            controlledInReserveByYou = afterPlaceMove.move.redPawns
+            controlledInReserveByEnemy = afterPlaceMove.move.greenPawns
         } else 
         {
-            controlledInReserveByYou = afterPlaceMove.greenCount
-            controlledInReserveByEnemy = afterPlaceMove.redCount
+            controlledInReserveByYou = afterPlaceMove.move.greenPawns
+            controlledInReserveByEnemy = afterPlaceMove.move.greenPawns
         }
     } else
     {
@@ -45,7 +45,7 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
         }
     }
 
-    let ratioInReserve = controlledInReserveByEnemy / controlledInReserveByYou
+    let ratioInReserve = controlledInReserveByYou - controlledInReserveByEnemy
     if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0
 
@@ -59,18 +59,20 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
 
     let heightOfNeighbour = 1
 
-    if (afterPlaceMove && afterPlaceMove.move)
+    if (afterPlaceMove && afterPlaceMove.move && afterPlaceMove.move.direction)
     {
         const offset = getOffsetBasedOnDirection(board.getFieldAt(afterPlaceMove.move.x, afterPlaceMove.move.y), afterPlaceMove.move.direction, afterPlaceMove.move.moveCount)
 
         try
         {
-            heightOfNeighbour = board.getFieldAt(offset.x, offset.y).height
+            heightOfNeighbour = Math.max(heightOfNeighbour, board.getFieldAt(offset.x, offset.y).height)
         } catch (e)
+        // eslint-disable-next-line no-empty
         {
         }
     }
-
-    const evalValue = 5 * ratio + 8 * ratioInReserve + heightOfNeighbour * 2
+    
+    
+    const evalValue = 15 * ratio + 10 * ratioInReserve + heightOfNeighbour * 4
     return evalValue
 }

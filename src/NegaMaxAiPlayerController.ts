@@ -12,7 +12,6 @@ import { getAvailableMoves, getLegalMovesFromField } from './LegalMovesFactory'
 import { AiMove, BestMove, comparatorPlaceMoveType } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
-
 let ownedPlayer: IPlayer = null
 let _game: IFocus = null
 
@@ -28,24 +27,40 @@ export class NegaMaxPlayer extends AiController
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
+    once = true
+
     move(): void
     {
-        const bestMove = this.negamax(this._gameBoard.gameBoard, 2, true, this.ownedPlayer) as BestMove
-        if (!bestMove.shouldPlaceSomething && !bestMove.bestMove)
+        const { bestMove } = this.negamax(this._gameBoard.gameBoard, 1, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
+
+        if (!bestMove && !bestMove.move.shouldPlaceSomething)
         {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
+            console.log(v)
+            console.log(bestMove)
+            console.log(this._game.gameBoard)
             return
         }
 
-        if (bestMove.shouldPlaceSomething)
+        if (bestMove.move.shouldPlaceSomething)
+            console.log(true)
+
+        if (bestMove.move.shouldPlaceSomething)
         {
-            console.log(`placed at ${bestMove.x}, ${bestMove.y}`)
-            this._game.placeField(bestMove.x, bestMove.y, this.ownedPlayer)
+            const { move } = bestMove
+
+            console.log(`placed at ${move.x}, ${move.y}`)
+            this._game.placeField(move.x, move.y, this.ownedPlayer)
         }
         else
         {
-            if (!this._game.moveToField(bestMove.bestMove.x, bestMove.bestMove.y, bestMove.bestMove.direction, bestMove.bestMove.moveCount))
-                console.warn('should not happen')
+            const { move } = bestMove
+            if (this.once)
+            {
+                this.once = false
+            }
+            if (!this._game.moveToField(move.x, move.y, move.direction, move.moveCount))
+                console.error('should not happen')
         }
     }
 
@@ -79,44 +94,36 @@ export class NegaMaxPlayer extends AiController
         this._game.placeField(best.x, best.y, this.ownedPlayer)
     }
 
-    private negamax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, player: IPlayer, sign = 1, afterPlaceMove?: AiMove): number | BestMove
+    private negamax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, player: IPlayer, sign = 1, afterPlaceMove?: AiMove): BestMove
     {
-        if (depth === 0 || board.countPlayersFields(this._game.getNextPlayer(player)) === 0)
-            return sign * evaluateMove(board, afterPlaceMove, player, this._game)
-
         const movesAndCount = getAvailableMoves(board, player)
+
+        if (depth === 0 || (movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
+            return { value: sign * evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
+
         const moves = movesAndCount.aiMoves
         if (moves.length < 1)
-            return 0
+            return null
 
-        let bestMove = moves[0].move
-        let x = 0
-        let y = 0
-        let redCount = 0
-        let greenCount = 0
-        let shouldPlaceSomething = false
+        let bestMove = moves[0]
 
         let evaluation = -Infinity
 
-        _game = this._game
-        ownedPlayer = _game.getNextPlayer(player)
-
         for (let i = 0; i < moves.length; i++)
         {
-            const current = -this.negamax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, ownedPlayer, -sign, movesAndCount.aiMoves[i]) as number
+            const current = this.negamax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, player, -sign, movesAndCount.aiMoves[i])
+            current.value *= -1
 
-            if (evaluation < current)
+            if (current.value > evaluation)
             {
-                evaluation = current
-                bestMove = moves[i].move
-                x = moves[i].x
-                y = moves[i].y
-                shouldPlaceSomething = moves[i].shouldPlaceSomething
-                redCount = moves[i].redCount
-                greenCount = moves[i].greenCount
+                evaluation = current.value
+                bestMove = current.bestMove
             }
         }
 
-        return { bestMove, value: evaluation, x, y, shouldPlaceSomething, redCount, greenCount }
+        console.log(bestMove == null)
+
+
+        return { bestMove: bestMove, value: evaluation }
     }
 }

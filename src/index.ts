@@ -34,7 +34,8 @@ class LoggingListener
     onVictory(victoriousPlayer: IPlayer): void
     {
         if (this.useLogging)
-            console.log(`${getPlayerName(victoriousPlayer)} won ${victoriousPlayer.pooledPawns}`)
+            console.log(`${getPlayerName(victoriousPlayer)} won`)
+        console.log(focus.gameBoard)
     }
     onNextTurnBegin(currentPlayer: IPlayer): void
     {

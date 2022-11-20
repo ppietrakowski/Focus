@@ -103,6 +103,7 @@ export class Focus implements IFocus
     {
         const field = this.gameBoard.getFieldAt(x, y)
 
+        console.log('placed')
         field.placeAtTop(owner.state)
         if (owner instanceof Player)
         {
@@ -197,7 +198,17 @@ export class Focus implements IFocus
 
     private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer)
     {
-        if (playerWhoFail.pooledPawns !== 0)
+        let hasPool = false
+
+        if (playerWhoFail === PLAYER_RED) 
+        {
+            hasPool = this.gameBoard.redPlayerPawnCount > 0
+        } else
+        {
+            hasPool = this.gameBoard.greenPlayerPawnCount > 0
+        }
+
+        if (hasPool)
         {
             this.events.emit(EventEnemyHasPool, playerWhoFail)
             return

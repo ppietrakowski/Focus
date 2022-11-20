@@ -11,29 +11,18 @@ import { IGameBoardView } from './IGameBoardView'
 import { getAvailableMoves, getLegalMovesFromField } from './LegalMovesFactory'
 import { IPlayer } from './Player'
 
+let once = true
 
 export interface AiMove
 {
     move?: Move
     gameBoardAfterMove: IGameBoard
-    shouldPlaceSomething?: boolean
-    x?: number
-    y?: number
-
-    redCount: number
-    greenCount: number
 }
 
 export interface BestMove
 {
-    bestMove?: Move
+    bestMove: AiMove
     value: number
-    shouldPlaceSomething?: boolean
-    x?: number
-    y?: number
-
-    redCount: number
-    greenCount: number
 }
 
 export type JustMinMaxValue = {
@@ -63,8 +52,9 @@ export class MinMaxAiPlayerController extends AiController
 
     move(): void
     {
-        const bestMove = this.minMax(this._gameBoard.gameBoard, 2, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
-        if (!bestMove.shouldPlaceSomething && !bestMove.bestMove)
+        const { bestMove } = this.minMax(this._gameBoard.gameBoard, 2, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
+
+        if (!bestMove.move.shouldPlaceSomething && !bestMove)
         {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
             console.log(v)
@@ -73,14 +63,18 @@ export class MinMaxAiPlayerController extends AiController
             return
         }
 
-        if (bestMove.shouldPlaceSomething)
+        if (bestMove.move.shouldPlaceSomething)
         {
-            console.log(`placed at ${bestMove.x}, ${bestMove.y}`)
-            this._game.placeField(bestMove.x, bestMove.y, this.ownedPlayer)
+            const { move } = bestMove
+
+            console.log(`placed at ${move.x}, ${move.y}`)
+            this._game.placeField(move.x, move.y, this.ownedPlayer)
         }
         else
         {
-            if (!this._game.moveToField(bestMove.bestMove.x, bestMove.bestMove.y, bestMove.bestMove.direction, bestMove.bestMove.moveCount))
+            const { move } = bestMove
+
+            if (!this._game.moveToField(move.x, move.y, move.direction, move.moveCount))
                 console.warn('should not happen')
         }
     }
@@ -113,10 +107,12 @@ export class MinMaxAiPlayerController extends AiController
         this._game.placeField(best.x, best.y, this.ownedPlayer)
     }
 
-    private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, player: IPlayer, afterPlaceMove?: AiMove): number | BestMove
+    private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, player: IPlayer, afterPlaceMove?: AiMove): BestMove
     {
+        const movesAndCount = getAvailableMoves(board, player)
+        
         if (depth === 0 || board.countPlayersFields(this._game.getNextPlayer(player)) === 0)
-            return evaluateMove(board, afterPlaceMove, player, this._game)
+            return { value: evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
 
         let evaluation = -Infinity
 
@@ -125,27 +121,16 @@ export class MinMaxAiPlayerController extends AiController
             evaluation = Infinity
         }
 
-        const movesAndCount = getAvailableMoves(board, player)
         const moves = movesAndCount.aiMoves
         if (moves.length < 1)
-            return 0
+            return null
 
-        let bestMove = moves[0].move
-        let x = 0
-        let y = 0
-        let redCount = 0
-        let greenCount = 0
-        let shouldPlaceSomething = false
+        let bestMove = moves[0]
 
-        const assignNewValue = function (current: number, i: number)
+        const assignNewValue = function (current: BestMove, i: number)
         {
-            evaluation = current
-            bestMove = moves[i].move
-            x = moves[i].x
-            y = moves[i].y
-            shouldPlaceSomething = moves[i].shouldPlaceSomething
-            redCount = moves[i].redCount
-            greenCount = moves[i].greenCount
+            evaluation = current.value
+            bestMove = current.bestMove
         }
 
         _game = this._game
@@ -153,31 +138,26 @@ export class MinMaxAiPlayerController extends AiController
 
         //moves.sort(aiMoveComparator)
 
+        if (once)
+        {
+            console.log(moves)
+            once = false
+        }
         for (let i = 0; i < moves.length; i++)
         {
-            const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, ownedPlayer, movesAndCount.aiMoves[i]) as number
+            const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, ownedPlayer, movesAndCount.aiMoves[i])
 
             if (isMaximizingPlayer)
             {
-                let val = current as any
-
-                if ((typeof val != 'number') && val.value)
-                    val = val.value
-
-                if (val > evaluation)
-                    assignNewValue(val,  i)
+                if (current.value > evaluation)
+                    assignNewValue(current, i)
             } else
             {
-                let val = current as any
-
-                if ((typeof val != 'number') && val.value)
-                    val = val.value
-
-                if (val < evaluation)
-                    assignNewValue(val, i)
+                if (current.value < evaluation)
+                    assignNewValue(current, i)
             }
         }
 
-        return { bestMove, value: evaluation, x, y, shouldPlaceSomething, redCount, greenCount }
+        return { bestMove: bestMove, value: evaluation }
     }
 }

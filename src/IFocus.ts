@@ -31,10 +31,22 @@ export interface INewTurnListener
 
 export interface Move
 {
-    direction: Direction,
-    moveCount: number
+    direction?: Direction,
+    moveCount?: number
+
+    /** contains baseX of moving field or placing x */
     x: number
+
+    /** contains baseY of moving field or placing y */
     y: number
+
+    shouldPlaceSomething?: boolean
+
+    /** red reserve count */
+    redPawns?: number
+
+    /** green reserve count */
+    greenPawns?: number
 }
 
 export const EventVictory = 'Victory'
