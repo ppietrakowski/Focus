@@ -158,6 +158,11 @@ export default class PlayerAiController extends AiController
         this._gameBoard.renderPossibleMoves(this._selectedField)
     }
 
+    checkIsYourTurn(player: IPlayer): Promise<void>
+    {
+        return Promise.resolve()
+    }
+
     private onClickedWhenSomethingSelected(clickedField: IFieldView)
     {
 
@@ -180,6 +185,7 @@ export default class PlayerAiController extends AiController
         }
 
         this.moveToField(clickedField, direction)
+        //this._game.nextTurn()
     }
 
     private selectedFieldWasDoubleClicked(clickedField: IFieldView)
@@ -197,6 +203,7 @@ export default class PlayerAiController extends AiController
         this._game.moveToField(this._selectedField.field.x, this._selectedField.field.y, direction, moveCount)
 
         this.unselectField()
+        
     }
 
     onPlaceStateStarted(): void

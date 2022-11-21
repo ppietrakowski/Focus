@@ -98,6 +98,7 @@ export class Focus implements IFocus
 
         runTimeout(0.01)
             .then(() => this.events.emit(EventMovedField, x, y, fromField, toField))
+            .then(() => this.nextTurn())
 
         return Promise.resolve(true)
     }
@@ -162,6 +163,11 @@ export class Focus implements IFocus
 
     nextTurn()
     {
+        if (this.mustEnd)
+        {
+            return
+        }
+
         if (this._hasPoolToPut)
         {
             this._currentPlayer = this.getNextPlayer()
@@ -181,6 +187,8 @@ export class Focus implements IFocus
     {
         this._hasPoolToPut = true
     }
+
+    mustEnd = false
 
     private increaseCurrentPlayersPool()
     {

@@ -71,4 +71,6 @@ export interface IFocus
     get hasEnded(): boolean
 
     setHasPoolToPut(): void
+
+    mustEnd: boolean
 }

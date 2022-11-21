@@ -46,7 +46,7 @@ class LoggingListener
 }
 
 const logging = new LoggingListener()
-logging.useLogging = true
+logging.useLogging = false
 
 focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
 focus.events.on(EventVictory, logging.onVictory, logging)
@@ -92,7 +92,7 @@ function getPlayer(name: string, player: IPlayer): IAiController
     throw new Error('Selected unavailable player controller')
 }
 
-beginPlay.addEventListener('click', e =>
+beginPlay.addEventListener('click', () =>
 {
     let p1
     let p2
@@ -119,7 +119,6 @@ beginPlay.addEventListener('click', e =>
         document.location.reload()
     }
     )
-    //focus.events.on(EventVictory, document.location.reload)
-    e.preventDefault()
+
     runTimeout(1).then(() => controller.start())
 })

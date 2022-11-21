@@ -25,14 +25,7 @@ export class GameBoardController implements IGameBoardController
 
     start(): void
     {
-        if (this._playerA.ownedPlayer === this.game.currentPlayer)
-            this._playerA.checkIsYourTurn(this.game.currentPlayer).then(() => this.game.nextTurn()).catch(logIllegalMove)
-        else
-            this._playerB.checkIsYourTurn(this.game.currentPlayer).then(() => this.game.nextTurn()).catch(logIllegalMove)
-
-        //this.game.nextTurn()
-
-        requestAnimationFrame(this.start.bind(this))
+        this._playerA.checkIsYourTurn(this.game.currentPlayer)
     }
 
     get game()

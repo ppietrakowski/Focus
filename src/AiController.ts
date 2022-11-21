@@ -17,6 +17,8 @@ export abstract class AiController implements IAiController
     {
         this.ownedPlayer = aiOwnedPlayer
         this._gameBoard = _gameBoard
+
+        this._game.events.on(EventNewTurn, this.checkIsYourTurn, this)
     }
 
     attachGameBoardController(controller: IGameBoardController): void
@@ -38,8 +40,8 @@ export abstract class AiController implements IAiController
         if (player == this.ownedPlayer)
         {
             runTimeout(0.01)
-                .then(() => this.move().then(v => console.log(v, 'should turn new turn')))
-                .then(console.trace)
+                .then(() => this.move().then(v => this._game.mustEnd = !v))
+                //.then(console.trace)
         } else
         {
             this.stopMoving()
