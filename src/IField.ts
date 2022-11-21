@@ -42,6 +42,7 @@ export interface IField {
     */
     get height(): number
     get state(): FieldState
+    get towerStructure(): Array<number>
 
     get x(): number
     get y(): number

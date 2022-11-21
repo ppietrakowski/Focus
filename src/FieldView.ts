@@ -75,6 +75,7 @@ export class FieldView implements IFieldView {
 
     visualizeHovered() {
         this.domElement.className = this.getHoveredClassName()
+        console.log(this.field.towerStructure)
     }
 
     visualizeUnhovered() {
