@@ -128,6 +128,9 @@ export class Field implements IField {
     get height() {
         return this._underThisField.length + 1
     }
+    get towerStructure() {
+        return [this.state].concat(this._underThisField);
+    }
 
     get isOvergrown() {
         return this.height > MaxTowerHeight
