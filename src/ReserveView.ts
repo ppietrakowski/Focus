@@ -81,14 +81,16 @@ export class ReserveView implements IReserveView {
 
     removeFromReserve() {
         this.emptyAllFields()
-        if (!this.isSomethingInPool()) {
-            return this.triedToUseEmptyPool()
-        }
+
 
         if (this.owner === PLAYER_RED)
             this._howManyReserveHas = this._game.gameBoard.redPlayerPawnCount
         else
             this._howManyReserveHas = this._game.gameBoard.greenPlayerPawnCount
+
+        if (!this.isSomethingInPool()) {
+            return this.triedToUseEmptyPool()
+        }
 
         if (this._howManyReserveHas > this.reserveFields.length) {
             console.warn('What reserve has oversize in REMOVE function ?')
@@ -112,6 +114,6 @@ export class ReserveView implements IReserveView {
     }
 
     private isSomethingInPool() {
-        return this.owner.hasAnyPool
+        return this._howManyReserveHas > 0
     }
 }

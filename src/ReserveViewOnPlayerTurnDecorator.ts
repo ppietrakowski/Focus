@@ -41,8 +41,6 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView {
     }
 
     removeFromReserve() {
-        console.log('removed from reserve')
-        console.log(this.owner.pooledPawns)
         if (this._reserveView instanceof ReserveView)
             this._reserveView.emptyAllFields()
 
