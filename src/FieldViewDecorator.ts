@@ -42,6 +42,9 @@ export class FieldViewDecorator implements IFieldView {
 
     private onMouseOver(): void {
         this.events.emit(EventMouseOverField, this._owningPlayer, this)
+
+        //TEMP CODE FOR DEBUG
+        console.log(this.field.towerStructure)
     }
 
     isInRange(anotherField: IField, range: { x: number; y: number; }): boolean {
