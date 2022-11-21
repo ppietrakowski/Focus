@@ -31,7 +31,7 @@ export function getAllFieldBelongingToPlayer(board: IGameBoard, player: IPlayer)
             if (f.isEmpty || (f.state & FieldState.Unplayable))
                 continue
             
-            if (f.state & player.state)
+            if (f.state === player.state)
                 fields.push(f)
         }
     }

@@ -131,7 +131,26 @@ export function getAvailableMoves(board: IGameBoard, player: IPlayer) {
 
     moves = yourFields.flatMap(v => getLegalMovesFromField(board, v.x, v.y))
 
-    const aiMoves: AiMove[] = moves.map(getAiMoves)
+    const aiMoves: AiMove[] = moves.map(move => {
+        const fieldFrom = board.getFieldAt(move.x, move.y)
+        const offset = {x: move.x + move.moveCount * move.direction.x, y: move.y + move.moveCount * move.direction.y}
+        const fieldTo = board.getFieldAt(offset.x, offset.y)
+
+        // buggy one
+        const gameBoardAfterMove: AfterPlaceMove = board.getBoardAfterMove(fieldFrom, fieldTo, _player)
+
+        move.redPawns = gameBoardAfterMove.redCount
+        move.greenPawns = gameBoardAfterMove.greenCount
+
+        return { gameBoardAfterMove: gameBoardAfterMove.gameBoard, move }
+    }).filter(
+        move => {
+            const fieldFrom = board.getFieldAt(move.move.x, move.move.y)
+    
+            return !!(fieldFrom.state & player.state)
+        }
+    )
+
     _aiMoves = aiMoves
 
     const afterPlaceMoves: AfterPlaceMove[] = []

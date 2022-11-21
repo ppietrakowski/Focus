@@ -67,9 +67,8 @@ export class Focus implements IFocus {
 
     moveToField(x: number, y: number, direction: { x: number, y: number }, howManyFieldWantMove: number) {
         const fromField = this.gameBoard.getFieldAt(x, y)
-
+        
         if (!this._currentPlayer.doesOwnThisField(fromField)) {
-            debugger
             return Promise.reject(false)
         }
 
