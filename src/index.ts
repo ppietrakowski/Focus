@@ -54,7 +54,7 @@ gameBoard.style.opacity = '0'
 const player1Select = document.getElementById('player1') as HTMLSelectElement
 const player2Select = document.getElementById('player2') as HTMLSelectElement
 
-const beginPlay = document.getElementById('BeginPlayButton') as HTMLInputElement
+const beginPlay = document.getElementById('BeginPlayButton') as HTMLButtonElement
 
 console.log(player1Select)
 console.log(player2Select)
@@ -97,6 +97,10 @@ beginPlay.addEventListener('click', () => {
     console.log(p2)
     gameBoard.style.visibility = 'visible'
     gameBoard.style.opacity = '1.0'
+
+    const parent = beginPlay.parentElement as HTMLSelectElement
+    
+    parent.disabled = true
 
     const controller = new GameBoardController(gameBoardView, p1, p2)
     focus.events.on(EventVictory, p => {
