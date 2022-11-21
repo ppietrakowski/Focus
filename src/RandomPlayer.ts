@@ -15,7 +15,7 @@ export class RandomPlayer extends AiController
         super(aiOwnedPlayer, game, gameBoard)
     }
 
-    move(): void
+    move(): Promise<boolean>
     {
         let moves: Move[] = []
 
@@ -32,8 +32,10 @@ export class RandomPlayer extends AiController
         const randomMove = moves[randomInteger(0, moves.length)] || null
         if (randomMove !== null)
         {
-            this._game.moveToField(randomMove.x, randomMove.y, randomMove.direction, randomMove.moveCount)
+            return this._game.moveToField(randomMove.x, randomMove.y, randomMove.direction, randomMove.moveCount)
         }
+
+        return Promise.reject('not move founded')
     }
 
     onPlaceStateStarted(): void

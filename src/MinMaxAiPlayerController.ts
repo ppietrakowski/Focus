@@ -48,7 +48,7 @@ export class MinMaxAiPlayerController extends AiController
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    move(): void
+    move(): Promise<boolean>
     {
         const { bestMove } = this.minMax(this._gameBoard.gameBoard, 1, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
 
@@ -67,13 +67,13 @@ export class MinMaxAiPlayerController extends AiController
 
             console.log(`placed at ${move.x}, ${move.y}`)
             this._game.placeField(move.x, move.y, this.ownedPlayer)
+            return Promise.resolve(true)
         }
         else
         {
             const { move } = bestMove
 
-            if (!this._game.moveToField(move.x, move.y, move.direction, move.moveCount))
-                console.warn('should not happen')
+            return this._game.moveToField(move.x, move.y, move.direction, move.moveCount)
         }
     }
 
@@ -107,9 +107,14 @@ export class MinMaxAiPlayerController extends AiController
 
     private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, player: IPlayer, afterPlaceMove?: AiMove): BestMove
     {
+        if (depth === 0)
+        {
+            return { value: evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove } 
+        }
+
         const movesAndCount = getAvailableMoves(board, player)
         
-        if (depth === 0 || (movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
+        if ((movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
             return { value: evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
 
         let evaluation = -Infinity

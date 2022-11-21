@@ -1,6 +1,6 @@
 import { Focus, PLAYER_GREEN, PLAYER_RED } from './Game'
 import { GameBoardView } from './GameBoardView'
-import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory } from './IFocus'
+import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory } from './IFocus'
 import { GameBoardController } from './GameBoardController'
 import { IPlayer } from './Player'
 import PlayerAiController from './PlayerAiController'
@@ -10,6 +10,7 @@ import { IGameBoardController } from './IGameBoardController'
 import { FieldState } from './IField'
 import { getPlayerName } from './AiController'
 import { NegaMaxPlayer } from './NegaMaxAiPlayerController'
+import { runTimeout } from './GameUtils'
 
 
 const focus = new Focus()
@@ -50,6 +51,7 @@ logging.useLogging = true
 focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
 focus.events.on(EventVictory, logging.onVictory, logging)
 focus.events.on(EventEnemyHasPool, logging.onEnemyHasPool, logging)
+focus.events.on(EventMovedField, function() { console.log(arguments) })
 focus.events.on(EventNewTurn, logging.onNextTurnBegin, logging)
 
 const gameBoard = document.querySelector('.gameBoard') as HTMLDivElement
@@ -79,5 +81,5 @@ function runAiVsAiGame()
 
     const controller = new GameBoardController(gameBoardView, new NegaMaxPlayer(PLAYER_RED, focus, gameBoardView), new NegaMaxPlayer(PLAYER_GREEN, focus, gameBoardView))
 
-    setTimeout(() => controller.start(), 1000)
+    runTimeout(1).then(() => controller.start())
 }

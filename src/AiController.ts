@@ -3,7 +3,7 @@ import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
 import { IAiController, IGameBoardController } from './IGameBoardController'
 import { FieldState, IField } from './IField'
-import { IPredicate, randomInteger } from './GameUtils'
+import { IPredicate, randomInteger, runTimeout } from './GameUtils'
 import { GameBoard } from './GameBoard'
 
 
@@ -17,8 +17,6 @@ export abstract class AiController implements IAiController
     {
         this.ownedPlayer = aiOwnedPlayer
         this._gameBoard = _gameBoard
-
-        this._game.events.on(EventNewTurn, this.checkIsYourTurn, this)
     }
 
     attachGameBoardController(controller: IGameBoardController): void
@@ -26,26 +24,28 @@ export abstract class AiController implements IAiController
         this._gameBoardController = controller
     }
 
-    abstract move(): void
+    abstract move(): Promise<boolean>
     abstract onPlaceStateStarted(): void
     stopMoving(): void
     {
         this._game
     }
-    
-
-    checkIsYourTurn(player: IPlayer)
+    checkIsYourTurn(player: IPlayer): Promise<void>
     {
         if (this._game.hasEnded)
             return
-            
+
         if (player == this.ownedPlayer)
         {
-            setTimeout(() => this.move(), 66)
+            runTimeout(0.01)
+                .then(() => this.move().then(v => console.log(v, 'should turn new turn')))
+                .then(console.trace)
         } else
         {
             this.stopMoving()
         }
+
+        return Promise.resolve()
     }
 
     protected getRandomFieldPosition(predicate: IPredicate<IField>)
@@ -63,12 +63,13 @@ export abstract class AiController implements IAiController
     }
 }
 
-export function getPlayerName(player: IPlayer) {
+export function getPlayerName(player: IPlayer)
+{
 
     if (player.state & FieldState.Green)
         return 'Green'
     else if (player.state & FieldState.Red)
         return 'Red'
-    
+
     return String(undefined).toUpperCase()
 }

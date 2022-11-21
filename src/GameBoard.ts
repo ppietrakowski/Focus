@@ -67,7 +67,7 @@ export class GameBoard implements IGameBoard
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
     {
         const gameBoard = new GameBoard()
-
+        
         const f = gameBoard.getFieldAt(x, y) as Field
 
         gameBoard.greenPlayerPawnCount = this.greenPlayerPawnCount

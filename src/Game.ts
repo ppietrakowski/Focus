@@ -10,6 +10,7 @@ import EventEmitter from 'eventemitter3'
 import board from './board.json'
 import { getPlayerName } from './AiController'
 import { debugLog } from './DebugUtils'
+import { runTimeout } from './GameUtils'
 
 export const PLAYER_RED = new Player(FieldState.Red)
 export const PLAYER_GREEN = new Player(FieldState.Green)
@@ -78,25 +79,27 @@ export class Focus implements IFocus
 
         if (!this._currentPlayer.doesOwnThisField(fromField))
         {
-            return false
+            //debugger
+            return Promise.reject(false)
         }
 
         const toField = this.getFieldBasedOnDirectionAndMoveCount(fromField as Field, direction, howManyFieldWantMove)
         if (!toField.isPlayable)
         {
-            return false
+            //debugger
+            return Promise.reject(false)
         }
 
         if (!toField.moveToThisField(fromField, howManyFieldWantMove))
         {
             console.warn('unable to move there')
-            return false
+            return Promise.reject(false)
         }
 
-        this.events.emit(EventMovedField, x, y, fromField, toField)
+        runTimeout(0.01)
+            .then(() => this.events.emit(EventMovedField, x, y, fromField, toField))
 
-        this.nextTurn()
-        return true
+        return Promise.resolve(true)
     }
 
     placeField(x: number, y: number, owner: IPlayer)

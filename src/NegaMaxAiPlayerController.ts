@@ -3,7 +3,7 @@ import { AiController, getPlayerName } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
 import { GameBoard } from './GameBoard'
-import { randomBoolean } from './GameUtils'
+import { randomBoolean, runTimeout } from './GameUtils'
 import { FieldState, IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
@@ -29,9 +29,9 @@ export class NegaMaxPlayer extends AiController
 
     once = true
 
-    move(): void
+    move(): Promise<boolean>
     {
-        const { bestMove } = this.negamax(this._gameBoard.gameBoard, 1, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
+        const { bestMove } = this.negamax(this._gameBoard.gameBoard, 3, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
 
         if (!bestMove && !bestMove.move.shouldPlaceSomething)
         {
@@ -39,7 +39,7 @@ export class NegaMaxPlayer extends AiController
             console.log(v)
             console.log(bestMove)
             console.log(this._game.gameBoard)
-            return
+            return Promise.reject(!bestMove)
         }
 
         if (bestMove.move.shouldPlaceSomething)
@@ -51,17 +51,14 @@ export class NegaMaxPlayer extends AiController
 
             console.log(`placed at ${move.x}, ${move.y}`)
             this._game.placeField(move.x, move.y, this.ownedPlayer)
+            return Promise.resolve(true)
         }
-        else
-        {
-            const { move } = bestMove
-            if (this.once)
-            {
-                this.once = false
-            }
-            if (!this._game.moveToField(move.x, move.y, move.direction, move.moveCount))
-                console.error('should not happen')
-        }
+
+        const { move } = bestMove
+
+        const pr = this._game.moveToField(move.x, move.y, move.direction, move.moveCount)
+
+        return pr
     }
 
 
@@ -96,9 +93,12 @@ export class NegaMaxPlayer extends AiController
 
     private negamax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, player: IPlayer, sign = 1, afterPlaceMove?: AiMove): BestMove
     {
+        if (depth === 0)
+            return { value: sign * evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
+
         const movesAndCount = getAvailableMoves(board, player)
 
-        if (depth === 0 || (movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
+        if ((movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
             return { value: sign * evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
 
         const moves = movesAndCount.aiMoves
@@ -120,8 +120,6 @@ export class NegaMaxPlayer extends AiController
                 bestMove = current.bestMove
             }
         }
-
-        console.log(bestMove == null)
 
 
         return { bestMove: bestMove, value: evaluation }

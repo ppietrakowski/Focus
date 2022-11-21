@@ -2,9 +2,9 @@ import { IPlayer } from './Player'
 
 export interface IAiController
 {
-    move(): void
+    move(): Promise<boolean>
     stopMoving(): void
-    checkIsYourTurn(player: IPlayer): void
+    checkIsYourTurn(player: IPlayer): Promise<void>
 
     attachGameBoardController(controller: IGameBoardController): void
 

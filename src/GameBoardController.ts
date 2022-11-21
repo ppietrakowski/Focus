@@ -1,7 +1,14 @@
+import { PLAYER_GREEN, PLAYER_RED } from './Game'
+import { runTimeout } from './GameUtils'
 import { EventEnemyHasPool, EventVictory } from './IFocus'
 import { IAiController, IGameBoardController } from './IGameBoardController'
 import { IGameBoardView } from './IGameBoardView'
 import { IPlayer } from './Player'
+
+function logIllegalMove()
+{
+    console.warn('illegal move')
+}
 
 export class GameBoardController implements IGameBoardController
 {
@@ -18,7 +25,14 @@ export class GameBoardController implements IGameBoardController
 
     start(): void
     {
-        this._playerA.move()
+        if (this._playerA.ownedPlayer === this.game.currentPlayer)
+            this._playerA.checkIsYourTurn(this.game.currentPlayer).catch(logIllegalMove)
+        else
+            this._playerB.checkIsYourTurn(this.game.currentPlayer).catch(logIllegalMove)
+
+        this.game.nextTurn()
+
+        //requestAnimationFrame(this.start.bind(this))
     }
 
     get game()
