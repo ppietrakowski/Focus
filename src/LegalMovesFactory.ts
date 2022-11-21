@@ -130,7 +130,6 @@ export function getAvailableMoves(board: IGameBoard, player: IPlayer) {
     const enemyFields: IField[] = getAllFieldBelongingToPlayer(board, player === PLAYER_RED ? PLAYER_GREEN : PLAYER_RED)
 
     moves = yourFields.flatMap(v => getLegalMovesFromField(board, v.x, v.y))
-    console.log([player])
 
     const aiMoves: AiMove[] = moves.map(getAiMoves)
     _aiMoves = aiMoves

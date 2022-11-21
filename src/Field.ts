@@ -59,7 +59,6 @@ export class Field implements IField {
             return underElements
         }
 
-        console.log(underElements)
         return underElements.concat([this.state]).concat(this._underThisField)
     }
 
@@ -69,7 +68,6 @@ export class Field implements IField {
         while (n-- > 0) {
             const element = this._underThisField.shift() || null
 
-            console.log(element)
             if (element) {
                 firstElements.push(element)
             }
@@ -131,7 +129,7 @@ export class Field implements IField {
         return this._underThisField.length + 1
     }
     get towerStructure() {
-        return [this.state].concat(this._underThisField);
+        return [this.state].concat(this._underThisField)
     }
 
     get isOvergrown() {

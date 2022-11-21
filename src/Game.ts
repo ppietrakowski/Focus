@@ -87,8 +87,6 @@ export class Focus implements IFocus {
         runTimeout(0.01)
             .then(() => this.events.emit(EventMovedField, x, y, fromField, toField))
             .then(() => this.nextTurn())
-            .then(() => console.log(toField))
-            .then(() => console.log(fromField))
 
         return Promise.resolve(true)
     }
