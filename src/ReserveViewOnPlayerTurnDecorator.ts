@@ -25,9 +25,7 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView {
     }
 
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void {
-        if (this.canAccess()) {
-            this._reserveView.emitPoolClicked(player, reserve)
-        }
+        this._reserveView.emitPoolClicked(player, reserve)
     }
 
     getFieldAt(i: number): HTMLDivElement {

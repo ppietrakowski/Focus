@@ -1,4 +1,5 @@
 import { getPlayerName } from './AiController'
+import { PLAYER_RED } from './Game'
 import { EventEnemyHasPool, EventVictory } from './IFocus'
 import { IAiController, IGameBoardController } from './IGameBoardController'
 import { IGameBoardView } from './IGameBoardView'
@@ -43,11 +44,13 @@ export class GameBoardController implements IGameBoardController {
     }
 
     placePoolState(player: IPlayer, aicontroller: IAiController) {
+        console.log(getPlayerName(player))
         if (this.game.currentPlayer !== player) {
             return
         }
+        console.log(getPlayerName(player), 2)
 
-        if (player.hasAnyPool) {
+        if ((player === PLAYER_RED ? this.game.gameBoard.redPlayerPawnCount : this.game.gameBoard.greenPlayerPawnCount) > 0) {
             aicontroller.onPlaceStateStarted()
         }
     }

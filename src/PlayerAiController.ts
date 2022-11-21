@@ -1,10 +1,11 @@
-import { AiController } from './AiController'
+import { AiController, getPlayerName } from './AiController'
 import { EventMouseLeaveField, EventMouseOverField, IFieldView } from './FieldView'
 import { IFocus } from './IFocus'
 import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
 import { IReserveView } from './IReserveView'
 import { Direction } from './IField'
+import { PLAYER_RED } from './Game'
 
 
 function isValidDirection(direction: Direction): boolean {
@@ -43,6 +44,7 @@ export default class PlayerAiController extends AiController {
 
     private onPoolClicked(player: IPlayer, reserve: IReserveView): void {
         if (this.isTurnOfPlayer(player)) {
+            console.log(`clicked ${getPlayerName(player)}`)
             if (this._usedPool) {
                 reserve.addToReserve(player)
                 this._usedPool = false
@@ -151,7 +153,7 @@ export default class PlayerAiController extends AiController {
 
         const direction = this._selectedField.field.getDirectionToField(clickedField.field)
 
-        if (isValidDirection(direction)) {
+        if (!isValidDirection(direction)) {
             // field is on diagonal or too far away
             console.warn('Tried to move more than is available in this time')
             this.unselectField()
@@ -186,23 +188,28 @@ export default class PlayerAiController extends AiController {
 
     private enterIntoPlaceState(field: IFieldView) {
         field.backupClickListeners()
+        console.log(field)
 
         // use click event now for placing instead of moving
         field.addClickListener(this.onPlaceFieldClicked, this, false)
+        console.log(field)
     }
 
     private onPlaceFieldClicked(field: IFieldView) {
-        if (!this.ownedPlayer.hasAnyPool) {
+        if ((this.ownedPlayer === PLAYER_RED ? this._gameBoard.gameBoard.redPlayerPawnCount : this._gameBoard.gameBoard.greenPlayerPawnCount) < 1) {
             console.warn('Tried to place item without any pool')
             this.resetToPlayState(this.ownedPlayer)
             return
         }
+
+        console.log('test')
 
         if (!field.field.isPlayable) {
             this.resetToPlayState(this.ownedPlayer)
             return
         }
 
+        console.log('player is going to place something')
         this._game.placeField(field.field.x, field.field.y, this.ownedPlayer)
         this.resetToPlayState(this._game.currentPlayer)
     }
