@@ -31,7 +31,7 @@ export class NegaMaxPlayer extends AiController
 
     move(): Promise<boolean>
     {
-        const { bestMove } = this.negamax(this._gameBoard.gameBoard, 3, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
+        const { bestMove } = this.negamax(this._gameBoard.gameBoard, 1, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
 
         if (!bestMove && !bestMove.move.shouldPlaceSomething)
         {

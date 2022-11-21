@@ -67,6 +67,6 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
         }
     }
 
-    const evalValue = 15 * ratio + 5 * ratioInReserve + controlledByYou
+    const evalValue = 15 * ratio + 5 * ratioInReserve
     return evalValue
 }

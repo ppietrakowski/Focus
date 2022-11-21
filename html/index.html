@@ -159,8 +159,7 @@
 
 <body>
   <div id="gameStyles" class="buttonBoard">
-    <form action="">
-      <label for="player1">Green player: </label>
+      <label for="player1">Red player: </label>
       <select name="player1" id="player1">
         <option value="human">Human player</option>
         <option value="random">Random</option>
@@ -168,15 +167,14 @@
         <option value="negamax">Negamax</option>
       </select>
 
-      <label for="player2">Red player: </label>
+      <label for="player2">Green player: </label>
       <select name="player2" id="player2">
         <option value="human">Human player</option>
         <option value="random">Random</option>
         <option value="minimax">Minimax</option>
         <option value="negamax">Negamax</option>
       </select>
-      <input type="submit" value="Begin">
-    </form>
+      <button id="BeginPlayButton">Begin play</button>
   </div>
 
   <div class="gameBoard">
