@@ -1,6 +1,5 @@
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
-import { PLAYER_RED } from './Game'
 import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
@@ -36,13 +35,16 @@ export class MinMaxAiPlayerController extends AiController {
     move(): Promise<boolean> {
         const { bestMove } = this.minMax(this._gameBoard.gameBoard, 3, true, this.ownedPlayer) as BestMove
 
-        if (!bestMove.move.shouldPlaceSomething && !bestMove) {
+        if (!bestMove && !bestMove.move.shouldPlaceSomething) {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
             console.log(v)
             console.log(bestMove)
             console.log(this._game.gameBoard)
-            return
+            return Promise.reject(!bestMove)
         }
+
+        if (bestMove.move.shouldPlaceSomething)
+            console.log(true)
 
         if (bestMove.move.shouldPlaceSomething) {
             const { move } = bestMove
@@ -51,11 +53,12 @@ export class MinMaxAiPlayerController extends AiController {
             this._game.placeField(move.x, move.y, this.ownedPlayer)
             return Promise.resolve(true)
         }
-        else {
-            const { move } = bestMove
 
-            return this._game.moveToField(move.x, move.y, move.direction, move.moveCount)
-        }
+        const { move } = bestMove
+
+        const pr = this._game.moveToField(move.x, move.y, move.direction, move.moveCount)
+
+        return pr
     }
 
 

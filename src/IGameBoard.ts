@@ -1,4 +1,4 @@
-import { IField } from './IField'
+import { FieldState, IField } from './IField'
 import { IPlayer } from './Player'
 import { ForEachCallback } from './GameBoard'
 
@@ -28,10 +28,12 @@ export function getAllFieldBelongingToPlayer(board: IGameBoard, player: IPlayer)
         for (let y = 0; y < 8; y++) {
             const f = board.getFieldAt(x, y)
 
-            if (f.isEmpty || !f.isPlayable)
+            if (f.isEmpty || (f.state & FieldState.Unplayable))
                 continue
+            
+            console.log(f.state, player.state)
 
-            if (player.doesOwnThisField(f))
+            if (f.state & player.state)
                 fields.push(f)
         }
     }

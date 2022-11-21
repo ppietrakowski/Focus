@@ -36,6 +36,7 @@ export class Field implements IField {
 
         // one move is just a changing of state
         this._underThisField = this.getNewUnderElements(fromWhichField, additionalDistance - 1)
+        console.log(this._underThisField)
         this._state = oldState
 
         this.reduceOverGrown()
@@ -58,7 +59,8 @@ export class Field implements IField {
             return underElements
         }
 
-        return underElements.concat([this.state], underElements, this._underThisField)
+        console.log(underElements)
+        return underElements.concat([this.state]).concat(this._underThisField)
     }
 
     private shiftElements(n: number) {
@@ -67,6 +69,7 @@ export class Field implements IField {
         while (n-- > 0) {
             const element = this._underThisField.shift() || null
 
+            console.log(element)
             if (element) {
                 firstElements.push(element)
             }
@@ -74,7 +77,6 @@ export class Field implements IField {
 
         // update the this.state to next element under
         this._state = this._underThisField.shift() || FieldState.Empty
-
         return firstElements
     }
 

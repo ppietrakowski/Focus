@@ -80,10 +80,6 @@ export function getLegalMovesFromField(board: IGameBoard, x: number, y: number):
 let _board: IGameBoard = null
 let _player: IPlayer = null
 
-function getLegalMoves(v: IField) {
-    return getLegalMovesFromField(_board, v.x, v.y)
-}
-
 function getAiMoves(move: Move): AiMove {
     const fieldFrom = _board.getFieldAt(move.x, move.y)
     const fieldTo = _board.getFieldAt(move.x + move.direction.x * move.moveCount, move.y + move.direction.y * move.moveCount)
@@ -133,7 +129,8 @@ export function getAvailableMoves(board: IGameBoard, player: IPlayer) {
     const yourFields: IField[] = getAllFieldBelongingToPlayer(board, player)
     const enemyFields: IField[] = getAllFieldBelongingToPlayer(board, player === PLAYER_RED ? PLAYER_GREEN : PLAYER_RED)
 
-    moves = yourFields.flatMap(getLegalMoves)
+    moves = yourFields.flatMap(v => getLegalMovesFromField(board, v.x, v.y))
+    console.log([player])
 
     const aiMoves: AiMove[] = moves.map(getAiMoves)
     _aiMoves = aiMoves
