@@ -1,16 +1,14 @@
-import { Direction, IField } from './IField'
+import { IField } from './IField'
 import { IPlayer } from './Player'
 import { ForEachCallback } from './GameBoard'
 
-export interface AfterPlaceMove
-{
+export interface AfterPlaceMove {
     gameBoard: IGameBoard
     redCount: number
     greenCount: number
 }
 
-export interface IGameBoard
-{
+export interface IGameBoard {
     redPlayerPawnCount: number
     greenPlayerPawnCount: number
 
@@ -23,14 +21,11 @@ export interface IGameBoard
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
 }
 
-export function getAllFieldBelongingToPlayer(board: IGameBoard, player: IPlayer)
-{
+export function getAllFieldBelongingToPlayer(board: IGameBoard, player: IPlayer) {
     const fields: IField[] = []
 
-    for (let x = 0; x < 8; x++)
-    {
-        for (let y = 0; y < 8; y++) 
-        {
+    for (let x = 0; x < 8; x++) {
+        for (let y = 0; y < 8; y++) {
             const f = board.getFieldAt(x, y)
 
             if (f.isEmpty || !f.isPlayable)

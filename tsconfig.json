@@ -3,7 +3,7 @@
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
     /* Projects */
-    "target": "ES5",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "target": "ES6",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     
     /* Modules */
     "rootDirs": ["./src"],                                  /* Specify the root folder within your source files. */
@@ -24,6 +24,7 @@
     "noImplicitAny": true,                            /* Enable error reporting for expressions and declarations with an implied `any` type.. */
     "strictNullChecks": false,                         /* When type checking, take into account `null` and `undefined`. */
     "skipLibCheck": true ,                                /* Skip type checking all .d.ts files. */
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "sourceMap": true
   }
 }

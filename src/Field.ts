@@ -1,18 +1,16 @@
 import { IPlayer } from './Player'
-import { IField, FieldState, Direction, EventFieldOvergrown, getDirectionFromOffset } from './IField'
+import { IField, FieldState, Direction, getDirectionFromOffset } from './IField'
 import EventEmitter from 'eventemitter3'
 
 export const MaxTowerHeight = 5
 
 export const FIELD_EVENTS = new EventEmitter()
 
-export interface IOvergrown
-{
+export interface IOvergrown {
     (field: IField, popedState: FieldState): void
 }
 
-export class Field implements IField 
-{
+export class Field implements IField {
     private _state: FieldState
     private _underThisField: FieldState[]
     private _x: number
@@ -20,66 +18,56 @@ export class Field implements IField
 
     public overgrownCallback: IOvergrown
 
-    constructor(state: FieldState, x: number, y: number) 
-    {
+    constructor(state: FieldState, x: number, y: number) {
         this._state = state
         this._underThisField = []
         this._x = x
         this._y = y
     }
 
-    moveToThisField(fromWhichField: IField, additionalDistance?: number) 
-    {
-        if (!fromWhichField.isPlayable || !(fromWhichField instanceof Field))
-        {
+    moveToThisField(fromWhichField: IField, additionalDistance?: number) {
+        if (!fromWhichField.isPlayable || !(fromWhichField instanceof Field)) {
             return false
         }
 
         additionalDistance = additionalDistance || this.getDistanceToField(fromWhichField)
 
         const oldState = fromWhichField.state
-        
+
         // one move is just a changing of state
         this._underThisField = this.getNewUnderElements(fromWhichField, additionalDistance - 1)
         this._state = oldState
 
         this.reduceOverGrown()
-        
+
         return true
     }
 
-    reduceOverGrown() 
-    {
-        while (this.isOvergrown) 
-        {
+    reduceOverGrown() {
+        while (this.isOvergrown) {
             const fieldState = this._underThisField.pop()
             if (this.overgrownCallback)
                 this.overgrownCallback(this, fieldState)
         }
     }
 
-    private getNewUnderElements(fromWhichField: Field, distance: number) 
-    {
+    private getNewUnderElements(fromWhichField: Field, distance: number) {
         const underElements = fromWhichField.shiftElements(distance)
 
-        if (this.isEmpty)
-        {
+        if (this.isEmpty) {
             return underElements
         }
 
         return underElements.concat([this.state], underElements, this._underThisField)
     }
 
-    private shiftElements(n: number) 
-    {
+    private shiftElements(n: number) {
         const firstElements: FieldState[] = []
 
-        while (n-- > 0) 
-        {
+        while (n-- > 0) {
             const element = this._underThisField.shift() || null
 
-            if (element) 
-            {
+            if (element) {
                 firstElements.push(element)
             }
         }
@@ -90,80 +78,66 @@ export class Field implements IField
         return firstElements
     }
 
-    placeAtTop(state: FieldState): void
-    {
+    placeAtTop(state: FieldState): void {
         this._underThisField = [this._state].concat(this._underThisField)
         this._state = state
 
         this.reduceOverGrown()
     }
 
-    getDistanceToField(anotherField: IField) 
-    {
+    getDistanceToField(anotherField: IField) {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
-        if (Math.abs(v.x) > 0) 
-        {
+        if (Math.abs(v.x) > 0) {
             return Math.abs(v.x)
         }
 
         return Math.abs(v.y)
     }
 
-    getDirectionToField(anotherField: IField): Direction 
-    {
+    getDirectionToField(anotherField: IField): Direction {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
-        if (!this.canJump(v)) 
-        {
-            return null
+        if (!this.canJump(v)) {
+            return { x: 0, y: 0 }
         }
 
         return getDirectionFromOffset(v.x, v.y)
     }
 
-    private canJump(v: Direction) 
-    {
+    private canJump(v: Direction) {
         return Math.abs(v.x) <= this.height && Math.abs(v.y) <= this.height
     }
 
-    possessByPlayer(player: IPlayer): void 
-    {
+    possessByPlayer(player: IPlayer): void {
         this._state = player.state
     }
 
-    get state(): FieldState 
-    {
+    get state(): FieldState {
         return this._state
     }
 
-    get x(): number 
-    {
+    get x(): number {
         return this._x
     }
 
-    get y(): number 
-    {
+    get y(): number {
         return this._y
     }
 
-    get height()
-    {
+    get height() {
         return this._underThisField.length + 1
     }
 
-    get isOvergrown()
-    {
+    get isOvergrown() {
         return this.height > MaxTowerHeight
     }
 
-    get isEmpty()
-    {
+    get isEmpty() {
         return !!(this._state & FieldState.Empty)
     }
 
-    get isPlayable()
-    {
+    get isPlayable() {
         return !(this._state & FieldState.Unplayable)
     }
 }

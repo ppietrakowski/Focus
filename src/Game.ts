@@ -1,7 +1,7 @@
-import { Field, FIELD_EVENTS } from './Field'
+import { Field } from './Field'
 import { GameBoard } from './GameBoard'
 import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory, IFocus } from './IFocus'
-import { Direction, EventFieldOvergrown, FieldState, IField } from './IField'
+import { Direction, FieldState, IField } from './IField'
 
 import { IGameBoard } from './IGameBoard'
 import { IPlayer, Player } from './Player'
@@ -15,8 +15,7 @@ import { runTimeout } from './GameUtils'
 export const PLAYER_RED = new Player(FieldState.Red)
 export const PLAYER_GREEN = new Player(FieldState.Green)
 
-export class Focus implements IFocus
-{
+export class Focus implements IFocus {
     readonly events: EventEmitter
     readonly gameBoard: IGameBoard
 
@@ -24,8 +23,7 @@ export class Focus implements IFocus
     private _currentPlayer: IPlayer
     private _hasEnded = false
 
-    constructor()
-    {
+    constructor() {
         this.events = new EventEmitter()
         this.gameBoard = GameBoard.loadFromJSON(board)
 
@@ -41,57 +39,47 @@ export class Focus implements IFocus
 
     }
 
-    private onOverGrownField(field: IField, stateThatWasPoped: FieldState): void
-    {
+    private onOverGrownField(_field: IField, stateThatWasPoped: FieldState): void {
         if (this.currentPlayer.doesOwnThisField(stateThatWasPoped))
             this.increaseCurrentPlayersPool()
     }
 
-    private onMoveField(): void
-    {
+    private onMoveField(): void {
         const player = this.getNextPlayer()
 
         const countOfEnemyFields = this.gameBoard.countPlayersFields(player)
         const countOfCurrentPlayerFields = this.gameBoard.countPlayersFields(this.currentPlayer)
 
-        if (countOfEnemyFields === 0)
-        {
+        if (countOfEnemyFields === 0) {
             this.checkForPoolAvailability(this.currentPlayer, player)
-        } else if (countOfCurrentPlayerFields === 0)
-        {
+        } else if (countOfCurrentPlayerFields === 0) {
             this.checkForPoolAvailability(player, this.currentPlayer)
         }
     }
 
-    get currentPlayer(): IPlayer
-    {
+    get currentPlayer(): IPlayer {
         return this._currentPlayer
     }
 
-    set currentPlayer(player: IPlayer)
-    {
+    set currentPlayer(player: IPlayer) {
         this._currentPlayer = player
     }
 
-    moveToField(x: number, y: number, direction: { x: number, y: number }, howManyFieldWantMove: number)
-    {
+    moveToField(x: number, y: number, direction: { x: number, y: number }, howManyFieldWantMove: number) {
         const fromField = this.gameBoard.getFieldAt(x, y)
 
-        if (!this._currentPlayer.doesOwnThisField(fromField))
-        {
+        if (!this._currentPlayer.doesOwnThisField(fromField)) {
             //debugger
             return Promise.reject(false)
         }
 
         const toField = this.getFieldBasedOnDirectionAndMoveCount(fromField as Field, direction, howManyFieldWantMove)
-        if (!toField.isPlayable)
-        {
+        if (!toField.isPlayable) {
             //debugger
             return Promise.reject(false)
         }
 
-        if (!toField.moveToThisField(fromField, howManyFieldWantMove))
-        {
+        if (!toField.moveToThisField(fromField, howManyFieldWantMove)) {
             console.warn('unable to move there')
             return Promise.reject(false)
         }
@@ -103,14 +91,12 @@ export class Focus implements IFocus
         return Promise.resolve(true)
     }
 
-    placeField(x: number, y: number, owner: IPlayer)
-    {
+    placeField(x: number, y: number, owner: IPlayer) {
         const field = this.gameBoard.getFieldAt(x, y)
 
         console.log('placed')
         field.placeAtTop(owner.state)
-        if (owner instanceof Player)
-        {
+        if (owner instanceof Player) {
             if (owner === PLAYER_GREEN)
                 this.gameBoard.greenPlayerPawnCount--
             else
@@ -121,55 +107,45 @@ export class Focus implements IFocus
         this.nextTurn()
     }
 
-    getFieldBasedOnDirectionAndMoveCount(field: Field, direction: Direction, howManyFieldWantMove: number)
-    {
+    getFieldBasedOnDirectionAndMoveCount(field: Field, direction: Direction, howManyFieldWantMove: number) {
         const offset = this.getOffsetBasedOnDirection(field, direction, howManyFieldWantMove)
         const foundField = this.gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
 
         return foundField
     }
 
-    getOffsetBasedOnDirection(field: IField, direction: Direction, howManyFieldWantMove: number)
-    {
+    getOffsetBasedOnDirection(field: IField, direction: Direction, howManyFieldWantMove: number) {
         let mult = howManyFieldWantMove
 
-        if (howManyFieldWantMove < 1)
-        {
+        if (howManyFieldWantMove < 1) {
             mult = 1
         }
 
-        if (field.height < howManyFieldWantMove)
-        {
+        if (field.height < howManyFieldWantMove) {
             mult = field.height
         }
 
         return { x: direction.x * mult, y: direction.y * mult }
     }
 
-    getNextPlayer(toPlayer?: IPlayer)
-    {
-        if (!toPlayer)
-        {
+    getNextPlayer(toPlayer?: IPlayer) {
+        if (!toPlayer) {
             toPlayer = this.currentPlayer
         }
 
-        if (toPlayer.doesOwnThisField(FieldState.Red))
-        {
+        if (toPlayer.doesOwnThisField(FieldState.Red)) {
             return PLAYER_GREEN
         }
 
         return PLAYER_RED
     }
 
-    nextTurn()
-    {
-        if (this.mustEnd)
-        {
+    nextTurn() {
+        if (this.mustEnd) {
             return
         }
 
-        if (this._hasPoolToPut)
-        {
+        if (this._hasPoolToPut) {
             this._currentPlayer = this.getNextPlayer()
             this._hasPoolToPut = false
             return
@@ -183,16 +159,14 @@ export class Focus implements IFocus
         this.events.emit(EventNewTurn, this._currentPlayer)
     }
 
-    setHasPoolToPut(): void
-    {
+    setHasPoolToPut(): void {
         this._hasPoolToPut = true
     }
 
     mustEnd = false
 
-    private increaseCurrentPlayersPool()
-    {
-        debugLog(`${getPlayerName(this._currentPlayer)} has ${this._currentPlayer === PLAYER_GREEN ? this.gameBoard.greenPlayerPawnCount :this.gameBoard.redPlayerPawnCount}`)
+    private increaseCurrentPlayersPool() {
+        debugLog(`${getPlayerName(this._currentPlayer)} has ${this._currentPlayer === PLAYER_GREEN ? this.gameBoard.greenPlayerPawnCount : this.gameBoard.redPlayerPawnCount}`)
         if (this._currentPlayer instanceof Player && PLAYER_GREEN === this._currentPlayer)
             this.gameBoard.greenPlayerPawnCount++
         else if (this._currentPlayer instanceof Player && PLAYER_RED === this._currentPlayer)
@@ -201,26 +175,21 @@ export class Focus implements IFocus
         this.events.emit(EventAddedToPool, this._currentPlayer)
     }
 
-    get hasEnded(): boolean
-    {
+    get hasEnded(): boolean {
         return this._hasEnded
     }
 
 
-    private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer)
-    {
+    private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer) {
         let hasPool = false
 
-        if (playerWhoFail === PLAYER_RED) 
-        {
+        if (playerWhoFail === PLAYER_RED) {
             hasPool = this.gameBoard.redPlayerPawnCount > 0
-        } else
-        {
+        } else {
             hasPool = this.gameBoard.greenPlayerPawnCount > 0
         }
 
-        if (hasPool)
-        {
+        if (hasPool) {
             this.events.emit(EventEnemyHasPool, playerWhoFail)
             return
         }

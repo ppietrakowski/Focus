@@ -1,52 +1,42 @@
-import { evaluateMove } from './EvaluationFunction'
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
-import { GameBoard } from './GameBoard'
 import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, FieldState, IField } from './IField'
 import { Move } from './IFocus'
 import { AfterPlaceMove, getAllFieldBelongingToPlayer, IGameBoard } from './IGameBoard'
-import { AiMove, BestMove } from './MinMaxAiPlayerController'
+import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
-export function getOffsetBasedOnDirection(field: IField, direction: { x: number, y: number }, howManyFieldWantMove: number)
-{
+export function getOffsetBasedOnDirection(field: IField, direction: { x: number, y: number }, howManyFieldWantMove: number) {
     let mult = howManyFieldWantMove
 
-    if (howManyFieldWantMove < 1)
-    {
+    if (howManyFieldWantMove < 1) {
         mult = 1
     }
 
-    if (field.height < howManyFieldWantMove)
-    {
+    if (field.height < howManyFieldWantMove) {
         mult = field.height
     }
 
     return { x: direction.x * mult, y: direction.y * mult }
 }
 
-function isMoveLegal(board: IGameBoard, x: number, y: number, direction: Direction, moveCount: number): boolean
-{
+function isMoveLegal(board: IGameBoard, x: number, y: number, direction: Direction, moveCount: number): boolean {
     const field = board.getFieldAt(x, y)
 
     const offset = getOffsetBasedOnDirection(field, direction, moveCount)
 
-    try
-    {
+    try {
         const fieldFromOffset = board.getFieldAt(x + offset.x, y + offset.y)
         return fieldFromOffset.isPlayable
     }
-    catch (e)
-    {
+    catch (e) {
         return false
     }
 }
 
-export function getNeighbours(board: IGameBoard, x: number, y: number, maxMove: number): IField[]
-{
+export function getNeighbours(board: IGameBoard, x: number, y: number, maxMove: number): IField[] {
     const neighbours: IField[] = []
 
-    for (let i = 1; i < maxMove; i++) 
-    {
+    for (let i = 1; i < maxMove; i++) {
         if (y > maxMove)
             neighbours.push(board.getFieldAt(x, y + DirectionNorth.y * i))
         if (y < maxMove)
@@ -62,23 +52,19 @@ export function getNeighbours(board: IGameBoard, x: number, y: number, maxMove: 
     return neighbours
 }
 
-export function getMovesFromDirection(board: IGameBoard, field: IField, x: number, y: number, direction: Direction): Move[]
-{
+export function getMovesFromDirection(board: IGameBoard, field: IField, x: number, y: number, direction: Direction): Move[] {
     const moves: Move[] = []
 
-    for (let moveCount = 1; moveCount <= field.height; moveCount++)
-    {
+    for (let moveCount = 1; moveCount <= field.height; moveCount++) {
         const isLegalMove = isMoveLegal(board, x, y, direction, moveCount)
-        if (isLegalMove)
-        {
+        if (isLegalMove) {
             moves.push({ direction: direction, x: x, y: y, moveCount: moveCount })
         }
     }
     return moves
 }
 
-export function getLegalMovesFromField(board: IGameBoard, x: number, y: number): Move[]
-{
+export function getLegalMovesFromField(board: IGameBoard, x: number, y: number): Move[] {
     const field = board.getFieldAt(x, y)
     let moves: Move[] = []
 
@@ -88,21 +74,17 @@ export function getLegalMovesFromField(board: IGameBoard, x: number, y: number):
     moves = moves.concat(getMovesFromDirection(board, field, x, y, DirectionWest))
     moves = moves.concat(getMovesFromDirection(board, field, x, y, DirectionSouth))
 
-    
-    
     return moves
 }
 
 let _board: IGameBoard = null
 let _player: IPlayer = null
 
-function getLegalMoves(v: IField)
-{
+function getLegalMoves(v: IField) {
     return getLegalMovesFromField(_board, v.x, v.y)
 }
 
-function getAiMoves(move: Move): AiMove
-{
+function getAiMoves(move: Move): AiMove {
     const fieldFrom = _board.getFieldAt(move.x, move.y)
     const fieldTo = _board.getFieldAt(move.x + move.direction.x * move.moveCount, move.y + move.direction.y * move.moveCount)
 
@@ -119,8 +101,7 @@ let _aiMoves: AiMove[] = null
 let _afterPlaceMoves: AfterPlaceMove[] = null
 
 
-function getPlaceMoves(v: IField)
-{
+function getPlaceMoves(v: IField) {
     const afterPlaceMove = _board.getBoardAfterPlace(v.x, v.y, _player)
 
     const move: AiMove = {
@@ -135,8 +116,7 @@ function getPlaceMoves(v: IField)
         }
     }
 
-    if (_player.state === FieldState.Green && afterPlaceMove.greenCount > 0)
-    {
+    if (_player.state === FieldState.Green && afterPlaceMove.greenCount > 0) {
         _aiMoves.push(move)
     }
     else if (_player.state === FieldState.Red && afterPlaceMove.redCount > 0)
@@ -145,8 +125,7 @@ function getPlaceMoves(v: IField)
     _afterPlaceMoves[_aiMoves.length - 1] = afterPlaceMove
 }
 
-export function getAvailableMoves(board: IGameBoard, player: IPlayer)
-{
+export function getAvailableMoves(board: IGameBoard, player: IPlayer) {
     let moves: Move[] = []
     _board = board
     _player = player

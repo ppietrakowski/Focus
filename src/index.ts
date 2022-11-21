@@ -1,13 +1,12 @@
 import { Focus, PLAYER_GREEN, PLAYER_RED } from './Game'
 import { GameBoardView } from './GameBoardView'
-import { EventAddedToPool, EventEnemyHasPool, EventMovedField, EventNewTurn, EventVictory } from './IFocus'
+import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory } from './IFocus'
 import { GameBoardController } from './GameBoardController'
 import { IPlayer } from './Player'
 import PlayerAiController from './PlayerAiController'
 import { RandomPlayer } from './RandomPlayer'
 import { MinMaxAiPlayerController } from './MinMaxAiPlayerController'
-import { IAiController, IGameBoardController } from './IGameBoardController'
-import { FieldState } from './IField'
+import { IAiController } from './IGameBoardController'
 import { getPlayerName } from './AiController'
 import { NegaMaxPlayer } from './NegaMaxAiPlayerController'
 import { runTimeout } from './GameUtils'
@@ -17,29 +16,24 @@ const focus = new Focus()
 
 const gameBoardView = new GameBoardView(focus)
 
-class LoggingListener
-{
+class LoggingListener {
     useLogging = true
 
-    onAddedToPool(toWhichPlayer: IPlayer): void
-    {
+    onAddedToPool(toWhichPlayer: IPlayer): void {
         if (this.useLogging)
             console.log('added to pool ', getPlayerName(toWhichPlayer))
     }
 
-    onEnemyHasPool(enemy: IPlayer): void
-    {
+    onEnemyHasPool(): void {
         if (this.useLogging)
             console.log('Should place pawn')
     }
-    onVictory(victoriousPlayer: IPlayer): void
-    {
+    onVictory(victoriousPlayer: IPlayer): void {
         if (this.useLogging)
             console.log(`${getPlayerName(victoriousPlayer)} won`)
         console.log(focus.gameBoard)
     }
-    onNextTurnBegin(currentPlayer: IPlayer): void
-    {
+    onNextTurnBegin(): void {
         if (this.useLogging)
             console.log('Next turn')
     }
@@ -66,43 +60,35 @@ console.log(player1Select)
 console.log(player2Select)
 console.log(beginPlay)
 
-function getPlayer(name: string, player: IPlayer): IAiController
-{
+function getPlayer(name: string, player: IPlayer): IAiController {
 
-    if (name === 'human')
-    {
+    if (name === 'human') {
         return new PlayerAiController(player, focus, gameBoardView)
     }
 
-    if (name === 'random')
-    {
+    if (name === 'random') {
         return new RandomPlayer(player, focus, gameBoardView)
     }
 
-    if (name === 'minimax')
-    {
+    if (name === 'minimax') {
         return new MinMaxAiPlayerController(player, focus, gameBoardView)
     }
 
-    if (name === 'negamax')
-    {
+    if (name === 'negamax') {
         return new NegaMaxPlayer(player, focus, gameBoardView)
     }
 
     throw new Error('Selected unavailable player controller')
 }
 
-beginPlay.addEventListener('click', () =>
-{
+beginPlay.addEventListener('click', () => {
     let p1
     let p2
 
-    try
-    {
+    try {
         p1 = getPlayer(player1Select.options[player1Select.selectedIndex].value, PLAYER_RED)
         p2 = getPlayer(player2Select.options[player2Select.selectedIndex].value, PLAYER_GREEN)
-    } catch (e)
-    {
+    } catch (e) {
         alert(e)
         return
     }
@@ -113,7 +99,7 @@ beginPlay.addEventListener('click', () =>
     gameBoard.style.opacity = '1.0'
 
     const controller = new GameBoardController(gameBoardView, p1, p2)
-    focus.events.on(EventVictory, p => { 
+    focus.events.on(EventVictory, p => {
         alert(`${getPlayerName(p)} won`)
         console.clear()
         document.location.reload()

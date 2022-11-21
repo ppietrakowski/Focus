@@ -7,22 +7,18 @@ import { getLegalMovesFromField } from './LegalMovesFactory'
 import { IPlayer } from './Player'
 
 
-export class RandomPlayer extends AiController
-{
+export class RandomPlayer extends AiController {
 
-    constructor(aiOwnedPlayer: IPlayer, game: IFocus, gameBoard: IGameBoardView)
-    {
+    constructor(aiOwnedPlayer: IPlayer, game: IFocus, gameBoard: IGameBoardView) {
         super(aiOwnedPlayer, game, gameBoard)
     }
 
-    move(): Promise<boolean>
-    {
+    move(): Promise<boolean> {
         let moves: Move[] = []
 
         const yourFields: IField[] = []
 
-        this._gameBoard.gameBoard.each(v =>
-        {
+        this._gameBoard.gameBoard.each(v => {
             if (this.ownedPlayer.doesOwnThisField(v))
                 yourFields.push(v)
         })
@@ -30,16 +26,14 @@ export class RandomPlayer extends AiController
         moves = yourFields.flatMap(v => getLegalMovesFromField(this._gameBoard.gameBoard, v.x, v.y))
 
         const randomMove = moves[randomInteger(0, moves.length)] || null
-        if (randomMove !== null)
-        {
+        if (randomMove !== null) {
             return this._game.moveToField(randomMove.x, randomMove.y, randomMove.direction, randomMove.moveCount)
         }
 
         return Promise.reject('not move founded')
     }
 
-    onPlaceStateStarted(): void
-    {
+    onPlaceStateStarted(): void {
         console.log(`Computer player(${getPlayerName(this.ownedPlayer)}) places`)
         const { x, y } = this.getRandomFieldPosition(f => f.isPlayable)
 

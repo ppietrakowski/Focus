@@ -1,5 +1,5 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
-import { EventAddedToPool, EventMovedField, IFocus } from './IFocus'
+import { EventMovedField, IFocus } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
 import { ReserveView } from './ReserveView'
 import { IReserveView, EventPoolClicked } from './IReserveView'
@@ -12,8 +12,7 @@ import { Direction, DirectionNorth, DirectionWest } from './IField'
 import EventEmitter from 'eventemitter3'
 
 
-export class GameBoardView implements IGameBoardView
-{
+export class GameBoardView implements IGameBoardView {
 
     static readonly POOL_CLICKED = 'PoolClicked'
 
@@ -25,10 +24,9 @@ export class GameBoardView implements IGameBoardView
     events: EventEmitter
 
     private _fields: IFieldView[]
-    private _selectedField: IFieldView
+    private _selectedField: IFieldView | null
 
-    constructor(game: IFocus)
-    {
+    constructor(game: IFocus) {
         this.events = new EventEmitter()
         this.gameBoard = game.gameBoard
 
@@ -48,8 +46,7 @@ export class GameBoardView implements IGameBoardView
 
         this.game.events.on(EventMovedField, () => this.erasePossibleMoves())
         this.gameBoard.each(
-            element =>
-            {
+            element => {
                 let e: IFieldView = new FieldView(this.game, element)
                 this.board.appendChild(e.domElement)
 
@@ -60,38 +57,32 @@ export class GameBoardView implements IGameBoardView
                 this._fields.push(e)
             }
         )
+        this._selectedField = null
     }
 
-    private onPoolClicked(player: IPlayer, reserve: IReserveView): void
-    {
+    private onPoolClicked(player: IPlayer, reserve: IReserveView): void {
         this.events.emit(EventPoolClicked, player, reserve)
     }
 
-    addPoolClickedListener(listener: IPoolClickedListener, context?: any): void
-    {
+    addPoolClickedListener<T>(listener: IPoolClickedListener, context?: T): void {
         this.events.on(EventPoolClicked, listener, context)
     }
 
-    removePoolClickedListener(listener: IPoolClickedListener, context?: any): void
-    {
+    removePoolClickedListener<T>(listener: IPoolClickedListener, context?: T): void {
         this.events.off(EventPoolClicked, listener, context)
     }
 
-    getFieldAt(i: number): IFieldView
-    {
+    getFieldAt(i: number): IFieldView {
         return this._fields[i]
     }
 
-    each(callback: ForEachFieldInView): void
-    {
-        for (const child of this._fields)
-        {
+    each(callback: ForEachFieldInView): void {
+        for (const child of this._fields) {
             callback(child)
         }
     }
 
-    renderPossibleMoves(selectedField: IFieldView)
-    {
+    renderPossibleMoves(selectedField: IFieldView) {
         this._selectedField = selectedField
         const maxPossibleMoves = selectedField.field.height
 
@@ -104,21 +95,21 @@ export class GameBoardView implements IGameBoardView
         selectedField.visualizeHovered()
     }
 
-    private renderInSameLine(maxPossibleMoves: number, baseDirection: Direction)
-    {
-        for (let i = 1; i <= maxPossibleMoves; i++)
-        {
+    private renderInSameLine(maxPossibleMoves: number, baseDirection: Direction) {
+        for (let i = 1; i <= maxPossibleMoves; i++) {
             this.selectNeighboursInRange(baseDirection, i)
         }
     }
 
-    get isSomethingSelected()
-    {
+    get isSomethingSelected() {
         return !!this._selectedField
     }
 
-    private selectNeighboursInRange(baseDirection: Direction, maxRange: number)
-    {
+    private selectNeighboursInRange(baseDirection: Direction, maxRange: number) {
+        if (this._selectedField === null) {
+            return
+        }
+
         const { field } = this._selectedField
         const offset = this.game.getOffsetBasedOnDirection(field, baseDirection, maxRange)
 
@@ -127,8 +118,7 @@ export class GameBoardView implements IGameBoardView
         neighbours.forEach(v => v.visualizeHovered())
     }
 
-    erasePossibleMoves()
-    {
+    erasePossibleMoves() {
         this._fields.forEach(v => v.visualizeUnhovered())
         this._selectedField = null
     }

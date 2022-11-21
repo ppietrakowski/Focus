@@ -4,33 +4,27 @@ import { IGameBoard } from './IGameBoard'
 import { IPlayer } from './Player'
 
 
-export interface IVictoryListener
-{
+export interface IVictoryListener {
     onVictory(victoriousPlayer: IPlayer): void
 }
 
-export interface IMovedListener
-{
+export interface IMovedListener {
     onMoveField(fromX: number, fromY: number, from: IField, to: IField): void
 }
 
-export interface IAddedToPoolListener
-{
+export interface IAddedToPoolListener {
     onAddedToPool(toWhichPlayer: IPlayer): void
 }
 
-export interface IEnemyHasPoolListener
-{
+export interface IEnemyHasPoolListener {
     onEnemyHasPool(enemy: IPlayer): void
 }
 
-export interface INewTurnListener
-{
+export interface INewTurnListener {
     onNextTurnBegin(currentPlayer: IPlayer): void
 }
 
-export interface Move
-{
+export interface Move {
     direction?: Direction,
     moveCount?: number
 
@@ -55,8 +49,7 @@ export const EventAddedToPool = 'AddedToPool'
 export const EventEnemyHasPool = 'EnemyHasPool'
 export const EventNewTurn = 'NewTurn'
 
-export interface IFocus
-{
+export interface IFocus {
     readonly events: EventEmitter
     readonly gameBoard: IGameBoard
 

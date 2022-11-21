@@ -7,20 +7,22 @@ import { IReserveView } from './IReserveView'
 import { Direction } from './IField'
 
 
+function isValidDirection(direction: Direction): boolean {
+    return direction.x !== 0 || direction.y !== 0
+}
+
 /**
  * Class responsible for managing owning player turn.
  * Works by hook to gameBoard and IFieldView events
  */
-export default class PlayerAiController extends AiController
-{
-    private _selectedField?: IFieldView
+export default class PlayerAiController extends AiController {
+    private _selectedField: IFieldView | null
     private _usedPool = false
 
-    constructor(player: IPlayer, game: IFocus, gameBoard: IGameBoardView)
-    {
+    constructor(player: IPlayer, game: IFocus, gameBoard: IGameBoardView) {
         super(player, game, gameBoard)
 
-        this._selectedField = undefined
+        this._selectedField = null
 
         this._gameBoard.each(v => this.hookIntoClickEvent(v))
 
@@ -30,23 +32,18 @@ export default class PlayerAiController extends AiController
         this._gameBoard.each(v => v.events.on(EventMouseLeaveField, this.onMouseLeaveFieldView, this))
     }
 
-    private onMouseOverFieldView(player: IPlayer, fieldView: IFieldView): void
-    {
+    private onMouseOverFieldView(player: IPlayer, fieldView: IFieldView): void {
         this.tintHoveredField(player, fieldView)
     }
 
-    private onMouseLeaveFieldView(player: IPlayer, fieldView: IFieldView): void
-    {
+    private onMouseLeaveFieldView(player: IPlayer, fieldView: IFieldView): void {
         this.clearTintFromHoveredField(player, fieldView)
     }
 
 
-    private onPoolClicked(player: IPlayer, reserve: IReserveView): void
-    {
-        if (this.isTurnOfPlayer(player))
-        {
-            if (this._usedPool)
-            {
+    private onPoolClicked(player: IPlayer, reserve: IReserveView): void {
+        if (this.isTurnOfPlayer(player)) {
+            if (this._usedPool) {
                 reserve.addToReserve(player)
                 this._usedPool = false
                 return
@@ -57,73 +54,59 @@ export default class PlayerAiController extends AiController
         }
     }
 
-    private onFieldViewClick(fieldView: IFieldView): void
-    {
-        try
-        {
+    private onFieldViewClick(fieldView: IFieldView): void {
+        try {
             this.selectField(fieldView)
-        } catch (e)
-        {
+        } catch (e) {
             const exception = e as unknown as Error
             console.log(exception.message)
         }
     }
 
-    private isTurnOfPlayer(player: IPlayer)
-    {
+    private isTurnOfPlayer(player: IPlayer) {
         const { currentPlayer } = this._game
 
         return currentPlayer === player
     }
 
-    private tintHoveredField(_player: IPlayer, field: IFieldView)
-    {
-        if (this.canBeTinted(field))
-        {
+    private tintHoveredField(_player: IPlayer, field: IFieldView) {
+        if (this.canBeTinted(field)) {
             field.visualizeHovered()
         }
     }
 
-    private canBeTinted(field: IFieldView)
-    {
+    private canBeTinted(field: IFieldView) {
         const { currentPlayer } = this._game
 
         return this.isTurnOfPlayer(this.ownedPlayer) && currentPlayer.doesOwnThisField(field.field) && !this._selectedField
     }
 
-    private clearTintFromHoveredField(_player: IPlayer, field: IFieldView)
-    {
-        if (this.canBeTinted(field))
-        {
+    private clearTintFromHoveredField(_player: IPlayer, field: IFieldView) {
+        if (this.canBeTinted(field)) {
             field.visualizeUnhovered()
         }
     }
 
-    private hookIntoClickEvent(fieldView: IFieldView)
-    {
+    private hookIntoClickEvent(fieldView: IFieldView) {
         fieldView.addClickListener(this.onFieldViewClick, this, true)
     }
 
-    move(): Promise<boolean>
-    {
+    move(): Promise<boolean> {
         return Promise.resolve(true)
     }
 
-    stopMoving(): void
-    {
+    stopMoving(): void {
         __dirname
     }
 
-    private selectField(clickedField: IFieldView)
-    {
+    private selectField(clickedField: IFieldView) {
         if (!this.isAbleToMoveThisField(clickedField))
             return
 
         if (!this._gameBoard.isSomethingSelected)
             this._gameBoard.erasePossibleMoves()
 
-        if (!this._selectedField)
-        {
+        if (!this._selectedField) {
             this.clickedFirstTime(clickedField)
             return
         }
@@ -131,26 +114,22 @@ export default class PlayerAiController extends AiController
         this.onClickedWhenSomethingSelected(clickedField)
     }
 
-    private isAbleToMoveThisField(clickedField: IFieldView)
-    {
+    private isAbleToMoveThisField(clickedField: IFieldView) {
         const wasSomethingSelected = !!this._selectedField
         const doesBelongToYou = this.ownedPlayer.doesOwnThisField(clickedField.field)
 
         return this.isTurnOfPlayer(this.ownedPlayer) && (doesBelongToYou || wasSomethingSelected)
     }
 
-    private clickedFirstTime(clickedField: IFieldView)
-    {
-        if (!this.ownedPlayer.doesOwnThisField(clickedField.field))
-        {
+    private clickedFirstTime(clickedField: IFieldView) {
+        if (!this.ownedPlayer.doesOwnThisField(clickedField.field)) {
             return
         }
 
         this.selectNewField(clickedField)
     }
 
-    private selectNewField(clickedField: IFieldView)
-    {
+    private selectNewField(clickedField: IFieldView) {
         this._selectedField = clickedField
         clickedField.visualizeHovered()
         console.log(clickedField.domElement.className)
@@ -158,26 +137,21 @@ export default class PlayerAiController extends AiController
         this._gameBoard.renderPossibleMoves(this._selectedField)
     }
 
-    checkIsYourTurn(player: IPlayer): Promise<void>
-    {
+    checkIsYourTurn(): Promise<void> {
         return Promise.resolve()
     }
 
-    private onClickedWhenSomethingSelected(clickedField: IFieldView)
-    {
+    private onClickedWhenSomethingSelected(clickedField: IFieldView) {
 
         // respond for double click
-        if (this.selectedFieldWasDoubleClicked(clickedField))
-        {
+        if (this.selectedFieldWasDoubleClicked(clickedField) || this._selectedField === null) {
             this.unselectField()
             return
         }
 
-        const direction = this._selectedField?.field.getDirectionToField(clickedField.field)
+        const direction = this._selectedField.field.getDirectionToField(clickedField.field)
 
-
-        if (!direction)
-        {
+        if (isValidDirection(direction)) {
             // field is on diagonal or too far away
             console.warn('Tried to move more than is available in this time')
             this.unselectField()
@@ -188,13 +162,11 @@ export default class PlayerAiController extends AiController
         //this._game.nextTurn()
     }
 
-    private selectedFieldWasDoubleClicked(clickedField: IFieldView)
-    {
+    private selectedFieldWasDoubleClicked(clickedField: IFieldView) {
         return this._selectedField === clickedField
     }
 
-    private moveToField(clickedField: IFieldView, direction: Direction)
-    {
+    private moveToField(clickedField: IFieldView, direction: Direction) {
         if (!this._selectedField)
             return
 
@@ -203,36 +175,30 @@ export default class PlayerAiController extends AiController
         this._game.moveToField(this._selectedField.field.x, this._selectedField.field.y, direction, moveCount)
 
         this.unselectField()
-        
+
     }
 
-    onPlaceStateStarted(): void
-    {
-        if (this._game.currentPlayer === this.ownedPlayer)
-        {
+    onPlaceStateStarted(): void {
+        if (this._game.currentPlayer === this.ownedPlayer) {
             this._gameBoard.each(v => this.enterIntoPlaceState(v))
         }
     }
 
-    private enterIntoPlaceState(field: IFieldView)
-    {
+    private enterIntoPlaceState(field: IFieldView) {
         field.backupClickListeners()
 
         // use click event now for placing instead of moving
         field.addClickListener(this.onPlaceFieldClicked, this, false)
     }
 
-    private onPlaceFieldClicked(field: IFieldView)
-    {
-        if (!this.ownedPlayer.hasAnyPool)
-        {
+    private onPlaceFieldClicked(field: IFieldView) {
+        if (!this.ownedPlayer.hasAnyPool) {
             console.warn('Tried to place item without any pool')
             this.resetToPlayState(this.ownedPlayer)
             return
         }
 
-        if (!field.field.isPlayable)
-        {
+        if (!field.field.isPlayable) {
             this.resetToPlayState(this.ownedPlayer)
             return
         }
@@ -241,17 +207,15 @@ export default class PlayerAiController extends AiController
         this.resetToPlayState(this._game.currentPlayer)
     }
 
-    private resetToPlayState(newNextPlayer: IPlayer)
-    {
+    private resetToPlayState(newNextPlayer: IPlayer) {
         this._gameBoard.each(v => v.restoreClickListeners())
         this._game.currentPlayer = newNextPlayer
         this.unselectField()
     }
 
-    private unselectField()
-    {
+    private unselectField() {
         this._selectedField?.visualizeUnhovered()
         this._gameBoard.erasePossibleMoves()
-        this._selectedField = undefined
+        this._selectedField = null
     }
 }

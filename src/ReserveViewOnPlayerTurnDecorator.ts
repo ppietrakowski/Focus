@@ -1,82 +1,63 @@
 import EventEmitter from 'eventemitter3'
 import { EventAddedToPool, IFocus } from './IFocus'
 import { IPoolClickedListener } from './IGameBoardView'
-import { EventPoolDecreased, EventPoolIncreased, IPlayer } from './Player'
+import { IPlayer } from './Player'
 import { ReserveView } from './ReserveView'
 import { IReserveView } from './IReserveView'
 
-export class ReserveViewOnPlayerTurnDecorator implements IReserveView
-{
+export class ReserveViewOnPlayerTurnDecorator implements IReserveView {
     readonly owner: IPlayer
     readonly events: EventEmitter
 
-    constructor(private readonly _reserveView: IReserveView, private readonly _game: IFocus)
-    {
+    constructor(private readonly _reserveView: IReserveView, private readonly _game: IFocus) {
         this.events = _reserveView.events
         this.owner = this._reserveView.owner
 
-        if (_reserveView instanceof ReserveView)
-        {
+        if (_reserveView instanceof ReserveView) {
             _reserveView.reserveFields.forEach(v => v.addEventListener('click', () => this.broadcastClickMessage()))
         }
 
         this._game.events.on(EventAddedToPool, this.addToReserve, this)
     }
 
-    addPoolClickedListener(listener: IPoolClickedListener, context: any): void
-    {
+    addPoolClickedListener<T>(listener: IPoolClickedListener, context: T): void {
         this._reserveView.addPoolClickedListener(listener, context)
     }
 
-    emitPoolClicked(player: IPlayer, reserve: IReserveView): void
-    {
-        if (this.canAccess())
-        {
+    emitPoolClicked(player: IPlayer, reserve: IReserveView): void {
+        if (this.canAccess()) {
             this._reserveView.emitPoolClicked(player, reserve)
         }
     }
 
-    getFieldAt(i: number): HTMLDivElement
-    {
+    getFieldAt(i: number): HTMLDivElement {
         return this._reserveView.getFieldAt(i)
     }
 
-    addToReserve(toWhichPlayer: IPlayer)
-    {
-        if (toWhichPlayer === this.owner)
-        {
+    addToReserve(toWhichPlayer: IPlayer) {
+        if (toWhichPlayer === this.owner) {
             if (this._reserveView instanceof ReserveView)
                 this._reserveView.emptyAllFields()
             this._reserveView.addToReserve(toWhichPlayer)
         }
     }
 
-    removeFromReserve()
-    {
+    removeFromReserve() {
         console.log('removed from reserve')
         console.log(this.owner.pooledPawns)
         if (this._reserveView instanceof ReserveView)
             this._reserveView.emptyAllFields()
 
-
-        //if (this.canAccess())
-        //{
         return this._reserveView.removeFromReserve()
-        //}
-
-        return false
     }
 
-    private broadcastClickMessage()
-    {
-        if (this.canAccess())
-        {
+    private broadcastClickMessage() {
+        if (this.canAccess()) {
             this._reserveView.emitPoolClicked(this.owner, this)
         }
     }
 
-    private canAccess()
-    {
+    private canAccess() {
         return this._game.currentPlayer === this.owner
     }
 }

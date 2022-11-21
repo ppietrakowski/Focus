@@ -1,30 +1,25 @@
-import { FieldState, getDirectionFromOffset, IField } from './IField'
-import { IFocus, Move } from './IFocus'
-import { AfterPlaceMove, IGameBoard } from './IGameBoard'
-import { getLegalMovesFromField, getNeighbours, getOffsetBasedOnDirection } from './LegalMovesFactory'
+import { FieldState, IField } from './IField'
+import { IFocus } from './IFocus'
+import { IGameBoard } from './IGameBoard'
+import { getOffsetBasedOnDirection } from './LegalMovesFactory'
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
 
 
-export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: IPlayer, game: IFocus) 
-{
+export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: IPlayer, game: IFocus) {
     let controlledByYou = 0
 
     let controlledByEnemy = 0
-
-
 
     let controlledInReserveByYou = 0
     let controlledInReserveByEnemy = 0
 
 
-    if (player.state === FieldState.Red)
-    {
+    if (player.state === FieldState.Red) {
         controlledInReserveByYou = board.redPlayerPawnCount
         controlledInReserveByEnemy = board.greenPlayerPawnCount
-    } else 
-    {
+    } else {
         controlledInReserveByEnemy = board.redPlayerPawnCount
         controlledInReserveByYou = board.greenPlayerPawnCount
     }
@@ -37,12 +32,10 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
     const yourFields: IField[] = []
     const enemyFields: IField[] = []
 
-    board.each(v =>
-    {
+    board.each(v => {
         if (player.doesOwnThisField(v))
             yourFields.push(v)
-        else if (game.getNextPlayer(player).doesOwnThisField(v))
-        {
+        else if (game.getNextPlayer(player).doesOwnThisField(v)) {
             enemyFields.push(v)
         }
     })
@@ -54,12 +47,10 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
 
     let heightOfNeighbour = 1
 
-    if (afterPlaceMove && afterPlaceMove.move && afterPlaceMove.move.direction)
-    {
+    if (afterPlaceMove && afterPlaceMove.move && afterPlaceMove.move.direction) {
         const offset = getOffsetBasedOnDirection(board.getFieldAt(afterPlaceMove.move.x, afterPlaceMove.move.y), afterPlaceMove.move.direction, afterPlaceMove.move.moveCount)
 
-        try
-        {
+        try {
             heightOfNeighbour = Math.max(heightOfNeighbour, board.getFieldAt(offset.x, offset.y).height)
         } catch (e)
         // eslint-disable-next-line no-empty
@@ -67,6 +58,6 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
         }
     }
 
-    const evalValue = 15 * ratio + 5 * ratioInReserve
+    const evalValue = 15 * ratio + 5 * ratioInReserve + heightOfNeighbour
     return evalValue
 }
