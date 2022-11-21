@@ -159,6 +159,7 @@
 
 <body>
   <div id="gameStyles" class="buttonBoard">
+    <fieldset>
       <label for="player1">Red player: </label>
       <select name="player1" id="player1">
         <option value="human">Human player</option>
@@ -174,7 +175,8 @@
         <option value="minimax">Minimax</option>
         <option value="negamax">Negamax</option>
       </select>
-      <button id="BeginPlayButton">Begin play</button>
+      <button id="BeginPlayButton" onclick="this.parentElement.disabled = 'disabled';">Begin play</button>
+    </fieldset>
   </div>
 
   <div class="gameBoard">
