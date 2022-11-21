@@ -34,8 +34,8 @@ export abstract class AiController implements IAiController {
 
         if (player == this.ownedPlayer) {
             runTimeout(0.01)
-                .then(() => this.move().then(v => this._game.mustEnd = !v))
-            //.then(console.trace)
+                .then(() => this.move())
+                .catch(console.log)
         } else {
             this.stopMoving()
         }

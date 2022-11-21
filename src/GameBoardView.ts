@@ -1,5 +1,5 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
-import { EventMovedField, IFocus } from './IFocus'
+import { EventMovedField, EventVictory, IFocus } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
 import { ReserveView } from './ReserveView'
 import { IReserveView, EventPoolClicked } from './IReserveView'
@@ -57,6 +57,7 @@ export class GameBoardView implements IGameBoardView {
                 this._fields.push(e)
             }
         )
+        this.game.events.on(EventVictory, () => this.erasePossibleMoves())
         this._selectedField = null
     }
 

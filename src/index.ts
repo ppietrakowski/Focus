@@ -40,7 +40,7 @@ class LoggingListener {
 }
 
 const logging = new LoggingListener()
-logging.useLogging = false
+logging.useLogging = true
 
 focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
 focus.events.on(EventVictory, logging.onVictory, logging)
@@ -101,7 +101,7 @@ beginPlay.addEventListener('click', () => {
     const controller = new GameBoardController(gameBoardView, p1, p2)
     focus.events.on(EventVictory, p => {
         alert(`${getPlayerName(p)} won`)
-        console.clear()
+        //console.clear()
         document.location.reload()
     }
     )

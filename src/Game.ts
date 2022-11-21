@@ -30,7 +30,7 @@ export class Focus implements IFocus {
         this._currentPlayer = PLAYER_RED
         this._hasPoolToPut = false
 
-        this.events.on(EventMovedField, this.onMoveField, this)
+        //this.events.on(EventMovedField, this.onMoveField, this)
 
         this.gameBoard.each(v => {
             const f = v as Field
@@ -69,7 +69,7 @@ export class Focus implements IFocus {
         const fromField = this.gameBoard.getFieldAt(x, y)
 
         if (!this._currentPlayer.doesOwnThisField(fromField)) {
-            //debugger
+            debugger
             return Promise.reject(false)
         }
 
@@ -155,6 +155,7 @@ export class Focus implements IFocus {
             return
 
 
+        this.onMoveField()
         this._currentPlayer = this.getNextPlayer()
         this.events.emit(EventNewTurn, this._currentPlayer)
     }

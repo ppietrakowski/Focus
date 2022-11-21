@@ -34,7 +34,7 @@ export class MinMaxAiPlayerController extends AiController {
     }
 
     move(): Promise<boolean> {
-        const { bestMove } = this.minMax(this._gameBoard.gameBoard, 1, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
+        const { bestMove } = this.minMax(this._gameBoard.gameBoard, 3, true, this.ownedPlayer) as BestMove
 
         if (!bestMove.move.shouldPlaceSomething && !bestMove) {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)

@@ -1,3 +1,4 @@
+import { getPlayerName } from './AiController'
 import { EventEnemyHasPool, EventVictory } from './IFocus'
 import { IAiController, IGameBoardController } from './IGameBoardController'
 import { IGameBoardView } from './IGameBoardView'
@@ -24,6 +25,8 @@ export class GameBoardController implements IGameBoardController {
 
     private onEnemyHasPool(enemy: IPlayer): void {
         this.game.setHasPoolToPut()
+
+        console.log('has pool', getPlayerName(enemy))
 
         if (this.game.currentPlayer !== enemy)
             this.game.nextTurn()
