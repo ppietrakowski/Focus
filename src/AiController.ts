@@ -3,9 +3,10 @@ import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
 import { IAiController, IGameBoardController } from './IGameBoardController'
 import { FieldState, IField } from './IField'
-import { IPredicate, randomInteger, runTimeout } from './GameUtils'
+import { IPredicate, randomInteger } from './GameUtils'
 import { GameBoard } from './GameBoard'
 import { debugLog } from './DebugUtils'
+import { runTimeout } from './Timing'
 
 
 export abstract class AiController implements IAiController {
@@ -34,8 +35,9 @@ export abstract class AiController implements IAiController {
             return Promise.resolve()
 
         if (player == this.ownedPlayer) {
-            runTimeout(0.01)
+            runTimeout(0.2)
                 .then(() => this.move())
+                .then(console.trace)
                 .catch(() => {
                     console.log('Illegal move or not move available')
                     this._game.nextTurn()

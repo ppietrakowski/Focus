@@ -19,7 +19,6 @@ function endTask(task: TimeTask) {
 function animationTimeFunction(time: number) {
 
     TimingContext.delta = 0.001 * (time - TimingContext.lastTime)
-
     TimingContext.lastTime = time
 
     TimingContext.tasks.forEach(task => task.update(TimingContext.delta))
@@ -27,6 +26,7 @@ function animationTimeFunction(time: number) {
     TimingContext.tasks.filter(task => task.hasExpired).forEach(endTask)
 
     TimingContext.tasks = TimingContext.tasks.filter(v => !v.hasExpired)
+
 
     requestAnimationFrame(animationTimeFunction)
 }
@@ -48,6 +48,8 @@ function createNewTimeTask(time: number, resolve: TimeResolveFn, reject: TimeRej
 
     const task = new TimeTask(time, resolve, null)
     TimingContext.tasks.push(task)
+
+    console.log(TimingContext.tasks)
     return task
 }
 
@@ -58,4 +60,10 @@ function createNewTimeTask(time: number, resolve: TimeResolveFn, reject: TimeRej
  */
 export function runTimeout(time: number) {
     return new Promise<void>((resolve, reject) => createNewTimeTask(time, resolve, reject))
+}
+
+export function addTimeTask(task: TimeTask) {
+    if (!task.hasExpired) {
+        TimingContext.tasks.push(task)
+    }
 }

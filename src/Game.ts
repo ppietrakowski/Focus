@@ -10,7 +10,8 @@ import EventEmitter from 'eventemitter3'
 import board from './board.json'
 import { getPlayerName } from './AiController'
 import { debugLog } from './DebugUtils'
-import { runTimeout } from './GameUtils'
+import { addTimeTask, runTimeout } from './Timing'
+import { TimeTask } from './TimeTask'
 
 export const PLAYER_RED = new Player(FieldState.Red)
 export const PLAYER_GREEN = new Player(FieldState.Green)
@@ -83,9 +84,12 @@ export class Focus implements IFocus {
             return Promise.reject(false)
         }
 
-        runTimeout(0.01)
-            .then(() => this.events.emit(EventMovedField, x, y, fromField, toField))
-            .then(() => this.nextTurn())
+        let timeTask = new TimeTask(0.1, () => this.events.emit(EventMovedField, x, y, fromField, toField), this)
+
+        addTimeTask(timeTask)
+
+        timeTask = new TimeTask(0.2, this.nextTurn, this)
+        addTimeTask(timeTask)
 
         return Promise.resolve(true)
     }
