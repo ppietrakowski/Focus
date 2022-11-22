@@ -12,11 +12,6 @@ export function randomBoolean() {
     return random <= 0.5
 }
 
-
-export function runTimeout(delayInSeconds: number) {
-    return new Promise<void>(resolve => setTimeout(resolve, delayInSeconds * 1000))
-}
-
 export interface IPredicate<T> {
     (obj: T): boolean
 }

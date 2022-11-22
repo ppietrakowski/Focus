@@ -9,7 +9,7 @@ import { MinMaxAiPlayerController } from './MinMaxAiPlayerController'
 import { IAiController } from './IGameBoardController'
 import { getPlayerName } from './AiController'
 import { NegaMaxPlayer } from './NegaMaxAiPlayerController'
-import { runTimeout } from './GameUtils'
+import { initializeTiming, runTimeout } from './Timing'
 
 
 const focus = new Focus()
@@ -106,9 +106,11 @@ beginPlay.addEventListener('click', () => {
     focus.events.on(EventVictory, p => {
         alert(`${getPlayerName(p)} won`)
         //console.clear()
-        document.location.reload()
+        //document.location.reload()
     }
     )
+
+    initializeTiming()
 
     runTimeout(1).then(() => controller.start())
 })
