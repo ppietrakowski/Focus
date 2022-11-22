@@ -15,4 +15,8 @@ export class TimeTask {
     get hasExpired() {
         return this.current >= this.time
     }
+
+    update(dt: number) {
+        this.current += dt
+    }
 }
