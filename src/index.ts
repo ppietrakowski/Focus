@@ -93,8 +93,6 @@ beginPlay.addEventListener('click', () => {
         return
     }
 
-    console.log(p1)
-    console.log(p2)
     gameBoard.style.visibility = 'visible'
     gameBoard.style.opacity = '1.0'
 

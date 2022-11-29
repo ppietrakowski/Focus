@@ -30,6 +30,10 @@ export interface IFieldView {
     domElement: HTMLDivElement
 }
 
+interface IVisualizeFunction {
+    (state: number): string
+}
+
 interface IClickListenerBackup {
     listener: IClickListener
     context: unknown
@@ -45,9 +49,17 @@ export class FieldView implements IFieldView {
     constructor(private readonly game: IFocus, field: IField) {
         this.field = field
         this.events = new EventEmitter()
-        this.domElement = document.createElement('div')
 
-        this.domElement.className = this.getUnhoveredClassName()
+        this.domElement = document.createElement('div')
+        this.domElement.className = 'rootObject'
+
+        for (let i = 0; i < 5; i++) {
+            const htmlElement = document.createElement('div') as HTMLDivElement
+            htmlElement.className = 'emptyField'
+            this.domElement.appendChild(htmlElement)
+        }
+        this.domElement.children[0].className = this.getUnhoveredClassName(field.state)
+
         this._backupClickListeners = []
     }
 
@@ -74,11 +86,27 @@ export class FieldView implements IFieldView {
     }
 
     visualizeHovered() {
-        this.domElement.className = this.getHoveredClassName()
+        this.updateEachChild(this.getHoveredClassName)
     }
 
     visualizeUnhovered() {
-        this.domElement.className = this.getUnhoveredClassName()
+        this.updateEachChild(this.getUnhoveredClassName)
+    }
+
+    private updateEachChild(fn: IVisualizeFunction) {
+        let scale = 1.0
+        const children = this.domElement.children
+        const tower = this.field.towerStructure
+
+        scale = 1.0 - (tower.length-1) * 0.1
+
+        for (let i = 0; i < tower.length; i++) {
+            const child = children[i] as HTMLDivElement
+            child.className = fn(tower[i])
+            child.style.scale = scale.toString()
+            child.style.zIndex = (5 - i).toString()
+            scale += 0.1
+        }
     }
 
     isInRange(anotherField: IField, range: Direction) {
@@ -86,11 +114,11 @@ export class FieldView implements IFieldView {
             (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
     }
 
-    private getHoveredClassName() {
-        return (this.field.state & FieldState.Red) ? 'playerRedFieldHovered' : (this.field.state & FieldState.Green) ? 'playerGreenFieldHovered' : 'emptyField'
+    private getHoveredClassName(state: number) {
+        return (state & FieldState.Red) ? 'playerRedFieldHovered' : (state & FieldState.Green) ? 'playerGreenFieldHovered' : 'emptyField'
     }
 
-    private getUnhoveredClassName() {
-        return (this.field.state & FieldState.Red) ? 'playerRedField' : (this.field.state & FieldState.Green) ? 'playerGreenField' : 'emptyField'
+    private getUnhoveredClassName(state: number) {
+        return (state & FieldState.Red) ? 'playerRedField' : (state & FieldState.Green) ? 'playerGreenField' : 'emptyField'
     }
 }

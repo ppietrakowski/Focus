@@ -57,12 +57,13 @@ export default class PlayerAiController extends AiController {
     }
 
     private onFieldViewClick(fieldView: IFieldView): void {
-        try {
-            this.selectField(fieldView)
-        } catch (e) {
-            const exception = e as unknown as Error
-            console.log(exception.message)
-        }
+        this.selectField(fieldView)
+        // try {
+        //     this.selectField(fieldView)
+        // } catch (e) {
+        //     const exception = e as unknown as Error
+        //     console.log(exception.message)
+        // }
     }
 
     private isTurnOfPlayer(player: IPlayer) {

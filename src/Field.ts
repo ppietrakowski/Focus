@@ -128,7 +128,7 @@ export class Field implements IField {
         return this._underThisField.length + 1
     }
     get towerStructure() {
-        return [this.state].concat(this._underThisField).map(function(x){return x == 8 ? 'red' : x == 16 ? 'green' : ''})
+        return [this.state].concat(this._underThisField)
     }
 
     get isOvergrown() {

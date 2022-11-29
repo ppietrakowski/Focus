@@ -5,6 +5,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    .rootObject {
+      height: 80px;
+      width: 80px;
+      float: left;
+      position: relative;
+      display: block;
+    }
+
     body {
       margin: 0;
       padding: 0;
@@ -81,29 +89,24 @@
     }
 
     .playerRedField {
+      float: none;
+      position: absolute;
       height: 80px;
       width: 80px;
       background-image: url(../img/focusPawnRed.svg);
       background-repeat: no-repeat;
       background-position: center;
-      float: left;
-      position: relative;
       background-blend-mode: multiply;
-    }
-
-    .playerRedField>img {
-      opacity: 0.75;
-      position: absolute;
     }
 
     .playerRedFieldHovered {
       opacity: 0.75;
+      float: none;
+      position: absolute;
       height: 80px;
       width: 80px;
       background-image: url(../img/focusPawnRed.svg);
       background-repeat: no-repeat;
-      float: left;
-      position: relative;
       background-position: center;
     }
 
@@ -113,43 +116,32 @@
     }
 
     .playerGreenField {
+      float: none;
+      position: absolute;
       height: 80px;
       width: 80px;
       background-image: url(../img/focusPawnGreen.svg);
       background-repeat: no-repeat;
-      float: left;
       background-position: center;
-      position: relative;
     }
 
 
     .playerGreenFieldHovered {
       opacity: 0.75;
+      float: none;
+      position: absolute;
       height: 80px;
       width: 80px;
       background-image: url(../img/focusPawnGreen.svg);
       background-repeat: no-repeat;
-      float: left;
       background-position: center;
-      position: relative;
-    }
-
-    .playerGreenField>img {
-      opacity: 0.75;
-      position: absolute;
-    }
-
-    .playerGreenFieldHovered>img {
-      opacity: 0.6;
-      position: absolute;
     }
 
     .emptyField {
-      height: 80px;
-      width: 80px;
       background-repeat: no-repeat;
       background-position: center;
-      float: left;
+      float: none;
+      position: absolute;
       z-index: 2;
     }
   </style>
