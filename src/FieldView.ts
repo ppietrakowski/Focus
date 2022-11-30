@@ -96,6 +96,11 @@ export class FieldView implements IFieldView {
     private updateEachChild(fn: IVisualizeFunction) {
         let scale = 1.0
         const children = this.domElement.children
+
+        for (let i = 0; i < children.length; i++) {
+            children[i].className = this.getUnhoveredClassName(FieldState.Empty)
+        }
+
         const tower = this.field.towerStructure
 
         scale = 1.0 - (tower.length-1) * 0.1

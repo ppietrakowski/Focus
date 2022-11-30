@@ -1,5 +1,6 @@
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
+import { PLAYER_RED } from './Game'
 import { FieldState, IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
@@ -32,11 +33,11 @@ export class MinMaxAiPlayerController extends AiController {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    depth = 3
+    depth = 1
 
     move(): Promise<boolean> {
         console.log('megamax')
-        const { bestMove } = this.minMax(this._gameBoard.gameBoard, this.depth, true, this.ownedPlayer) as BestMove
+        const { bestMove } = this.minMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
 
         if (!bestMove && !bestMove.move.shouldPlaceSomething) {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)

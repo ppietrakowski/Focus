@@ -1,6 +1,7 @@
 
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
+import { PLAYER_RED } from './Game'
 import { IField } from './IField'
 import { IFocus } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
@@ -27,7 +28,7 @@ export class NegaMaxPlayer extends AiController {
 
     move(): Promise<boolean> {
         console.log('negamax')
-        const { bestMove } = this.negamax(this._gameBoard.gameBoard, this.depth, true, this.ownedPlayer) as BestMove
+        const { bestMove } = this.negamax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer === PLAYER_RED, this.ownedPlayer) as BestMove
 
         if (!bestMove && !bestMove.move.shouldPlaceSomething) {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
