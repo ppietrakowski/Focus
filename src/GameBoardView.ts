@@ -8,9 +8,8 @@ import { ReserveViewOnPlayerTurnDecorator } from './ReserveViewOnPlayerTurnDecor
 import { IGameBoard } from './IGameBoard'
 import { ForEachFieldInView, IGameBoardView, IPoolClickedListener } from './IGameBoardView'
 import { FieldViewDecorator } from './FieldViewDecorator'
-import { Direction, DirectionNorth, DirectionWest, IField } from './IField'
 import EventEmitter from 'eventemitter3'
-import { getAvailableMoves } from './LegalMovesFactory'
+import { getLegalMovesFromField } from './LegalMovesFactory'
 
 export class GameBoardView implements IGameBoardView {
 
@@ -86,14 +85,11 @@ export class GameBoardView implements IGameBoardView {
     renderPossibleMoves(selectedField: IFieldView) {
         this._selectedField = selectedField
 
-        const moves = getAvailableMoves(this.gameBoard, this.game.currentPlayer)
-
         const isMoveFromThisField = function (move: Move) {
             return move.x === selectedField.field.x && move.y === selectedField.field.y
         }
 
-        const movesFromThisField = moves.aiMoves
-            .map(v => v.move)
+        const movesFromThisField = getLegalMovesFromField(this.gameBoard, selectedField.field.x, selectedField.field.y)
             .filter(isMoveFromThisField, this)
 
         
@@ -109,41 +105,10 @@ export class GameBoardView implements IGameBoardView {
 
             neighbours.forEach(v => v.visualizeHovered())
         }
-        
-        console.log(movesFromThisField)
-        console.log(this._fields)
-
-        // north & south
-        /*
-        this.renderInSameLine(maxPossibleMoves, DirectionNorth)
-
-        // east & west
-        this.renderInSameLine(maxPossibleMoves, DirectionWest)
-
-        */
-    }
-
-    private renderInSameLine(maxPossibleMoves: number, baseDirection: Direction) {
-        for (let i = 1; i <= maxPossibleMoves; i++) {
-            this.selectNeighboursInRange(baseDirection, i)
-        }
     }
 
     get isSomethingSelected() {
         return !!this._selectedField
-    }
-
-    private selectNeighboursInRange(baseDirection: Direction, maxRange: number) {
-        if (this._selectedField === null) {
-            return
-        }
-
-        const { field } = this._selectedField
-        const offset = this.game.getOffsetBasedOnDirection(field, baseDirection, maxRange)
-
-        const neighbours = this._fields.filter(v => v.isInRange(field, offset))
-
-        neighbours.forEach(v => v.visualizeHovered())
     }
 
     erasePossibleMoves() {

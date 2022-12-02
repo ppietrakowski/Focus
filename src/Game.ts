@@ -10,7 +10,7 @@ import EventEmitter from 'eventemitter3'
 import board from './board.json'
 import { getPlayerName } from './AiController'
 import { debugLog } from './DebugUtils'
-import { addTimeTask, runTimeout } from './Timing'
+import { addTimeTask } from './Timing'
 import { TimeTask } from './TimeTask'
 
 export const PLAYER_RED = new Player(FieldState.Red)
