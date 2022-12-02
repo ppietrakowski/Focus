@@ -32,7 +32,7 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView {
         return this._reserveView.getFieldAt(i)
     }
 
-    addToReserve(toWhichPlayer: IPlayer) {
+    addToReserve(toWhichPlayer: IPlayer): void {
         if (toWhichPlayer === this.owner) {
             if (this._reserveView instanceof ReserveView)
                 this._reserveView.emptyAllFields()
@@ -40,20 +40,20 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView {
         }
     }
 
-    removeFromReserve() {
+    removeFromReserve(): boolean {
         if (this._reserveView instanceof ReserveView)
             this._reserveView.emptyAllFields()
 
         return this._reserveView.removeFromReserve()
     }
 
-    private broadcastClickMessage() {
+    private broadcastClickMessage(): void {
         if (this.canAccess()) {
             this._reserveView.emitPoolClicked(this.owner, this)
         }
     }
 
-    private canAccess() {
+    private canAccess(): boolean {
         return this._game.currentPlayer === this.owner
     }
 }

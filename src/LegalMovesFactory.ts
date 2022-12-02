@@ -5,7 +5,7 @@ import { AfterPlaceMove, getAllFieldBelongingToPlayer, IGameBoard } from './IGam
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
-export function getOffsetBasedOnDirection(field: IField, direction: { x: number, y: number }, howManyFieldWantMove: number) {
+export function getOffsetBasedOnDirection(field: IField, direction: { x: number, y: number }, howManyFieldWantMove: number): Direction {
     let mult = howManyFieldWantMove
 
     if (howManyFieldWantMove < 1) {
@@ -97,7 +97,7 @@ let _aiMoves: AiMove[] = null
 let _afterPlaceMoves: AfterPlaceMove[] = null
 
 
-function getPlaceMoves(v: IField) {
+function getPlaceMoves(v: IField): void {
     const afterPlaceMove = _board.getBoardAfterPlace(v.x, v.y, _player)
 
     const move: AiMove = {
@@ -121,7 +121,12 @@ function getPlaceMoves(v: IField) {
     _afterPlaceMoves[_aiMoves.length - 1] = afterPlaceMove
 }
 
-export function getAvailableMoves(board: IGameBoard, player: IPlayer) {
+interface IAvailableMoves {
+    aiMoves: AiMove[]
+    afterPlaceMoves: AfterPlaceMove[]
+}
+
+export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
     let moves: Move[] = []
     _board = board
     _player = player

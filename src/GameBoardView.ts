@@ -82,7 +82,7 @@ export class GameBoardView implements IGameBoardView {
         }
     }
 
-    renderPossibleMoves(selectedField: IFieldView) {
+    renderPossibleMoves(selectedField: IFieldView): void {
         this._selectedField = selectedField
 
         const isMoveFromThisField = function (move: Move) {
@@ -107,11 +107,11 @@ export class GameBoardView implements IGameBoardView {
         }
     }
 
-    get isSomethingSelected() {
+    get isSomethingSelected(): boolean {
         return !!this._selectedField
     }
 
-    erasePossibleMoves() {
+    erasePossibleMoves(): void {
         this._fields.forEach(v => v.visualizeUnhovered())
         this._selectedField = null
     }

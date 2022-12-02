@@ -21,7 +21,7 @@ export interface IGameBoard {
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
 }
 
-export function getAllFieldBelongingToPlayer(board: IGameBoard, player: IPlayer) {
+export function getAllFieldBelongingToPlayer(board: IGameBoard, player: IPlayer): IField[] {
     const fields: IField[] = []
 
     for (let x = 0; x < 8; x++) {

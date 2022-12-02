@@ -92,15 +92,15 @@ export class FieldView implements IFieldView {
         }
     }
 
-    visualizeHovered() {
+    visualizeHovered(): void {
         this.updateEachChild(this.getHoveredClassName)
     }
 
-    visualizeUnhovered() {
+    visualizeUnhovered(): void {
         this.updateEachChild(this.getUnhoveredClassName)
     }
 
-    private updateEachChild(fn: IVisualizeFunction) {
+    private updateEachChild(fn: IVisualizeFunction): void {
         let scale = 1.0
         this.tower = this.field.towerStructure
 
@@ -113,7 +113,7 @@ export class FieldView implements IFieldView {
         }
     }
 
-    private updateChildDisplay(i: number, fn: IVisualizeFunction, scale: number) {
+    private updateChildDisplay(i: number, fn: IVisualizeFunction, scale: number): number {
         const child = this.rootNodeChilds[i]
 
         child.className = fn(this.tower[i])
@@ -124,7 +124,7 @@ export class FieldView implements IFieldView {
         return scale
     }
 
-    private clearEachChild(fn: IVisualizeFunction) {
+    private clearEachChild(fn: IVisualizeFunction): void {
         for (let i = 0; i < this.rootNodeChilds.length; i++) {
             const child = this.rootNodeChilds[i]
             child.className = fn(FieldState.Empty)
@@ -132,16 +132,16 @@ export class FieldView implements IFieldView {
         }
     }
 
-    isInRange(anotherField: IField, range: Direction) {
+    isInRange(anotherField: IField, range: Direction): boolean {
         return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) &&
             (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
     }
 
-    private getHoveredClassName(state: number) {
+    private getHoveredClassName(state: number): string {
         return (state & FieldState.Red) ? 'playerRedFieldHovered' : (state & FieldState.Green) ? 'playerGreenFieldHovered' : 'emptyField'
     }
 
-    private getUnhoveredClassName(state: number) {
+    private getUnhoveredClassName(state: number): string {
         return (state & FieldState.Red) ? 'playerRedField' : (state & FieldState.Green) ? 'playerGreenField' : 'emptyField'
     }
 }

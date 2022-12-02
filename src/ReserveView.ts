@@ -42,7 +42,7 @@ export class ReserveView implements IReserveView {
         this._howManyReserveHas = 0
     }
 
-    emptyAllFields() {
+    emptyAllFields(): void {
         this.reserveFields.forEach(v => v.className = getClassNameOfElement(FieldState.Empty))
     }
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void {
@@ -58,7 +58,7 @@ export class ReserveView implements IReserveView {
         return this.reserveFields[i]
     }
 
-    addToReserve() {
+    addToReserve(): boolean {
         this.emptyAllFields()
         if (this._howManyReserveHas >= this.reserveFields.length) {
             console.log('what happened')
@@ -79,9 +79,8 @@ export class ReserveView implements IReserveView {
         return true
     }
 
-    removeFromReserve() {
+    removeFromReserve(): boolean {
         this.emptyAllFields()
-
 
         if (this.owner === PLAYER_RED)
             this._howManyReserveHas = this._game.gameBoard.redPlayerPawnCount
@@ -106,14 +105,14 @@ export class ReserveView implements IReserveView {
         return true
     }
 
-    private triedToUseEmptyPool() {
+    private triedToUseEmptyPool(): boolean {
         this._howManyReserveHas = Math.max(this._howManyReserveHas, 0)
 
         console.warn('Trying to click unexisting item in reserve')
         return false
     }
 
-    private isSomethingInPool() {
+    private isSomethingInPool(): boolean {
         return this._howManyReserveHas > 0
     }
 }
