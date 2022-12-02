@@ -135,7 +135,6 @@ export default class PlayerAiController extends AiController {
     private selectNewField(clickedField: IFieldView) {
         this._selectedField = clickedField
         clickedField.visualizeHovered()
-        console.log(clickedField.domElement.className)
 
         this._gameBoard.renderPossibleMoves(this._selectedField)
     }

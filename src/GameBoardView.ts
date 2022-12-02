@@ -1,5 +1,5 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
-import { EventMovedField, EventVictory, IFocus } from './IFocus'
+import { EventMovedField, EventVictory, IFocus, Move } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
 import { ReserveView } from './ReserveView'
 import { IReserveView, EventPoolClicked } from './IReserveView'
@@ -8,9 +8,9 @@ import { ReserveViewOnPlayerTurnDecorator } from './ReserveViewOnPlayerTurnDecor
 import { IGameBoard } from './IGameBoard'
 import { ForEachFieldInView, IGameBoardView, IPoolClickedListener } from './IGameBoardView'
 import { FieldViewDecorator } from './FieldViewDecorator'
-import { Direction, DirectionNorth, DirectionWest } from './IField'
+import { Direction, DirectionNorth, DirectionWest, IField } from './IField'
 import EventEmitter from 'eventemitter3'
-
+import { getAvailableMoves } from './LegalMovesFactory'
 
 export class GameBoardView implements IGameBoardView {
 
@@ -85,15 +85,42 @@ export class GameBoardView implements IGameBoardView {
 
     renderPossibleMoves(selectedField: IFieldView) {
         this._selectedField = selectedField
-        const maxPossibleMoves = selectedField.field.height
+
+        const moves = getAvailableMoves(this.gameBoard, this.game.currentPlayer)
+
+        const isMoveFromThisField = function (move: Move) {
+            return move.x === selectedField.field.x && move.y === selectedField.field.y
+        }
+
+        const movesFromThisField = moves.aiMoves
+            .map(v => v.move)
+            .filter(isMoveFromThisField, this)
+
+        
+        for (let i = 0; i < movesFromThisField.length; i++) {
+            if (this._selectedField === null) {
+                return
+            }
+
+            const { field } = this._selectedField
+            const offset = this.game.getOffsetBasedOnDirection(field, movesFromThisField[i].direction, movesFromThisField[i].moveCount)
+
+            const neighbours = this._fields.filter(v => v.isInRange(field, offset))
+
+            neighbours.forEach(v => v.visualizeHovered())
+        }
+        
+        console.log(movesFromThisField)
+        console.log(this._fields)
 
         // north & south
+        /*
         this.renderInSameLine(maxPossibleMoves, DirectionNorth)
 
         // east & west
         this.renderInSameLine(maxPossibleMoves, DirectionWest)
 
-        selectedField.visualizeHovered()
+        */
     }
 
     private renderInSameLine(maxPossibleMoves: number, baseDirection: Direction) {
