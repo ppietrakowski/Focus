@@ -99,7 +99,9 @@ export class FieldView implements IFieldView {
         const tower = this.field.towerStructure
 
         for (let i = 0; i < children.length; i++) {
-            children[i].className = fn(FieldState.Empty)
+            const child = children[i] as HTMLDivElement
+            child.className = fn(FieldState.Empty)
+            child.style.scale = '1'
         }
 
         scale = 1.0 - (tower.length-1) * 0.1
