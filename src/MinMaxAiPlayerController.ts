@@ -33,7 +33,7 @@ export class MinMaxAiPlayerController extends AiController {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    depth = 1
+    depth = 2
 
     move(): Promise<boolean> {
         console.log('megamax')
@@ -88,44 +88,86 @@ export class MinMaxAiPlayerController extends AiController {
     }
 
     private minMax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, player: IPlayer, afterPlaceMove?: AiMove): BestMove {
-        if (depth === 0) {
-            return { value: evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
+
+        if (board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0) {
+            // owned player wins
+            const result = { value: evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
+
+            return result
         }
 
-        const movesAndCount = getAvailableMoves(board, player)
+        if (board.countPlayersFields(this.ownedPlayer) === 0) {
+            // owned player wins
+            const result = { value: -evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
+
+            return result
+        }
+
+        // omit the calculating moves
+        if (depth === 0) {
+            const result = { value: evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
+
+            return result
+        }
+
+        const movesAndCount = getAvailableMoves(board, this.ownedPlayer)
+
+        player = this._game.getNextPlayer(player)
 
         if ((movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
             return { value: evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
 
-        let evaluation = -Infinity
-
-        if (!isMaximizingPlayer) {
-            evaluation = Infinity
-        }
+        player = this._game.getNextPlayer(player)
 
         const moves = movesAndCount.aiMoves
-        if (moves.length < 1)
+        if (moves.length < 1) {
             return null
-
-        let bestMove = moves[0]
-
-        const assignNewValue = function (current: BestMove) {
-            evaluation = current.value
-            bestMove = current.bestMove
         }
 
-        for (let i = 0; i < moves.length; i++) {
-            const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, player, movesAndCount.aiMoves[i])
+        if (player === this.ownedPlayer) {
+            let evaluation = -Infinity
+            let bestMove = moves[0]
 
-            if (isMaximizingPlayer) {
-                if (current.value > evaluation)
-                    assignNewValue(current)
-            } else {
-                if (current.value < evaluation)
-                    assignNewValue(current)
+            const assignNewValue = function (current: BestMove) {
+                evaluation = current.value
+                bestMove = current.bestMove
             }
-        }
 
-        return { bestMove: bestMove, value: evaluation }
+            for (let i = 0; i < moves.length; i++) {
+                player = this._game.getNextPlayer(player)
+
+                const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, player, movesAndCount.aiMoves[i])
+
+                player = this._game.getNextPlayer(player)
+                if (current.value > evaluation) {
+                    assignNewValue(current)
+                }
+            }
+
+
+            return { bestMove, value: evaluation }
+        } else {
+
+            let evaluation = Infinity
+            let bestMove = moves[0]
+
+            const assignNewValue = function (current: BestMove) {
+                evaluation = current.value
+                bestMove = current.bestMove
+            }
+
+            for (let i = 0; i < moves.length; i++) {
+                player = this._game.getNextPlayer(player)
+
+                const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, player, movesAndCount.aiMoves[i])
+
+                player = this._game.getNextPlayer(player)
+                if (current.value < evaluation) {
+                    assignNewValue(current)
+                }
+            }
+
+            return { bestMove, value: evaluation }
+        }
     }
 }

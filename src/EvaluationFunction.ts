@@ -45,19 +45,8 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
     const ratio = controlledByYou - controlledByEnemy
 
 
-    let heightOfNeighbour = 1
+    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height, 0)
 
-    if (afterPlaceMove && afterPlaceMove.move && afterPlaceMove.move.direction) {
-        const offset = getOffsetBasedOnDirection(board.getFieldAt(afterPlaceMove.move.x, afterPlaceMove.move.y), afterPlaceMove.move.direction, afterPlaceMove.move.moveCount)
-
-        try {
-            heightOfNeighbour = Math.max(heightOfNeighbour, board.getFieldAt(offset.x, offset.y).height)
-        } catch (e)
-        // eslint-disable-next-line no-empty
-        {
-        }
-    }
-
-    const evalValue = 6 * ratio + 5 * ratioInReserve
+    const evalValue = 48 * ratio + 25 * ratioInReserve + 11 * heightOfYourFields
     return evalValue
 }
