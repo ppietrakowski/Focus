@@ -1,6 +1,6 @@
 import { getPlayerName } from './AiController'
 import { PLAYER_RED } from './Game'
-import { EventEnemyHasPool, EventVictory } from './IFocus'
+import { EventEnemyHasPool, EventVictory, IFocus } from './IFocus'
 import { IAiController, IGameBoardController } from './IGameBoardController'
 import { IGameBoardView } from './IGameBoardView'
 import { IPlayer } from './Player'
@@ -20,14 +20,12 @@ export class GameBoardController implements IGameBoardController {
         this._playerA.checkIsYourTurn(this.game.currentPlayer)
     }
 
-    get game() {
+    get game(): IFocus {
         return this._gameBoardView.game
     }
 
     private onEnemyHasPool(enemy: IPlayer): void {
         this.game.setHasPoolToPut()
-
-        console.log('has pool', getPlayerName(enemy))
 
         if (this.game.currentPlayer !== enemy)
             this.game.nextTurn()
@@ -35,7 +33,7 @@ export class GameBoardController implements IGameBoardController {
         this.switchToPoolState(enemy)
     }
 
-    switchToPoolState(player: IPlayer) {
+    switchToPoolState(player: IPlayer): void {
         if (player === this._playerA.ownedPlayer) {
             this.placePoolState(player, this._playerA)
         } else {
@@ -43,12 +41,10 @@ export class GameBoardController implements IGameBoardController {
         }
     }
 
-    placePoolState(player: IPlayer, aicontroller: IAiController) {
-        console.log(getPlayerName(player))
+    placePoolState(player: IPlayer, aicontroller: IAiController): void {
         if (this.game.currentPlayer !== player) {
             return
         }
-        console.log(getPlayerName(player), 2)
 
         if ((player === PLAYER_RED ? this.game.gameBoard.redPlayerPawnCount : this.game.gameBoard.greenPlayerPawnCount) > 0) {
             aicontroller.onPlaceStateStarted()

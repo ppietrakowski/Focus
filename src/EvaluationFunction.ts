@@ -7,7 +7,7 @@ import { IPlayer } from './Player'
 
 
 
-export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: IPlayer, game: IFocus) {
+export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: IPlayer, game: IFocus): number {
     let controlledByYou = 0
 
     let controlledByEnemy = 0

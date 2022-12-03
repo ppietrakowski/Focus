@@ -25,7 +25,7 @@ export class Field implements IField {
         this._y = y
     }
 
-    moveToThisField(fromWhichField: IField, additionalDistance?: number) {
+    moveToThisField(fromWhichField: IField, additionalDistance?: number): boolean {
         if (!fromWhichField.isPlayable || !(fromWhichField instanceof Field)) {
             return false
         }
@@ -43,7 +43,7 @@ export class Field implements IField {
         return true
     }
 
-    reduceOverGrown() {
+    reduceOverGrown(): void {
         while (this.isOvergrown) {
             const fieldState = this._underThisField.pop()
             if (this.overgrownCallback)
@@ -51,7 +51,7 @@ export class Field implements IField {
         }
     }
 
-    private getNewUnderElements(fromWhichField: Field, distance: number) {
+    private getNewUnderElements(fromWhichField: Field, distance: number): FieldState[] {
         const underElements = fromWhichField.shiftElements(distance)
 
         if (this.isEmpty) {
@@ -61,7 +61,7 @@ export class Field implements IField {
         return underElements.concat([this.state]).concat(this._underThisField)
     }
 
-    private shiftElements(n: number) {
+    private shiftElements(n: number): FieldState[] {
         const firstElements: FieldState[] = []
 
         while (n-- > 0) {
@@ -84,7 +84,7 @@ export class Field implements IField {
         this.reduceOverGrown()
     }
 
-    getDistanceToField(anotherField: IField) {
+    getDistanceToField(anotherField: IField): number {
         const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
 
         if (Math.abs(v.x) > 0) {
@@ -104,7 +104,7 @@ export class Field implements IField {
         return getDirectionFromOffset(v.x, v.y)
     }
 
-    private canJump(v: Direction) {
+    private canJump(v: Direction): boolean {
         return Math.abs(v.x) <= this.height && Math.abs(v.y) <= this.height
     }
 
@@ -124,18 +124,18 @@ export class Field implements IField {
         return this._y
     }
 
-    get height() {
+    get height(): number {
         return this._underThisField.length + 1
     }
-    get towerStructure() {
+    get towerStructure(): FieldState[] {
         return [this.state].concat(this._underThisField)
     }
 
-    get isOvergrown() {
+    get isOvergrown(): boolean {
         return this.height > MaxTowerHeight
     }
 
-    get isEmpty() {
+    get isEmpty(): boolean {
         return !!(this._state & FieldState.Empty)
     }
 
