@@ -1,5 +1,5 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
-import { EventMovedField, EventVictory, IFocus } from './IFocus'
+import { EventMovedField, EventVictory, IFocus, Move } from './IFocus'
 import { FieldView, IFieldView } from './FieldView'
 import { ReserveView } from './ReserveView'
 import { IReserveView, EventPoolClicked } from './IReserveView'
@@ -8,9 +8,8 @@ import { ReserveViewOnPlayerTurnDecorator } from './ReserveViewOnPlayerTurnDecor
 import { IGameBoard } from './IGameBoard'
 import { ForEachFieldInView, IGameBoardView, IPoolClickedListener } from './IGameBoardView'
 import { FieldViewDecorator } from './FieldViewDecorator'
-import { Direction, DirectionNorth, DirectionWest } from './IField'
 import EventEmitter from 'eventemitter3'
-
+import { getLegalMovesFromField } from './LegalMovesFactory'
 
 export class GameBoardView implements IGameBoardView {
 
@@ -83,43 +82,36 @@ export class GameBoardView implements IGameBoardView {
         }
     }
 
-    renderPossibleMoves(selectedField: IFieldView) {
+    renderPossibleMoves(selectedField: IFieldView): void {
         this._selectedField = selectedField
-        const maxPossibleMoves = selectedField.field.height
 
-        // north & south
-        this.renderInSameLine(maxPossibleMoves, DirectionNorth)
+        const isMoveFromThisField = function (move: Move) {
+            return move.x === selectedField.field.x && move.y === selectedField.field.y
+        }
 
-        // east & west
-        this.renderInSameLine(maxPossibleMoves, DirectionWest)
+        const movesFromThisField = getLegalMovesFromField(this.gameBoard, selectedField.field.x, selectedField.field.y)
+            .filter(isMoveFromThisField, this)
 
-        selectedField.visualizeHovered()
-    }
+        
+        for (let i = 0; i < movesFromThisField.length; i++) {
+            if (this._selectedField === null) {
+                return
+            }
 
-    private renderInSameLine(maxPossibleMoves: number, baseDirection: Direction) {
-        for (let i = 1; i <= maxPossibleMoves; i++) {
-            this.selectNeighboursInRange(baseDirection, i)
+            const { field } = this._selectedField
+            const offset = this.game.getOffsetBasedOnDirection(field, movesFromThisField[i].direction, movesFromThisField[i].moveCount)
+
+            const neighbours = this._fields.filter(v => v.isInRange(field, offset))
+
+            neighbours.forEach(v => v.visualizeHovered())
         }
     }
 
-    get isSomethingSelected() {
+    get isSomethingSelected(): boolean {
         return !!this._selectedField
     }
 
-    private selectNeighboursInRange(baseDirection: Direction, maxRange: number) {
-        if (this._selectedField === null) {
-            return
-        }
-
-        const { field } = this._selectedField
-        const offset = this.game.getOffsetBasedOnDirection(field, baseDirection, maxRange)
-
-        const neighbours = this._fields.filter(v => v.isInRange(field, offset))
-
-        neighbours.forEach(v => v.visualizeHovered())
-    }
-
-    erasePossibleMoves() {
+    erasePossibleMoves(): void {
         this._fields.forEach(v => v.visualizeUnhovered())
         this._selectedField = null
     }

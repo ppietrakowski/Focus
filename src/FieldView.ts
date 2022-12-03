@@ -45,6 +45,8 @@ export class FieldView implements IFieldView {
     domElement: HTMLDivElement
 
     private _backupClickListeners: IClickListenerBackup[]
+    private tower: number[]
+    private rootNodeChilds: HTMLDivElement[]
 
     constructor(private readonly game: IFocus, field: IField) {
         this.field = field
@@ -52,12 +54,19 @@ export class FieldView implements IFieldView {
 
         this.domElement = document.createElement('div')
         this.domElement.className = 'rootObject'
+        this.rootNodeChilds = []
 
-        for (let i = 0; i < 5; i++) {
+        const createSubNodeToRootNode = () => {
             const htmlElement = document.createElement('div') as HTMLDivElement
             htmlElement.className = 'emptyField'
             this.domElement.appendChild(htmlElement)
+            this.rootNodeChilds.push(htmlElement)
         }
+
+        for (let i = 0; i < 5; i++) {
+            createSubNodeToRootNode()
+        }
+
         this.domElement.children[0].className = this.getUnhoveredClassName(field.state)
 
         this._backupClickListeners = []
@@ -81,44 +90,58 @@ export class FieldView implements IFieldView {
         for (const listener of this._backupClickListeners) {
             this.events.on(EventClickField, listener.listener, listener.context)
         }
-
-        console.log(`field at (${this.field.x}, ${this.field.y}) restored listeners`)
     }
 
-    visualizeHovered() {
+    visualizeHovered(): void {
         this.updateEachChild(this.getHoveredClassName)
     }
 
-    visualizeUnhovered() {
+    visualizeUnhovered(): void {
         this.updateEachChild(this.getUnhoveredClassName)
     }
 
-    private updateEachChild(fn: IVisualizeFunction) {
+    private updateEachChild(fn: IVisualizeFunction): void {
         let scale = 1.0
-        const children = this.domElement.children
-        const tower = this.field.towerStructure
+        this.tower = this.field.towerStructure
 
-        scale = 1.0 - (tower.length-1) * 0.1
+        this.clearEachChild(fn)
 
-        for (let i = 0; i < tower.length; i++) {
-            const child = children[i] as HTMLDivElement
-            child.className = fn(tower[i])
-            child.style.scale = scale.toString()
-            child.style.zIndex = (5 - i).toString()
-            scale += 0.1
+        scale = 1.0 - (this.tower.length - 1) * 0.1
+
+        for (let i = 0; i < this.tower.length; i++) {
+            scale = this.updateChildDisplay(i, fn, scale)
         }
     }
 
-    isInRange(anotherField: IField, range: Direction) {
+    private updateChildDisplay(i: number, fn: IVisualizeFunction, scale: number): number {
+        const child = this.rootNodeChilds[i]
+
+        child.className = fn(this.tower[i])
+        child.style.scale = scale.toString()
+        child.style.zIndex = (5 - i).toString()
+        scale += 0.1
+
+        return scale
+    }
+
+    private clearEachChild(fn: IVisualizeFunction): void {
+        for (let i = 0; i < this.rootNodeChilds.length; i++) {
+            const child = this.rootNodeChilds[i]
+            child.className = fn(FieldState.Empty)
+            child.style.scale = '1'
+        }
+    }
+
+    isInRange(anotherField: IField, range: Direction): boolean {
         return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) &&
             (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
     }
 
-    private getHoveredClassName(state: number) {
+    private getHoveredClassName(state: number): string {
         return (state & FieldState.Red) ? 'playerRedFieldHovered' : (state & FieldState.Green) ? 'playerGreenFieldHovered' : 'emptyField'
     }
 
-    private getUnhoveredClassName(state: number) {
+    private getUnhoveredClassName(state: number): string {
         return (state & FieldState.Red) ? 'playerRedField' : (state & FieldState.Green) ? 'playerGreenField' : 'emptyField'
     }
 }

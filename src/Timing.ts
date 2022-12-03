@@ -7,16 +7,16 @@ const TimingContext = {
     initialized: false
 }
 
-export function initializeTiming() {
+export function initializeTiming(): void {
     requestAnimationFrame(animationTimeFunction)
     TimingContext.initialized = true
 }
 
-function endTask(task: TimeTask) {
+function endTask(task: TimeTask): void {
     task.onExpired.call(task.onExpiredContext)
 }
 
-function animationTimeFunction(time: number) {
+function animationTimeFunction(time: number): void {
 
     TimingContext.delta = 0.001 * (time - TimingContext.lastTime)
     TimingContext.lastTime = time
@@ -40,7 +40,7 @@ type TimeResolveFn = {
     (): void
 }
 
-function createNewTimeTask(time: number, resolve: TimeResolveFn, reject: TimeRejectFn) {
+function createNewTimeTask(time: number, resolve: TimeResolveFn, reject: TimeRejectFn): TimeTask {
     if (!TimingContext.initialized) {
         reject(Error('Timing not initialized'))
         return null
@@ -58,11 +58,11 @@ function createNewTimeTask(time: number, resolve: TimeResolveFn, reject: TimeRej
  * @param {number} time in seconds
  * @returns Promise resolved, when time ended or rejected if timing is not initialized
  */
-export function runTimeout(time: number) {
+export function runTimeout(time: number): Promise<void> {
     return new Promise<void>((resolve, reject) => createNewTimeTask(time, resolve, reject))
 }
 
-export function addTimeTask(task: TimeTask) {
+export function addTimeTask(task: TimeTask): void {
     if (!task.hasExpired) {
         TimingContext.tasks.push(task)
     }

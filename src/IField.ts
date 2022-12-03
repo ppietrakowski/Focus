@@ -51,7 +51,7 @@ export interface IField {
     get isPlayable(): boolean
 }
 
-export function getDirectionFromOffset(x: number, y: number) {
+export function getDirectionFromOffset(x: number, y: number): Direction {
     if (x > 0) {
         return DirectionEast
     }

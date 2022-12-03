@@ -27,7 +27,7 @@ export class Player implements IPlayer {
         return this._state
     }
 
-    doesOwnThisField(field: number | IField) {
+    doesOwnThisField(field: number | IField): boolean {
         if (typeof field == 'number') {
             return !!(field & this.state)
         }

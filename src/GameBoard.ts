@@ -117,7 +117,7 @@ export class GameBoard implements IGameBoard {
         return { gameBoard, redCount: gameBoard.redPlayerPawnCount, greenCount: gameBoard.greenPlayerPawnCount }
     }
 
-    static loadFromJSON(json: GameBoardJson) {
+    static loadFromJSON(json: GameBoardJson): IGameBoard {
         const board = new GameBoard()
         const { elements } = json
 
@@ -133,7 +133,7 @@ export class GameBoard implements IGameBoard {
         return board
     }
 
-    each(callback: ForEachCallback) {
+    each(callback: ForEachCallback): void {
         for (let x = 0; x < this._fields.length; x++) {
             for (let y = 0; y < this._fields[x].length; y++) {
                 callback(this._fields[x][y], x, y)
@@ -141,7 +141,7 @@ export class GameBoard implements IGameBoard {
         }
     }
 
-    getFieldAt(x: number, y: number) {
+    getFieldAt(x: number, y: number): IField {
         if (this.isOutOfBoundsInXAxis(x) || this.isOutOfBoundsInYAxis(y)) {
             throw new Error(`point (${x}, ${y}) is out of bounds`)
         }
@@ -149,7 +149,7 @@ export class GameBoard implements IGameBoard {
         return this._fields[x][y] || null
     }
 
-    countPlayersFields(player: IPlayer) {
+    countPlayersFields(player: IPlayer): number {
         return this._fields.reduce((accumulated, value) => {
             value.filter(v => player.doesOwnThisField(v)).forEach(() => accumulated++)
             return accumulated
@@ -160,7 +160,7 @@ export class GameBoard implements IGameBoard {
         return this._fields.length
     }
 
-    private addNewFieldFromJson({elements}: GameBoardJson, fieldId: number) {
+    private addNewFieldFromJson({elements}: GameBoardJson, fieldId: number): void {
         const field = elements.find((v: BoardState) => v.id === fieldId) || null
 
         const x = (fieldId % GameBoard.GAME_BOARD_WIDTH)
@@ -173,11 +173,11 @@ export class GameBoard implements IGameBoard {
         this._fields[x][y] = new Field(boardToStateMask(elements[fieldId].state), x, y)
     }
 
-    private isOutOfBoundsInXAxis(x: number) {
+    private isOutOfBoundsInXAxis(x: number): boolean {
         return x < 0 || x >= GameBoard.GAME_BOARD_WIDTH
     }
 
-    private isOutOfBoundsInYAxis(y: number) {
+    private isOutOfBoundsInYAxis(y: number): boolean {
         return y < 0 || y >= GameBoard.GAME_BOARD_HEIGHT
     }
 }

@@ -56,10 +56,6 @@ const player2Select = document.getElementById('player2') as HTMLSelectElement
 
 const beginPlay = document.getElementById('BeginPlayButton') as HTMLButtonElement
 
-console.log(player1Select)
-console.log(player2Select)
-console.log(beginPlay)
-
 function getPlayer(name: string, player: IPlayer): IAiController {
 
     if (name === 'human') {
@@ -103,8 +99,7 @@ beginPlay.addEventListener('click', () => {
     const controller = new GameBoardController(gameBoardView, p1, p2)
     focus.events.on(EventVictory, p => {
         alert(`${getPlayerName(p)} won`)
-        //console.clear()
-        //document.location.reload()
+        document.location.reload()
     }
     )
 
