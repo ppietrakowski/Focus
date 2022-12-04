@@ -49,7 +49,6 @@ function createNewTimeTask(time: number, resolve: TimeResolveFn, reject: TimeRej
     const task = new TimeTask(time, resolve, null)
     TimingContext.tasks.push(task)
 
-    console.log(TimingContext.tasks)
     return task
 }
 
