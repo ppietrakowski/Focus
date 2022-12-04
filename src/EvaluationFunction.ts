@@ -1,7 +1,6 @@
 import { FieldState, IField } from './IField'
 import { IFocus } from './IFocus'
 import { IGameBoard } from './IGameBoard'
-import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
 

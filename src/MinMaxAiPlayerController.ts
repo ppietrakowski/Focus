@@ -1,7 +1,6 @@
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
-import { PLAYER_RED } from './Game'
-import { Direction, FieldState, IField } from './IField'
+import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
