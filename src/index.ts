@@ -11,6 +11,7 @@ import { getPlayerName } from './AiController'
 import { NegaMaxPlayer } from './NegaMaxAiPlayerController'
 import { initializeTiming, runTimeout } from './Timing'
 import { AlphaBetaPlayerController } from './AlphaBetaPlayerController'
+import { AbNegaMaxPlayer } from './AbNegaMaxPlayerController'
 
 
 const focus = new Focus()
@@ -78,7 +79,11 @@ function getPlayer(name: string, player: IPlayer): IAiController {
     if (name === 'abminimax') {
         return new AlphaBetaPlayerController(player, focus, gameBoardView)
     }
-
+    
+    if (name === 'abnegaminimax') {
+        return new AbNegaMaxPlayer(player, focus, gameBoardView)
+    }
+    
     throw new Error('Selected unavailable player controller')
 }
 
