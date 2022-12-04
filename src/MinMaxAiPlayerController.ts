@@ -41,11 +41,6 @@ export class MinMaxAiPlayerController extends AiController {
         console.log('megamax')
         this.minMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
-        const movesAndCount = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
-            .aiMoves
-            .map(v => { return { score: evaluateMove(v.gameBoardAfterMove, v, this.ownedPlayer, this._game), move: v } })
-            .sort((a, b) => b.score - a.score)
-
         if (!this.bestMove && !this.bestMove.shouldPlaceSomething) {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
             console.log(v)
@@ -95,19 +90,19 @@ export class MinMaxAiPlayerController extends AiController {
 
         if (board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0) {
             // owned player wins
-            const result = evaluateMove(board, null, player, this._game)
+            const result = evaluateMove(board, player, this._game)
             return result
         }
 
         if (board.countPlayersFields(this.ownedPlayer) === 0) {
             // owned player wins
-            const result = -evaluateMove(board, null, player, this._game)
+            const result = -evaluateMove(board, player, this._game)
             return result
         }
 
         // omit the calculating moves
         if (depth === 0) {
-            const result = evaluateMove(board, null, player, this._game)
+            const result = evaluateMove(board, player, this._game)
 
             return result
         }
@@ -117,7 +112,7 @@ export class MinMaxAiPlayerController extends AiController {
         player = this._game.getNextPlayer(player)
 
         if ((movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
-            return evaluateMove(board, null, player, this._game)
+            return evaluateMove(board, player, this._game)
 
         player = this._game.getNextPlayer(player)
 
