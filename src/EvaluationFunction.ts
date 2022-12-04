@@ -1,7 +1,6 @@
 import { FieldState, IField } from './IField'
 import { IFocus } from './IFocus'
 import { IGameBoard } from './IGameBoard'
-import { getOffsetBasedOnDirection } from './LegalMovesFactory'
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
@@ -27,7 +26,7 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
 
     let ratioInReserve = controlledInReserveByYou - controlledInReserveByEnemy
     if (Number.isNaN(ratioInReserve))
-        ratioInReserve = 0
+        ratioInReserve = 0.0
 
     const yourFields: IField[] = []
     const enemyFields: IField[] = []
@@ -40,13 +39,14 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
         }
     })
 
-    controlledByYou = yourFields.reduce((accumulated, current) => accumulated + current.height, 0)
-    controlledByEnemy = enemyFields.reduce((accumulated, current) => accumulated + current.height, 0)
+    controlledByYou = yourFields.length
+    controlledByEnemy = enemyFields.length
     const ratio = controlledByYou - controlledByEnemy
 
 
     const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height, 0)
+    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + current.height, 0)
 
-    const evalValue = 48 * ratio + 25 * ratioInReserve + 11 * heightOfYourFields
+    const evalValue = 40 * ratio + 4 * ratioInReserve + 8 * heightOfEnemyFields / heightOfYourFields
     return evalValue
 }

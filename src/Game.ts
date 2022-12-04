@@ -10,7 +10,7 @@ import EventEmitter from 'eventemitter3'
 import board from './board.json'
 import { getPlayerName } from './AiController'
 import { debugLog } from './DebugUtils'
-import { addTimeTask } from './Timing'
+import { addTimeTask, runTimeout } from './Timing'
 import { TimeTask } from './TimeTask'
 
 export const PLAYER_RED = new Player(FieldState.Red)
@@ -66,7 +66,7 @@ export class Focus implements IFocus {
         this._currentPlayer = player
     }
 
-    moveToField(x: number, y: number, direction: { x: number, y: number }, howManyFieldWantMove: number): Promise<boolean> {
+    moveToField(x: number, y: number, direction: { x: number, y: number }, howManyFieldWantMove: number) {
         const fromField = this.gameBoard.getFieldAt(x, y)
         
         if (!this._currentPlayer.doesOwnThisField(fromField)) {
@@ -75,7 +75,6 @@ export class Focus implements IFocus {
 
         const toField = this.getFieldBasedOnDirectionAndMoveCount(fromField as Field, direction, howManyFieldWantMove)
         if (!toField.isPlayable) {
-            //debugger
             return Promise.reject(false)
         }
 
@@ -90,11 +89,11 @@ export class Focus implements IFocus {
 
         timeTask = new TimeTask(0.2, this.nextTurn, this)
         addTimeTask(timeTask)
-
+        
         return Promise.resolve(true)
     }
 
-    placeField(x: number, y: number, owner: IPlayer): void {
+    placeField(x: number, y: number, owner: IPlayer) {
         const field = this.gameBoard.getFieldAt(x, y)
 
         console.log('placed')
@@ -108,14 +107,14 @@ export class Focus implements IFocus {
         this.nextTurn()
     }
 
-    getFieldBasedOnDirectionAndMoveCount(field: Field, direction: Direction, howManyFieldWantMove: number): IField {
+    getFieldBasedOnDirectionAndMoveCount(field: Field, direction: Direction, howManyFieldWantMove: number) {
         const offset = this.getOffsetBasedOnDirection(field, direction, howManyFieldWantMove)
         const foundField = this.gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
 
         return foundField
     }
 
-    getOffsetBasedOnDirection(field: IField, direction: Direction, howManyFieldWantMove: number): Direction {
+    getOffsetBasedOnDirection(field: IField, direction: Direction, howManyFieldWantMove: number) {
         let mult = howManyFieldWantMove
 
         if (howManyFieldWantMove < 1) {
@@ -129,7 +128,7 @@ export class Focus implements IFocus {
         return { x: direction.x * mult, y: direction.y * mult }
     }
 
-    getNextPlayer(toPlayer?: IPlayer): IPlayer {
+    getNextPlayer(toPlayer?: IPlayer) {
         if (!toPlayer) {
             toPlayer = this.currentPlayer
         }
@@ -141,7 +140,7 @@ export class Focus implements IFocus {
         return PLAYER_RED
     }
 
-    nextTurn(): void {
+    nextTurn() {
         if (this.mustEnd) {
             return
         }
@@ -167,7 +166,7 @@ export class Focus implements IFocus {
 
     mustEnd = false
 
-    private increaseCurrentPlayersPool(): void {
+    private increaseCurrentPlayersPool() {
         debugLog(`${getPlayerName(this._currentPlayer)} has ${this._currentPlayer === PLAYER_GREEN ? this.gameBoard.greenPlayerPawnCount : this.gameBoard.redPlayerPawnCount}`)
         if (this._currentPlayer instanceof Player && PLAYER_GREEN === this._currentPlayer)
             this.gameBoard.greenPlayerPawnCount++
@@ -181,7 +180,8 @@ export class Focus implements IFocus {
         return this._hasEnded
     }
 
-    private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer): void {
+
+    private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer) {
         let hasPool = false
 
         if (playerWhoFail === PLAYER_RED) {

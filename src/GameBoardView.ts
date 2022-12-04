@@ -53,7 +53,7 @@ export class GameBoardView implements IGameBoardView {
                     e = new FieldViewDecorator(e, PLAYER_GREEN)
                 else
                     e = new FieldViewDecorator(e, PLAYER_RED)
-                this._fields.push(e)
+                this._fields[element.x + 8 * element.y] = e
             }
         )
         this.game.events.on(EventVictory, () => this.erasePossibleMoves())
