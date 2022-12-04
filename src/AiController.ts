@@ -36,7 +36,6 @@ export abstract class AiController implements IAiController {
         if (player == this.ownedPlayer) {
             runTimeout(0.2)
                 .then(() => this.move())
-                .then(console.trace)
                 .catch(() => {
                     console.log('Illegal move or not move available')
                     this._game.nextTurn()

@@ -2,21 +2,23 @@
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
 import { IField } from './IField'
-import { IFocus } from './IFocus'
+import { IFocus, Move } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
 import { getAvailableMoves } from './LegalMovesFactory'
-import { AiMove, BestMove, comparatorPlaceMoveType } from './MinMaxAiPlayerController'
+import { comparatorPlaceMoveType } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
 let ownedPlayer: IPlayer = null
 let _game: IFocus = null
 
 function availablePlaceMovesComparator(a: comparatorPlaceMoveType, b: comparatorPlaceMoveType) {
-    return evaluateMove(a.afterPlaceMove.gameBoard, null, ownedPlayer, _game) - evaluateMove(b.afterPlaceMove.gameBoard, null, ownedPlayer, _game)
+    return evaluateMove(a.afterPlaceMove.gameBoard, ownedPlayer, _game) - evaluateMove(b.afterPlaceMove.gameBoard, ownedPlayer, _game)
 }
 
 export class NegaMaxPlayer extends AiController {
+    bestMove: Move
+
     constructor(aiOwnedPlayer: IPlayer, _game: IFocus, _gameBoard: IGameBoardView) {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
@@ -27,30 +29,28 @@ export class NegaMaxPlayer extends AiController {
 
     move(): Promise<boolean> {
         console.log('negamax')
-        const { bestMove } = this.negamax(this._gameBoard.gameBoard, this.depth, true, this.ownedPlayer) as BestMove
+        this.negamax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
-        if (!bestMove && !bestMove.move.shouldPlaceSomething) {
+
+        if (!this.bestMove && !this.bestMove.shouldPlaceSomething) {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
             console.log(v)
-            console.log(bestMove)
+            console.log(this.bestMove)
             console.log(this._game.gameBoard)
-            return Promise.reject(!bestMove)
+            return Promise.reject(!this.bestMove)
         }
 
-        if (bestMove.move.shouldPlaceSomething)
+        if (this.bestMove.shouldPlaceSomething)
             console.log(true)
 
-        if (bestMove.move.shouldPlaceSomething) {
-            const { move } = bestMove
-
-            console.log(`placed at ${move.x}, ${move.y}`)
-            this._game.placeField(move.x, move.y, this.ownedPlayer)
+        if (this.bestMove.shouldPlaceSomething) {
+            console.log(`placed at ${this.bestMove.x}, ${this.bestMove.y}`)
+            this._game.placeField(this.bestMove.x, this.bestMove.y, this.ownedPlayer)
             return Promise.resolve(true)
         }
 
-        const { move } = bestMove
-
-        const pr = this._game.moveToField(move.x, move.y, move.direction, move.moveCount)
+        const pr = this._game.moveToField(this.bestMove.x,
+            this.bestMove.y, this.bestMove.direction, this.bestMove.moveCount)
 
         return pr
     }
@@ -82,33 +82,46 @@ export class NegaMaxPlayer extends AiController {
         this._game.placeField(best.x, best.y, this.ownedPlayer)
     }
 
-    private negamax(board: IGameBoard, depth: number, isMaximizingPlayer: boolean, player: IPlayer, sign = 1, afterPlaceMove?: AiMove): BestMove {
+    private negamax(board: IGameBoard, depth: number, player: IPlayer, sign = 1): number {
+        if (board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0) {
+            // owned player wins
+            const result = sign * evaluateMove(board, player, this._game)
+            return result
+        }
+
+        if (board.countPlayersFields(this.ownedPlayer) === 0) {
+            // owned player wins
+            const result = sign * -evaluateMove(board, player, this._game)
+            return result
+        }
+        
         if (depth === 0)
-            return { value: sign * evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
+            return evaluateMove(board, player, this._game)
 
         const movesAndCount = getAvailableMoves(board, player)
 
         if ((movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
-            return { value: sign * evaluateMove(board, afterPlaceMove, player, this._game), bestMove: afterPlaceMove }
+            return evaluateMove(board, player, this._game)
 
         const moves = movesAndCount.aiMoves
         if (moves.length < 1)
             return null
 
-        let bestMove = moves[0]
-
         let evaluation = -Infinity
 
         for (let i = 0; i < moves.length; i++) {
-            const current = this.negamax(moves[i].gameBoardAfterMove, depth - 1, !isMaximizingPlayer, player, -sign, movesAndCount.aiMoves[i])
-            current.value *= -1
+            let current = this.negamax(moves[i].gameBoardAfterMove, depth - 1, player, -sign)
+            current *= -1
 
-            if (current.value > evaluation) {
-                evaluation = current.value
-                bestMove = current.bestMove
+            if (current > evaluation) {
+                if (depth === this.depth) {
+                    this.bestMove = moves[i].move
+                }
+
+                evaluation = current
             }
         }
 
-        return { bestMove: bestMove, value: evaluation }
+        return evaluation
     }
 }

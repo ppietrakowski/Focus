@@ -1,4 +1,3 @@
-import { getPlayerName } from './AiController'
 import { PLAYER_RED } from './Game'
 import { EventEnemyHasPool, EventVictory, IFocus } from './IFocus'
 import { IAiController, IGameBoardController } from './IGameBoardController'

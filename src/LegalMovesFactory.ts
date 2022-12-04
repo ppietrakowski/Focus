@@ -1,7 +1,7 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
 import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, FieldState, IField } from './IField'
 import { Move } from './IFocus'
-import { AfterPlaceMove, getAllFieldBelongingToPlayer, IGameBoard } from './IGameBoard'
+import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
@@ -77,49 +77,6 @@ export function getLegalMovesFromField(board: IGameBoard, x: number, y: number):
     return moves
 }
 
-let _board: IGameBoard = null
-let _player: IPlayer = null
-
-function getAiMoves(move: Move): AiMove {
-    const fieldFrom = _board.getFieldAt(move.x, move.y)
-    const fieldTo = _board.getFieldAt(move.x + move.direction.x * move.moveCount, move.y + move.direction.y * move.moveCount)
-
-    // buggy one
-    const gameBoardAfterMove: AfterPlaceMove = _board.getBoardAfterMove(fieldFrom, fieldTo, _player)
-
-    move.redPawns = gameBoardAfterMove.redCount
-    move.greenPawns = gameBoardAfterMove.greenCount
-
-    return { gameBoardAfterMove: gameBoardAfterMove.gameBoard, move }
-}
-
-let _aiMoves: AiMove[] = null
-let _afterPlaceMoves: AfterPlaceMove[] = null
-
-
-function getPlaceMoves(v: IField): void {
-    const afterPlaceMove = _board.getBoardAfterPlace(v.x, v.y, _player)
-
-    const move: AiMove = {
-
-        gameBoardAfterMove: afterPlaceMove.gameBoard,
-        move: {
-            x: v.x,
-            y: v.y,
-            shouldPlaceSomething: true,
-            redPawns: afterPlaceMove.redCount,
-            greenPawns: afterPlaceMove.greenCount
-        }
-    }
-
-    if (_player.state === FieldState.Green && afterPlaceMove.greenCount > 0) {
-        _aiMoves.push(move)
-    }
-    else if (_player.state === FieldState.Red && afterPlaceMove.redCount > 0)
-        _aiMoves.push(move)
-
-    _afterPlaceMoves[_aiMoves.length - 1] = afterPlaceMove
-}
 
 interface IAvailableMoves {
     aiMoves: AiMove[]
@@ -127,41 +84,55 @@ interface IAvailableMoves {
 }
 
 export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
-    let moves: Move[] = []
-    _board = board
-    _player = player
+    const yourFields: IField[] = []
+    const enemyFields: IField[] = []
+    const enemyPlayer = player.state === PLAYER_RED.state ? PLAYER_GREEN : PLAYER_RED
 
-    const yourFields: IField[] = getAllFieldBelongingToPlayer(board, player)
-    const enemyFields: IField[] = getAllFieldBelongingToPlayer(board, player === PLAYER_RED ? PLAYER_GREEN : PLAYER_RED)
-
-    moves = yourFields.flatMap(v => getLegalMovesFromField(board, v.x, v.y))
-
-    const aiMoves: AiMove[] = moves.map(move => {
-        const fieldFrom = board.getFieldAt(move.x, move.y)
-        const offset = {x: move.x + move.moveCount * move.direction.x, y: move.y + move.moveCount * move.direction.y}
-        const fieldTo = board.getFieldAt(offset.x, offset.y)
-
-        // buggy one
-        const gameBoardAfterMove: AfterPlaceMove = board.getBoardAfterMove(fieldFrom, fieldTo, _player)
-
-        move.redPawns = gameBoardAfterMove.redCount
-        move.greenPawns = gameBoardAfterMove.greenCount
-
-        return { gameBoardAfterMove: gameBoardAfterMove.gameBoard, move }
-    }).filter(
-        move => {
-            const fieldFrom = board.getFieldAt(move.move.x, move.move.y)
-    
-            return !!(fieldFrom.state & player.state)
+    function getEachYourField(field: IField) {
+        if (player.doesOwnThisField(field.state)) {
+            yourFields.push(field)
+        } else if (enemyPlayer.doesOwnThisField(field.state)) {
+            enemyFields.push(field)
         }
-    )
+    }
 
-    _aiMoves = aiMoves
+    board.each(getEachYourField)
+
+    const aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.x, f.y))
+        .map<AiMove>(v => {
+            return {
+                gameBoardAfterMove: board.getBoardAfterMove(board.getFieldAt(v.x, v.y),
+                    board.getFieldAt(v.x + v.direction.x * v.moveCount, v.y + v.direction.y * v.moveCount), player).gameBoard, move: v
+            }
+        })
+
 
     const afterPlaceMoves: AfterPlaceMove[] = []
-    _afterPlaceMoves = afterPlaceMoves
 
-    enemyFields.forEach(getPlaceMoves)
+    enemyFields.forEach(v => {
+        const afterPlaceMove = board.getBoardAfterPlace(v.x, v.y, player)
 
-    return { aiMoves, afterPlaceMoves }
+        const move: AiMove = {
+
+            gameBoardAfterMove: afterPlaceMove.gameBoard,
+            move: {
+                x: v.x,
+                y: v.y,
+                shouldPlaceSomething: true,
+                redPawns: afterPlaceMove.redCount,
+                greenPawns: afterPlaceMove.greenCount
+            }
+        }
+
+        if (player.state === FieldState.Green && afterPlaceMove.greenCount > 0) {
+            aiMoves.push(move)
+        }
+        else if (player.state === FieldState.Red && afterPlaceMove.redCount > 0)
+            aiMoves.push(move)
+
+        afterPlaceMoves[aiMoves.length - 1] = afterPlaceMove
+    })
+
+
+    return { aiMoves, afterPlaceMoves: afterPlaceMoves }
 }

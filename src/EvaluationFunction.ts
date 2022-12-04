@@ -1,13 +1,11 @@
 import { FieldState, IField } from './IField'
 import { IFocus } from './IFocus'
 import { IGameBoard } from './IGameBoard'
-import { getOffsetBasedOnDirection } from './LegalMovesFactory'
-import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
 
 
-export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: IPlayer, game: IFocus): number {
+export function evaluateMove(board: IGameBoard, player: IPlayer, game: IFocus): number {
     let controlledByYou = 0
 
     let controlledByEnemy = 0
@@ -27,7 +25,7 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
 
     let ratioInReserve = controlledInReserveByYou - controlledInReserveByEnemy
     if (Number.isNaN(ratioInReserve))
-        ratioInReserve = 0
+        ratioInReserve = 0.0
 
     const yourFields: IField[] = []
     const enemyFields: IField[] = []
@@ -40,24 +38,14 @@ export function evaluateMove(board: IGameBoard, afterPlaceMove: AiMove, player: 
         }
     })
 
-    controlledByYou = yourFields.reduce((accumulated, current) => accumulated + current.height, 0)
-    controlledByEnemy = enemyFields.reduce((accumulated, current) => accumulated + current.height, 0)
+    controlledByYou = yourFields.length
+    controlledByEnemy = enemyFields.length
     const ratio = controlledByYou - controlledByEnemy
 
 
-    let heightOfNeighbour = 1
+    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height, 0)
+    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + current.height, 0)
 
-    if (afterPlaceMove && afterPlaceMove.move && afterPlaceMove.move.direction) {
-        const offset = getOffsetBasedOnDirection(board.getFieldAt(afterPlaceMove.move.x, afterPlaceMove.move.y), afterPlaceMove.move.direction, afterPlaceMove.move.moveCount)
-
-        try {
-            heightOfNeighbour = Math.max(heightOfNeighbour, board.getFieldAt(offset.x, offset.y).height)
-        } catch (e)
-        // eslint-disable-next-line no-empty
-        {
-        }
-    }
-
-    const evalValue = 15 * ratio + 5 * ratioInReserve
+    const evalValue = 40 * ratio + 4 * ratioInReserve + 8 * heightOfEnemyFields / heightOfYourFields
     return evalValue
 }

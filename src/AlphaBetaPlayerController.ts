@@ -1,3 +1,5 @@
+
+
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
 import { IField } from './IField'
@@ -7,27 +9,8 @@ import { IGameBoardView } from './IGameBoardView'
 import { getAvailableMoves } from './LegalMovesFactory'
 import { IPlayer } from './Player'
 
-export interface AiMove {
-    move?: Move
-    gameBoardAfterMove: IGameBoard
-}
 
-export interface BestMove {
-    bestMove: AiMove
-    value: number
-}
-
-export type JustMinMaxValue = {
-    value: number
-}
-
-export type comparatorPlaceMoveType = {
-    afterPlaceMove: AfterPlaceMove
-    x: number
-    y: number
-}
-
-export class MinMaxAiPlayerController extends AiController {
+export class AlphaBetaPlayerController extends AiController {
     bestMove: Move
 
     constructor(aiOwnedPlayer: IPlayer, _game: IFocus, _gameBoard: IGameBoardView) {
@@ -35,10 +18,15 @@ export class MinMaxAiPlayerController extends AiController {
     }
 
     depth = 3
+    alpha = -Infinity
+    beta = Infinity
 
     move(): Promise<boolean> {
-        console.log('megamax')
-        this.minMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
+        console.log('alpha-beta megamax')
+
+        this.alpha = -Infinity
+        this.beta = Infinity
+        this.alphaBeta(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
         if (!this.bestMove && !this.bestMove.shouldPlaceSomething) {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
@@ -85,7 +73,7 @@ export class MinMaxAiPlayerController extends AiController {
         this._game.placeField(best.x, best.y, this.ownedPlayer)
     }
 
-    private minMax(board: IGameBoard, depth: number, player: IPlayer): number {
+    private alphaBeta(board: IGameBoard, depth: number, player: IPlayer): number {
 
         if (board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0) {
             // owned player wins
@@ -126,7 +114,7 @@ export class MinMaxAiPlayerController extends AiController {
             for (let i = 0; i < moves.length; i++) {
                 player = this._game.getNextPlayer(player)
 
-                const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, player)
+                const current = this.alphaBeta(moves[i].gameBoardAfterMove, depth - 1, player)
 
                 player = this._game.getNextPlayer(player)
                 if (current > evaluation) {
@@ -135,8 +123,13 @@ export class MinMaxAiPlayerController extends AiController {
                     }
                     evaluation = current
                 }
-            }
 
+                this.alpha = Math.max(this.alpha, current)
+
+                if (this.alpha >= this.beta) {
+                    break
+                }
+            }
 
             return evaluation
         } else {
@@ -147,7 +140,7 @@ export class MinMaxAiPlayerController extends AiController {
             for (let i = 0; i < moves.length; i++) {
                 player = this._game.getNextPlayer(player)
 
-                const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, player)
+                const current = this.alphaBeta(moves[i].gameBoardAfterMove, depth - 1, player)
 
                 player = this._game.getNextPlayer(player)
                 if (current < evaluation) {
@@ -155,6 +148,12 @@ export class MinMaxAiPlayerController extends AiController {
                         this.bestMove = moves[i].move
                     }
                     evaluation = current
+                }
+
+                this.beta = Math.min(this.beta, current)
+
+                if (this.alpha >= this.beta) {
+                    break
                 }
             }
 

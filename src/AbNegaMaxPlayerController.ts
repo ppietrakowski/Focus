@@ -1,3 +1,4 @@
+
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
 import { IField } from './IField'
@@ -5,40 +6,33 @@ import { IFocus, Move } from './IFocus'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
 import { getAvailableMoves } from './LegalMovesFactory'
+import { comparatorPlaceMoveType } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
-export interface AiMove {
-    move?: Move
-    gameBoardAfterMove: IGameBoard
+let ownedPlayer: IPlayer = null
+let _game: IFocus = null
+
+function availablePlaceMovesComparator(a: comparatorPlaceMoveType, b: comparatorPlaceMoveType) {
+    return evaluateMove(a.afterPlaceMove.gameBoard, ownedPlayer, _game) - evaluateMove(b.afterPlaceMove.gameBoard, ownedPlayer, _game)
 }
 
-export interface BestMove {
-    bestMove: AiMove
-    value: number
-}
-
-export type JustMinMaxValue = {
-    value: number
-}
-
-export type comparatorPlaceMoveType = {
-    afterPlaceMove: AfterPlaceMove
-    x: number
-    y: number
-}
-
-export class MinMaxAiPlayerController extends AiController {
+export class AbNegaMaxPlayer extends AiController {
     bestMove: Move
+    alpha = -Infinity
+    beta = Infinity
 
     constructor(aiOwnedPlayer: IPlayer, _game: IFocus, _gameBoard: IGameBoardView) {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
+    once = true
+
     depth = 3
 
     move(): Promise<boolean> {
-        console.log('megamax')
-        this.minMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
+        this.alpha = -Infinity
+        this.beta = Infinity
+        this.abNegaMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer, this.alpha, this.beta)
 
         if (!this.bestMove && !this.bestMove.shouldPlaceSomething) {
             const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
@@ -79,86 +73,62 @@ export class MinMaxAiPlayerController extends AiController {
             availablePlaceMoves.push({ afterPlaceMove, x: v.x, y: v.y })
         })
 
+        ownedPlayer = this.ownedPlayer
+        _game = this._game
+
+        availablePlaceMoves.sort(availablePlaceMovesComparator)
+
         const best = availablePlaceMoves[0]
 
 
         this._game.placeField(best.x, best.y, this.ownedPlayer)
     }
 
-    private minMax(board: IGameBoard, depth: number, player: IPlayer): number {
-
+    private abNegaMax(board: IGameBoard, depth: number, player: IPlayer, alpha: number, beta: number, sign = 1): number {
         if (board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0) {
             // owned player wins
-            const result = evaluateMove(board, player, this._game)
+            const result = sign * evaluateMove(board, player, this._game)
             return result
         }
 
         if (board.countPlayersFields(this.ownedPlayer) === 0) {
             // owned player wins
-            const result = -evaluateMove(board, player, this._game)
+            const result = sign * -evaluateMove(board, player, this._game)
             return result
         }
+        
+        if (depth === 0)
+            return evaluateMove(board, player, this._game)
 
-        // omit the calculating moves
-        if (depth === 0) {
-            const result = evaluateMove(board, player, this._game)
-
-            return result
-        }
-
-        const movesAndCount = getAvailableMoves(board, this.ownedPlayer)
-
-        player = this._game.getNextPlayer(player)
+        const movesAndCount = getAvailableMoves(board, player)
 
         if ((movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
             return evaluateMove(board, player, this._game)
 
-        player = this._game.getNextPlayer(player)
-
         const moves = movesAndCount.aiMoves
-        if (moves.length < 1) {
-            return 0
-        }
+        if (moves.length < 1)
+            return null
 
-        if (player === this.ownedPlayer) {
-            let evaluation = -Infinity
+        let evaluation = -Infinity
 
-            for (let i = 0; i < moves.length; i++) {
-                player = this._game.getNextPlayer(player)
+        for (let i = 0; i < moves.length; i++) {
+            let current = this.abNegaMax(moves[i].gameBoardAfterMove, depth - 1, player, -beta, -alpha, -sign)
+            current *= -1
 
-                const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, player)
-
-                player = this._game.getNextPlayer(player)
-                if (current > evaluation) {
-                    if (depth === this.depth) {
-                        this.bestMove = moves[i].move
-                    }
-                    evaluation = current
+            if (current > evaluation) {
+                if (depth === this.depth) {
+                    this.bestMove = moves[i].move
                 }
+
+                evaluation = current
             }
 
-
-            return evaluation
-        } else {
-
-            let evaluation = Infinity
-
-
-            for (let i = 0; i < moves.length; i++) {
-                player = this._game.getNextPlayer(player)
-
-                const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, player)
-
-                player = this._game.getNextPlayer(player)
-                if (current < evaluation) {
-                    if (depth === this.depth) {
-                        this.bestMove = moves[i].move
-                    }
-                    evaluation = current
-                }
+            alpha = Math.max(alpha, evaluation)
+            if (alpha >= beta) {
+                break
             }
-
-            return evaluation
         }
+
+        return evaluation
     }
 }
