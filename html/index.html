@@ -37,7 +37,7 @@
     .buttonBoard {
       width: 600px;
       padding: 20px 120px 10px 120px;
-      float: left;
+      float:inline-start;
     }
 
     .playOptionButton {
@@ -156,20 +156,20 @@
       <select name="player1" id="player1">
         <option value="human">Human player</option>
         <option value="random">Random</option>
-        <option value="minimax">Minimax</option>
-        <option value="negamax">Negamax</option>
-        <option value="abminimax">Alfa-Beta prunning minimax</option>
-        <option value="abnegaminimax">Alfa-Beta prunning negamax</option>
+        <option value="minimax">Minimax (D:3)</option>
+        <option value="negamax">Negamax (D:3)</option>
+        <option value="abminimax">A-B Pr. Minimax (D:6)</option>
+        <option value="abnegaminimax">A-B Pr. Negamax (D:6)</option>
       </select>
 
       <label for="player2">Green player: </label>
       <select name="player2" id="player2">
         <option value="human">Human player</option>
         <option value="random">Random</option>
-        <option value="minimax">Minimax</option>
-        <option value="negamax">Negamax</option>
-        <option value="abminimax">Alfa-Beta prunning minimax</option>
-        <option value="abnegaminimax">Alfa-Beta prunning negamax</option>
+        <option value="minimax">Minimax (D:3)</option>
+        <option value="negamax">Negamax (D:3)</option>
+        <option value="abminimax">A-B Pr. Minimax (D:6)</option>
+        <option value="abnegaminimax">A-B Pr. Negamax (D:6)</option>
       </select>
       <button id="BeginPlayButton">Begin play</button>
     </fieldset>
