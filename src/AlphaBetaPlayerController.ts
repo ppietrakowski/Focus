@@ -2,9 +2,8 @@
 
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
-import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
-import { AfterPlaceMove, IGameBoard } from './IGameBoard'
+import { IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
 import { getAvailableMoves } from './LegalMovesFactory'
 import { IPlayer } from './Player'
@@ -29,28 +28,6 @@ export class AlphaBetaPlayerController extends AiController {
         this.alphaBeta(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
         return super.move()
-    }
-
-
-    onPlaceStateStarted(): void {
-        const enemyFields: IField[] = []
-
-        this._game.gameBoard.each(v => {
-            if (!this.ownedPlayer.doesOwnThisField(v))
-                enemyFields.push(v)
-        })
-
-        const availablePlaceMoves: { afterPlaceMove: AfterPlaceMove, x: number, y: number }[] = []
-
-        enemyFields.forEach(v => {
-            const afterPlaceMove = this._game.gameBoard.getBoardAfterPlace(v.x, v.y, this.ownedPlayer)
-            availablePlaceMoves.push({ afterPlaceMove, x: v.x, y: v.y })
-        })
-
-        const best = availablePlaceMoves[0]
-
-
-        this._game.placeField(best.x, best.y, this.ownedPlayer)
     }
 
     private alphaBeta(board: IGameBoard, depth: number, player: IPlayer): number {

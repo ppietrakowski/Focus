@@ -32,11 +32,4 @@ export class RandomPlayer extends AiController {
 
         return Promise.reject('not move founded')
     }
-
-    onPlaceStateStarted(): void {
-        console.log(`Computer player(${getPlayerName(this.ownedPlayer)}) places`)
-        const { x, y } = this.getRandomFieldPosition(f => f.isPlayable)
-
-        this._game.placeField(x, y, this.ownedPlayer)
-    }
 }

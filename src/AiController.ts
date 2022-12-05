@@ -6,9 +6,25 @@ import { Direction, FieldState, IField } from './IField'
 import { IPredicate, randomInteger } from './GameUtils'
 import { GameBoard } from './GameBoard'
 import { runTimeout } from './Timing'
-import { IGameBoard } from './IGameBoard'
+import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { evaluateMove } from './EvaluationFunction'
 
+export type PlaceMoveType = {
+    afterPlaceMove: AfterPlaceMove
+    x: number
+    y: number
+}
+
+let ownedPlayer: IPlayer = null
+let _game: IFocus = null
+
+function availablePlaceMovesComparator(a: PlaceMoveType, b: PlaceMoveType) {
+    return evaluateMove(b.afterPlaceMove.gameBoard, ownedPlayer, _game) - evaluateMove(a.afterPlaceMove.gameBoard, ownedPlayer, _game)
+}
+
+function enemyFieldToPlaceMoveType(field: IField) {
+    return { afterPlaceMove: _game.gameBoard.getBoardAfterPlace(field.x, field.y, ownedPlayer), x: field.x, y: field.y }
+}
 
 export abstract class AiController implements IAiController {
 
@@ -44,7 +60,27 @@ export abstract class AiController implements IAiController {
         return pr
     }
 
-    abstract onPlaceStateStarted(): void
+    onPlaceStateStarted(): void {
+        const enemyFields: IField[] = []
+
+        ownedPlayer = this.ownedPlayer
+        _game = this._game
+
+        // get each enemy fields
+        this._game.gameBoard.each(v => {
+            if (!this.ownedPlayer.doesOwnThisField(v))
+                enemyFields.push(v)
+        })
+
+        const availablePlaceMoves: PlaceMoveType[] = enemyFields
+            .map(enemyFieldToPlaceMoveType)
+            .sort(availablePlaceMovesComparator)
+
+        const best = availablePlaceMoves[0]
+
+        this._game.placeField(best.x, best.y, this.ownedPlayer)
+    }
+
     stopMoving(): void {
         this._game
     }

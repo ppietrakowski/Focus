@@ -43,28 +43,6 @@ export class MinMaxAiPlayerController extends AiController {
         return super.move()
     }
 
-
-    onPlaceStateStarted(): void {
-        const enemyFields: IField[] = []
-
-        this._game.gameBoard.each(v => {
-            if (!this.ownedPlayer.doesOwnThisField(v))
-                enemyFields.push(v)
-        })
-
-        const availablePlaceMoves: { afterPlaceMove: AfterPlaceMove, x: number, y: number }[] = []
-
-        enemyFields.forEach(v => {
-            const afterPlaceMove = this._game.gameBoard.getBoardAfterPlace(v.x, v.y, this.ownedPlayer)
-            availablePlaceMoves.push({ afterPlaceMove, x: v.x, y: v.y })
-        })
-
-        const best = availablePlaceMoves[0]
-
-
-        this._game.placeField(best.x, best.y, this.ownedPlayer)
-    }
-
     private minMax(board: IGameBoard, depth: number, player: IPlayer): number {
         if (this.hasReachedEndConditions(board, depth)) {
             return this.calculateOnEndConditions(board, player)
