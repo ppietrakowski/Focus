@@ -34,7 +34,7 @@ export class MinMaxAiPlayerController extends AiController {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    depth = 3
+    depth = 4
 
     move(): Promise<boolean> {
         console.log('megamax')

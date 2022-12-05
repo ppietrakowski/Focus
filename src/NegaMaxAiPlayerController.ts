@@ -25,7 +25,7 @@ export class NegaMaxPlayer extends AiController {
 
     once = true
 
-    depth = 3
+    depth = 5
 
     move(): Promise<boolean> {
         console.log('negamax')
