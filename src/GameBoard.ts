@@ -4,6 +4,7 @@ import { IField } from './IField'
 import { IPlayer } from './Player'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { FieldState } from './IField'
+import { IPredicate } from './GameUtils'
 
 
 interface BoardState {
@@ -54,6 +55,20 @@ export class GameBoard implements IGameBoard {
 
         this.redPlayerPawnCount = 0
         this.greenPlayerPawnCount = 0
+    }
+
+    filter(predicate: IPredicate<IField>): IField[] {
+        const fields: IField[] = []
+
+        for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
+            for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
+                if (predicate(this._fields[x][y])) {
+                    fields.push(this._fields[x][y])
+                }
+            }
+        }
+
+        return fields
     }
 
     redPlayerPawnCount: number
