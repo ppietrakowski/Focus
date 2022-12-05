@@ -6,6 +6,8 @@ import { Direction, FieldState, IField } from './IField'
 import { IPredicate, randomInteger } from './GameUtils'
 import { GameBoard } from './GameBoard'
 import { runTimeout } from './Timing'
+import { IGameBoard } from './IGameBoard'
+import { evaluateMove } from './EvaluationFunction'
 
 
 export abstract class AiController implements IAiController {
@@ -74,6 +76,23 @@ export abstract class AiController implements IAiController {
         }
 
         return { x, y }
+    }
+
+    protected hasReachedEndConditions(board: IGameBoard, depth: number) {
+        return board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0 ||
+            board.countPlayersFields(this.ownedPlayer) === 0 ||
+            depth === 0
+    }
+
+    protected calculateOnEndConditions(board: IGameBoard, player: IPlayer) {
+        if (board.countPlayersFields(this.ownedPlayer) === 0) {
+            // owned player wins
+            const result = -evaluateMove(board, player, this._game)
+            return result
+        }
+
+        const result = evaluateMove(board, player, this._game)
+        return result
     }
 }
 

@@ -62,20 +62,9 @@ export class NegaMaxPlayer extends AiController {
     }
 
     private negamax(board: IGameBoard, depth: number, player: IPlayer, sign = 1): number {
-        if (board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0) {
-            // owned player wins
-            const result = sign * evaluateMove(board, player, this._game)
-            return result
+        if (this.hasReachedEndConditions(board, depth)) {
+            return this.calculateOnEndConditions(board, player)
         }
-
-        if (board.countPlayersFields(this.ownedPlayer) === 0) {
-            // owned player wins
-            const result = sign * -evaluateMove(board, player, this._game)
-            return result
-        }
-        
-        if (depth === 0)
-            return evaluateMove(board, player, this._game)
 
         const movesAndCount = getAvailableMoves(board, player)
 

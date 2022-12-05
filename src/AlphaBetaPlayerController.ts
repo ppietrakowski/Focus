@@ -55,23 +55,8 @@ export class AlphaBetaPlayerController extends AiController {
 
     private alphaBeta(board: IGameBoard, depth: number, player: IPlayer): number {
 
-        if (board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0) {
-            // owned player wins
-            const result = evaluateMove(board, player, this._game)
-            return result
-        }
-
-        if (board.countPlayersFields(this.ownedPlayer) === 0) {
-            // owned player wins
-            const result = -evaluateMove(board, player, this._game)
-            return result
-        }
-
-        // omit the calculating moves
-        if (depth === 0) {
-            const result = evaluateMove(board, player, this._game)
-
-            return result
+        if (this.hasReachedEndConditions(board, depth)) {
+            return this.calculateOnEndConditions(board, player)
         }
 
         const movesAndCount = getAvailableMoves(board, this.ownedPlayer)
