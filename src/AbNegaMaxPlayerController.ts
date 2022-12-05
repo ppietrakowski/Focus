@@ -18,7 +18,7 @@ export class AbNegaMaxPlayer extends AiController {
 
     once = true
 
-    depth = 3
+    depth = 4
 
     move(): Promise<boolean> {
         this.alpha = -Infinity

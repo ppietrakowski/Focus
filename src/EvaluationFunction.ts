@@ -32,11 +32,12 @@ export function evaluateMove(board: IGameBoard, player: IPlayer, game: IFocus): 
 
     controlledByYou = yourFields.length
     controlledByEnemy = enemyFields.length
-    const ratio = controlledByYou - controlledByEnemy
+    const ratio = controlledByYou - (2*controlledByEnemy)
 
-    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height, 0)
-    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + current.height, 0)
+    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height-1, 0)
+    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + current.height-1, 0)
 
-    const evalValue = 40 * ratio + 4 * ratioInReserve + 8 * heightOfYourFields / heightOfEnemyFields
+    const evalValue = 10 * ratio + 1 * ratioInReserve + 2 * (heightOfYourFields - heightOfEnemyFields)
+
     return evalValue
 }

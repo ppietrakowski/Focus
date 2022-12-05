@@ -27,7 +27,7 @@ export class MinMaxAiPlayerController extends AiController {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    depth = 3
+    depth = 4
 
     move(): Promise<boolean> {
         this.minMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
