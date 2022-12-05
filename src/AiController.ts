@@ -1,4 +1,4 @@
-import { EventNewTurn, IFocus } from './IFocus'
+import { EventNewTurn, IFocus, Move } from './IFocus'
 import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
 import { IAiController, IGameBoardController } from './IGameBoardController'
@@ -12,6 +12,7 @@ export abstract class AiController implements IAiController {
 
     readonly ownedPlayer: IPlayer
     protected _gameBoardController: IGameBoardController
+    protected bestMove: Move
 
     constructor(aiOwnedPlayer: IPlayer, protected readonly _game: IFocus, protected readonly _gameBoard: IGameBoardView) {
         this.ownedPlayer = aiOwnedPlayer
@@ -24,7 +25,23 @@ export abstract class AiController implements IAiController {
         this._gameBoardController = controller
     }
 
-    abstract move(): Promise<boolean>
+    move(): Promise<boolean> {
+        if (!this.bestMove && !this.bestMove.shouldPlaceSomething) {
+            return Promise.reject(!this.bestMove)
+        }
+
+        if (this.bestMove.shouldPlaceSomething) {
+            console.log(`placed at ${this.bestMove.x}, ${this.bestMove.y}`)
+            this._game.placeField(this.bestMove.x, this.bestMove.y, this.ownedPlayer)
+            return Promise.resolve(true)
+        }
+
+        const pr = this._game.moveToField(this.bestMove.x,
+            this.bestMove.y, this.bestMove.direction, this.bestMove.moveCount)
+
+        return pr
+    }
+
     abstract onPlaceStateStarted(): void
     stopMoving(): void {
         this._game

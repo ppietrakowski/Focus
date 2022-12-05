@@ -34,27 +34,7 @@ export class AbNegaMaxPlayer extends AiController {
         this.beta = Infinity
         this.abNegaMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer, this.alpha, this.beta)
 
-        if (!this.bestMove && !this.bestMove.shouldPlaceSomething) {
-            const v = getAvailableMoves(this._gameBoard.gameBoard, this.ownedPlayer)
-            console.log(v)
-            console.log(this.bestMove)
-            console.log(this._game.gameBoard)
-            return Promise.reject(!this.bestMove)
-        }
-
-        if (this.bestMove.shouldPlaceSomething)
-            console.log(true)
-
-        if (this.bestMove.shouldPlaceSomething) {
-            console.log(`placed at ${this.bestMove.x}, ${this.bestMove.y}`)
-            this._game.placeField(this.bestMove.x, this.bestMove.y, this.ownedPlayer)
-            return Promise.resolve(true)
-        }
-
-        const pr = this._game.moveToField(this.bestMove.x,
-            this.bestMove.y, this.bestMove.direction, this.bestMove.moveCount)
-
-        return pr
+        return super.move()
     }
 
 
