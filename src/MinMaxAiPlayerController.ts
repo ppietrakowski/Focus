@@ -1,5 +1,6 @@
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
+import { PLAYER_RED } from './Game'
 import { IFocus, Move } from './IFocus'
 import { IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
@@ -40,24 +41,18 @@ export class MinMaxAiPlayerController extends AiController {
             return this.calculateOnEndConditions(board, player)
         }
 
-        const moves = getAvailableMoves(board, this.ownedPlayer)
-
-        player = this._game.getNextPlayer(player)
+        const moves = getAvailableMoves(board, player)
 
         if ((moves.length === 0))
             return evaluateMove(board, player, this._game)
 
-        player = this._game.getNextPlayer(player)
-
-        if (player === this.ownedPlayer) {
+        if (player === this._game.currentPlayer) {
             let evaluation = -Infinity
 
             for (let i = 0; i < moves.length; i++) {
                 player = this._game.getNextPlayer(player)
-
                 const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, player)
 
-                player = this._game.getNextPlayer(player)
                 if (current > evaluation) {
                     if (depth === this.depth) {
                         this.bestMove = moves[i].move
@@ -78,7 +73,6 @@ export class MinMaxAiPlayerController extends AiController {
 
                 const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, player)
 
-                player = this._game.getNextPlayer(player)
                 if (current < evaluation) {
                     if (depth === this.depth) {
                         this.bestMove = moves[i].move

@@ -16,7 +16,7 @@ export class AbNegaMaxPlayer extends AiController {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    depth = 6
+    depth = 5
 
     move(): Promise<boolean> {
         this.alpha = -Infinity

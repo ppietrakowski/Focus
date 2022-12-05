@@ -2,6 +2,7 @@
 
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
+import { PLAYER_RED } from './Game'
 import { IFocus, Move } from './IFocus'
 import { IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
@@ -16,19 +17,15 @@ export class AlphaBetaPlayerController extends AiController {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    depth = 6
-    alpha = -Infinity
-    beta = Infinity
+    depth = 3
 
     move(): Promise<boolean> {
-        this.alpha = -Infinity
-        this.beta = Infinity
         this.alphaBeta(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
         return super.move()
     }
 
-    private alphaBeta(board: IGameBoard, depth: number, player: IPlayer): number {
+    private alphaBeta(board: IGameBoard, depth: number, player: IPlayer, alpha = -Infinity, beta = Infinity): number {
 
         if (this.hasReachedEndConditions(board, depth)) {
             return this.calculateOnEndConditions(board, player)
@@ -36,22 +33,16 @@ export class AlphaBetaPlayerController extends AiController {
 
         const moves = getAvailableMoves(board, this.ownedPlayer)
 
-        player = this._game.getNextPlayer(player)
-
         if ((moves.length === 0))
             return evaluateMove(board, player, this._game)
 
-        player = this._game.getNextPlayer(player)
-
-        if (player === this.ownedPlayer) {
+        if (player === this._game.currentPlayer) {
             let evaluation = -Infinity
 
             for (let i = 0; i < moves.length; i++) {
                 player = this._game.getNextPlayer(player)
-
                 const current = this.alphaBeta(moves[i].gameBoardAfterMove, depth - 1, player)
 
-                player = this._game.getNextPlayer(player)
                 if (current > evaluation) {
                     if (depth === this.depth) {
                         this.bestMove = moves[i].move
@@ -59,9 +50,9 @@ export class AlphaBetaPlayerController extends AiController {
                     evaluation = current
                 }
 
-                this.alpha = Math.max(this.alpha, current)
+                alpha = Math.max(alpha, current)
 
-                if (this.alpha >= this.beta) {
+                if (alpha >= beta) {
                     break
                 }
             }
@@ -71,13 +62,11 @@ export class AlphaBetaPlayerController extends AiController {
 
             let evaluation = Infinity
 
-
             for (let i = 0; i < moves.length; i++) {
                 player = this._game.getNextPlayer(player)
 
                 const current = this.alphaBeta(moves[i].gameBoardAfterMove, depth - 1, player)
 
-                player = this._game.getNextPlayer(player)
                 if (current < evaluation) {
                     if (depth === this.depth) {
                         this.bestMove = moves[i].move
@@ -85,9 +74,9 @@ export class AlphaBetaPlayerController extends AiController {
                     evaluation = current
                 }
 
-                this.beta = Math.min(this.beta, current)
+                beta = Math.min(beta, current)
 
-                if (this.alpha >= this.beta) {
+                if (alpha >= beta) {
                     break
                 }
             }

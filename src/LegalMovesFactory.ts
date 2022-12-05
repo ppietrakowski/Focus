@@ -87,6 +87,8 @@ export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailabl
     const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f.state))
     const enemyFields: IField[] = board.filter(f => enemyPlayer.doesOwnThisField(f.state))
     
+    yourFields.sort((a, b) => b.height - a.height)
+    
     const aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.x, f.y))
         .map<AiMove>(v => {
             return {
