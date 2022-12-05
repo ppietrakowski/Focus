@@ -27,26 +27,17 @@ export function evaluateMove(board: IGameBoard, player: IPlayer, game: IFocus): 
     if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0.0
 
-    const yourFields: IField[] = []
-    const enemyFields: IField[] = []
-
-    board.each(v => {
-        if (player.doesOwnThisField(v))
-            yourFields.push(v)
-        else if (game.getNextPlayer(player).doesOwnThisField(v)) {
-            enemyFields.push(v)
-        }
-    })
+    const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f))
+    const enemyFields: IField[] = board.filter(f => game.getNextPlayer(player).doesOwnThisField(f))
 
     controlledByYou = yourFields.length
     controlledByEnemy = enemyFields.length
-    const ratio = controlledByYou - (2*controlledByEnemy)
+    const ratio = controlledByYou - (2 * controlledByEnemy)
 
-
-    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height-1, 0)
-    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + current.height-1, 0)
+    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height - 1, 0)
+    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + current.height - 1, 0)
 
     const evalValue = 10 * ratio + 1 * ratioInReserve + 2 * (heightOfYourFields - heightOfEnemyFields)
-    console.log(evalValue)
+
     return evalValue
 }
