@@ -84,20 +84,12 @@ interface IAvailableMoves {
 }
 
 export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
-    const yourFields: IField[] = []
-    const enemyFields: IField[] = []
+    
+
     const enemyPlayer = player.state === PLAYER_RED.state ? PLAYER_GREEN : PLAYER_RED
-
-    function getEachYourField(field: IField) {
-        if (player.doesOwnThisField(field.state)) {
-            yourFields.push(field)
-        } else if (enemyPlayer.doesOwnThisField(field.state)) {
-            enemyFields.push(field)
-        }
-    }
-
-    board.each(getEachYourField)
-
+    const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f.state))
+    const enemyFields: IField[] = board.filter(f => enemyPlayer.doesOwnThisField(f.state))
+    
     const aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.x, f.y))
         .map<AiMove>(v => {
             return {
@@ -132,7 +124,6 @@ export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailabl
 
         afterPlaceMoves[aiMoves.length - 1] = afterPlaceMove
     })
-
 
     return { aiMoves, afterPlaceMoves: afterPlaceMoves }
 }

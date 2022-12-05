@@ -61,16 +61,10 @@ export abstract class AiController implements IAiController {
     }
 
     onPlaceStateStarted(): void {
-        const enemyFields: IField[] = []
+        const enemyFields: IField[] = this._game.gameBoard.filter(f => !this.ownedPlayer.doesOwnThisField(f))
 
         ownedPlayer = this.ownedPlayer
         _game = this._game
-
-        // get each enemy fields
-        this._game.gameBoard.each(v => {
-            if (!this.ownedPlayer.doesOwnThisField(v))
-                enemyFields.push(v)
-        })
 
         const availablePlaceMoves: PlaceMoveType[] = enemyFields
             .map(enemyFieldToPlaceMoveType)
@@ -91,10 +85,10 @@ export abstract class AiController implements IAiController {
         if (player == this.ownedPlayer) {
             runTimeout(0.2)
                 .then(() => this.move())
-                .catch(() => {
-                    console.log('Illegal move or not move available')
-                    this._game.nextTurn()
-                })
+            // .catch(() => {
+            // console.log('Illegal move or not move available')
+            // this._game.nextTurn()
+            // })
         } else {
             this.stopMoving()
         }

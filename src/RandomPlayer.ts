@@ -16,12 +16,7 @@ export class RandomPlayer extends AiController {
     move(): Promise<boolean> {
         let moves: Move[] = []
 
-        const yourFields: IField[] = []
-
-        this._gameBoard.gameBoard.each(v => {
-            if (this.ownedPlayer.doesOwnThisField(v))
-                yourFields.push(v)
-        })
+        const yourFields: IField[] = this._gameBoard.gameBoard.filter(f => this.ownedPlayer.doesOwnThisField(f))
 
         moves = yourFields.flatMap(v => getLegalMovesFromField(this._gameBoard.gameBoard, v.x, v.y))
 
@@ -32,4 +27,4 @@ export class RandomPlayer extends AiController {
 
         return Promise.reject('not move founded')
     }
-}
+}   

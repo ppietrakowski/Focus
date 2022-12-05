@@ -1,8 +1,7 @@
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
-import { IField } from './IField'
 import { IFocus, Move } from './IFocus'
-import { AfterPlaceMove, IGameBoard } from './IGameBoard'
+import { IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
 import { getAvailableMoves } from './LegalMovesFactory'
 import { IPlayer } from './Player'
@@ -19,12 +18,6 @@ export interface BestMove {
 
 export type JustMinMaxValue = {
     value: number
-}
-
-export type comparatorPlaceMoveType = {
-    afterPlaceMove: AfterPlaceMove
-    x: number
-    y: number
 }
 
 export class MinMaxAiPlayerController extends AiController {
