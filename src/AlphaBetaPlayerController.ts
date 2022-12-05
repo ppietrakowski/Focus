@@ -17,7 +17,7 @@ export class AlphaBetaPlayerController extends AiController {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    depth = 4
+    depth = 6
     alpha = -Infinity
     beta = Infinity
 
