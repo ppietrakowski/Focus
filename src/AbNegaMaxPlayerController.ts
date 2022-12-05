@@ -33,14 +33,10 @@ export class AbNegaMaxPlayer extends AiController {
             return this.calculateOnEndConditions(board, player)
         }
 
-        const movesAndCount = getAvailableMoves(board, player)
+        const moves = getAvailableMoves(board, this.ownedPlayer)
 
-        if ((movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
+        if ((moves.length === 0))
             return evaluateMove(board, player, this._game)
-
-        const moves = movesAndCount.aiMoves
-        if (moves.length < 1)
-            return null
 
         let evaluation = -Infinity
 

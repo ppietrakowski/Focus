@@ -30,7 +30,6 @@ export class MinMaxAiPlayerController extends AiController {
     depth = 3
 
     move(): Promise<boolean> {
-        console.log('megamax')
         this.minMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
         return super.move()
@@ -41,19 +40,14 @@ export class MinMaxAiPlayerController extends AiController {
             return this.calculateOnEndConditions(board, player)
         }
 
-        const movesAndCount = getAvailableMoves(board, this.ownedPlayer)
+        const moves = getAvailableMoves(board, this.ownedPlayer)
 
         player = this._game.getNextPlayer(player)
 
-        if ((movesAndCount.afterPlaceMoves.length === 0 && movesAndCount.aiMoves.length === 0))
+        if ((moves.length === 0))
             return evaluateMove(board, player, this._game)
 
         player = this._game.getNextPlayer(player)
-
-        const moves = movesAndCount.aiMoves
-        if (moves.length < 1) {
-            return 0
-        }
 
         if (player === this.ownedPlayer) {
             let evaluation = -Infinity

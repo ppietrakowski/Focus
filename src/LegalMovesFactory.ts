@@ -78,10 +78,7 @@ export function getLegalMovesFromField(board: IGameBoard, x: number, y: number):
 }
 
 
-interface IAvailableMoves {
-    aiMoves: AiMove[]
-    afterPlaceMoves: AfterPlaceMove[]
-}
+type IAvailableMoves = AiMove[]
 
 export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
     
@@ -98,8 +95,6 @@ export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailabl
             }
         })
 
-
-    const afterPlaceMoves: AfterPlaceMove[] = []
 
     enemyFields.forEach(v => {
         const afterPlaceMove = board.getBoardAfterPlace(v.x, v.y, player)
@@ -121,9 +116,7 @@ export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailabl
         }
         else if (player.state === FieldState.Red && afterPlaceMove.redCount > 0)
             aiMoves.push(move)
-
-        afterPlaceMoves[aiMoves.length - 1] = afterPlaceMove
     })
 
-    return { aiMoves, afterPlaceMoves: afterPlaceMoves }
+    return aiMoves
 }
