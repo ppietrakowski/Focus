@@ -15,12 +15,9 @@ export class NegaMaxPlayer extends AiController {
         super(aiOwnedPlayer, _game, _gameBoard)
     }
 
-    once = true
-
     depth = 3
 
     move(): Promise<boolean> {
-        console.log('negamax')
         this.negamax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
         return super.move()
