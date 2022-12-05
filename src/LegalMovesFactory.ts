@@ -78,7 +78,7 @@ export function getLegalMovesFromField(board: IGameBoard, x: number, y: number):
 }
 
 
-type IAvailableMoves = AiMove[]
+export type IAvailableMoves = AiMove[]
 
 export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
     
