@@ -1,7 +1,7 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
 import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, FieldState, IField } from './IField'
 import { Move } from './IFocus'
-import { AfterPlaceMove, IGameBoard } from './IGameBoard'
+import { IGameBoard } from './IGameBoard'
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
@@ -81,28 +81,37 @@ export function getLegalMovesFromField(board: IGameBoard, x: number, y: number):
 type IAvailableMoves = AiMove[]
 
 export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
-    
-
     const enemyPlayer = player.state === PLAYER_RED.state ? PLAYER_GREEN : PLAYER_RED
+    
     const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f.state))
     const enemyFields: IField[] = board.filter(f => enemyPlayer.doesOwnThisField(f.state))
-    
-    yourFields.sort((a, b) => b.height - a.height)
-    
-    const aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.x, f.y))
-        .map<AiMove>(v => {
-            return {
-                gameBoardAfterMove: board.getBoardAfterMove(board.getFieldAt(v.x, v.y),
-                    board.getFieldAt(v.x + v.direction.x * v.moveCount, v.y + v.direction.y * v.moveCount), player).gameBoard, move: v
-            }
-        })
 
+    yourFields.sort((a, b) => b.height - a.height)
+
+    let aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.x, f.y))
+        .map<AiMove>(convertMoveToAiMove.bind(undefined, board))
+
+    // accumulate each place moves
+    aiMoves = aiMoves.concat(accumulateEachPlaceMove(enemyFields, board, player))
+
+    return aiMoves
+}
+
+function convertMoveToAiMove(board: IGameBoard, move: Move): AiMove {
+    return {
+        gameBoardAfterMove: board.getBoardAfterMove(board.getFieldAt(move.x, move.y),
+            board.getFieldAt(move.x + move.direction.x * move.moveCount, move.y + move.direction.y * move.moveCount), player).gameBoard, move: move
+    }
+}
+
+function accumulateEachPlaceMove(enemyFields: IField[], board: IGameBoard, player: IPlayer) {
+
+    const aiMoves: AiMove[] = []
 
     enemyFields.forEach(v => {
         const afterPlaceMove = board.getBoardAfterPlace(v.x, v.y, player)
 
         const move: AiMove = {
-
             gameBoardAfterMove: afterPlaceMove.gameBoard,
             move: {
                 x: v.x,
