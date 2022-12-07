@@ -97,7 +97,7 @@ export class GameBoard implements IGameBoard {
         return { gameBoard, redCount: gameBoard.redPlayerPawnCount, greenCount: gameBoard.greenPlayerPawnCount }
     }
 
-    getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): AfterPlaceMove {
+    getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): IGameBoard {
         const gameBoard = new GameBoard()
 
         for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
@@ -111,8 +111,6 @@ export class GameBoard implements IGameBoard {
 
         gameBoard.greenPlayerPawnCount = this.greenPlayerPawnCount
         gameBoard.redPlayerPawnCount = this.redPlayerPawnCount
-
-
 
         outField.overgrownCallback = (field: IField, state: FieldState) => {
             if (state === player.state) {
@@ -129,7 +127,7 @@ export class GameBoard implements IGameBoard {
 
         outField.moveToThisField(field)
 
-        return { gameBoard, redCount: gameBoard.redPlayerPawnCount, greenCount: gameBoard.greenPlayerPawnCount }
+        return gameBoard
     }
 
     static loadFromJSON(json: GameBoardJson): IGameBoard {

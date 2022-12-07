@@ -33,25 +33,6 @@ function isMoveLegal(board: IGameBoard, x: number, y: number, direction: Directi
     }
 }
 
-export function getNeighbours(board: IGameBoard, x: number, y: number, maxMove: number): IField[] {
-    const neighbours: IField[] = []
-
-    for (let i = 1; i < maxMove; i++) {
-        if (y > maxMove)
-            neighbours.push(board.getFieldAt(x, y + DirectionNorth.y * i))
-        if (y < maxMove)
-            neighbours.push(board.getFieldAt(x, y + DirectionSouth.y * i))
-
-        if (x < maxMove)
-            neighbours.push(board.getFieldAt(x + DirectionEast.x * i, y))
-
-        if (x > maxMove)
-            neighbours.push(board.getFieldAt(x + DirectionWest.x * i, y))
-    }
-
-    return neighbours
-}
-
 export function getMovesFromDirection(board: IGameBoard, field: IField, x: number, y: number, direction: Direction): Move[] {
     const moves: Move[] = []
 
@@ -61,6 +42,7 @@ export function getMovesFromDirection(board: IGameBoard, field: IField, x: numbe
             moves.push({ direction: direction, x: x, y: y, moveCount: moveCount })
         }
     }
+
     return moves
 }
 
@@ -82,14 +64,14 @@ type IAvailableMoves = AiMove[]
 
 export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
     const enemyPlayer = player.state === PLAYER_RED.state ? PLAYER_GREEN : PLAYER_RED
-    
+
     const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f.state))
     const enemyFields: IField[] = board.filter(f => enemyPlayer.doesOwnThisField(f.state))
 
     yourFields.sort((a, b) => b.height - a.height)
 
     let aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.x, f.y))
-        .map<AiMove>(convertMoveToAiMove.bind(undefined, board))
+        .map<AiMove>(convertMoveToAiMove.bind(undefined, board, player))
 
     // accumulate each place moves
     aiMoves = aiMoves.concat(accumulateEachPlaceMove(enemyFields, board, player))
@@ -97,10 +79,16 @@ export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailabl
     return aiMoves
 }
 
-function convertMoveToAiMove(board: IGameBoard, move: Move): AiMove {
+function convertMoveToAiMove(board: IGameBoard, player: IPlayer, move: Move): AiMove {
+    const xOffset = move.x + move.direction.x * move.moveCount
+    const yOffset = move.y + move.direction.y * move.moveCount
+
+    const gameBoardAfterMove = board.getBoardAfterMove(
+        board.getFieldAt(move.x, move.y),
+        board.getFieldAt(xOffset, yOffset), player)
+
     return {
-        gameBoardAfterMove: board.getBoardAfterMove(board.getFieldAt(move.x, move.y),
-            board.getFieldAt(move.x + move.direction.x * move.moveCount, move.y + move.direction.y * move.moveCount), player).gameBoard, move: move
+        gameBoardAfterMove, move
     }
 }
 
