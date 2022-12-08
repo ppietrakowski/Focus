@@ -3,20 +3,14 @@ import { GameBoardView } from './GameBoardView'
 import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory } from './IFocus'
 import { GameBoardController } from './GameBoardController'
 import { IPlayer } from './Player'
-import PlayerAiController from './PlayerAiController'
-import { RandomPlayer } from './RandomPlayer'
-import { MinMaxAiPlayerController } from './MinMaxAiPlayerController'
-import { IAiController } from './IGameBoardController'
 import { getPlayerName } from './AiController'
-import { NegaMaxPlayer } from './NegaMaxAiPlayerController'
 import { initializeTiming, runTimeout } from './Timing'
-import { AlphaBetaPlayerController } from './AlphaBetaPlayerController'
-import { AbNegaMaxPlayer } from './AbNegaMaxPlayerController'
+import { getPlayerController } from './getPlayerController'
 
 
-const focus = new Focus()
+export const focus = new Focus()
 
-const gameBoardView = new GameBoardView(focus)
+export const gameBoardView = new GameBoardView(focus)
 
 class LoggingListener {
     useLogging = true
@@ -57,35 +51,6 @@ const player1Select = document.getElementById('player1') as HTMLSelectElement
 const player2Select = document.getElementById('player2') as HTMLSelectElement
 
 const beginPlay = document.getElementById('BeginPlayButton') as HTMLButtonElement
-
-function getPlayerController(name: string, player: IPlayer): IAiController {
-
-    if (name === 'human') {
-        return new PlayerAiController(player, focus, gameBoardView)
-    }
-
-    if (name === 'random') {
-        return new RandomPlayer(player, focus, gameBoardView)
-    }
-
-    if (name === 'minimax') {
-        return new MinMaxAiPlayerController(player, focus, gameBoardView)
-    }
-
-    if (name === 'negamax') {
-        return new NegaMaxPlayer(player, focus, gameBoardView)
-    }
-
-    if (name === 'abminimax') {
-        return new AlphaBetaPlayerController(player, focus, gameBoardView)
-    }
-    
-    if (name === 'abnegaminimax') {
-        return new AbNegaMaxPlayer(player, focus, gameBoardView)
-    }
-    
-    throw new Error('Selected unavailable player controller')
-}
 
 beginPlay.addEventListener('click', () => {
     let p1

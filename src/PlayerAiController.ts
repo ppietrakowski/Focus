@@ -155,7 +155,6 @@ export default class PlayerAiController extends AiController {
         }
 
         this.moveToField(clickedField, direction)
-        //this._game.nextTurn()
     }
 
     private selectedFieldWasDoubleClicked(clickedField: IFieldView): boolean {
@@ -193,8 +192,6 @@ export default class PlayerAiController extends AiController {
             this.resetToPlayState(this.ownedPlayer)
             return
         }
-
-        console.log('test')
 
         if (!field.field.isPlayable) {
             this.resetToPlayState(this.ownedPlayer)
