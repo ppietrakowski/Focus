@@ -1,6 +1,5 @@
 import EventEmitter from 'eventemitter3'
 import { Direction, FieldState, IField } from './IField'
-import { IFocus } from './IFocus'
 import { IPlayer } from './Player'
 
 export interface IClickListener {
