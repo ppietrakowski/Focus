@@ -34,15 +34,17 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView {
 
     addToReserve(toWhichPlayer: IPlayer): void {
         if (toWhichPlayer === this.owner) {
-            if (this.reserveView instanceof ReserveView)
+            if (this.reserveView instanceof ReserveView) {
                 this.reserveView.emptyAllFields()
+            }
             this.reserveView.addToReserve(toWhichPlayer)
         }
     }
 
     removeFromReserve(): boolean {
-        if (this.reserveView instanceof ReserveView)
+        if (this.reserveView instanceof ReserveView) {
             this.reserveView.emptyAllFields()
+        }
 
         return this.reserveView.removeFromReserve()
     }

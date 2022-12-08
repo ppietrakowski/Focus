@@ -48,7 +48,7 @@ export class FieldView implements IFieldView {
     private tower: number[]
     private rootNodeChilds: HTMLDivElement[]
 
-    constructor(private readonly game: IFocus, field: IField) {
+    constructor(field: IField) {
         this.field = field
         this.events = new EventEmitter()
 
@@ -70,6 +70,22 @@ export class FieldView implements IFieldView {
         this.domElement.children[0].className = this.getUnhoveredClassName(field.fieldState)
 
         this.backedUpClickListeners = []
+
+        this.domElement.addEventListener('mouseover', () => this.onMouseOver())
+        this.domElement.addEventListener('mouseleave', () => this.onMouseLeave())
+        this.domElement.addEventListener('click', () => this.onClick())
+    }
+
+    private onClick(): void {
+        this.events.emit(EventClickField, this)
+    }
+
+    private onMouseLeave(): void {
+        this.events.emit(EventMouseLeaveField, this)
+    }
+
+    private onMouseOver(): void {
+        this.events.emit(EventMouseOverField, this)
     }
 
     addClickListener<T>(clickListener: IClickListener, context: T, backup?: boolean): void {

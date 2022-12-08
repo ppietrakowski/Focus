@@ -17,7 +17,7 @@ function isValidDirection(direction: Direction): boolean {
  * Works by hook to gameBoard and IFieldView events
  */
 export default class PlayerAiController extends AiController {
-    
+
     private selectedField: IFieldView | null
     private usedPool = false
 
@@ -34,14 +34,13 @@ export default class PlayerAiController extends AiController {
         this.gameBoardView.each(v => v.events.on(EventMouseLeaveField, this.onMouseLeaveFieldView, this))
     }
 
-    private onMouseOverFieldView(player: IPlayer, fieldView: IFieldView): void {
-        this.tintHoveredField(player, fieldView)
+    private onMouseOverFieldView(fieldView: IFieldView): void {
+        this.tintHoveredField(fieldView)
     }
 
-    private onMouseLeaveFieldView(player: IPlayer, fieldView: IFieldView): void {
-        this.clearTintFromHoveredField(player, fieldView)
+    private onMouseLeaveFieldView(fieldView: IFieldView): void {
+        this.clearTintFromHoveredField(fieldView)
     }
-
 
     private onPoolClicked(player: IPlayer, reserve: IReserveView): void {
         if (this.isTurnOfPlayer(player)) {
@@ -67,7 +66,7 @@ export default class PlayerAiController extends AiController {
         return currentPlayer === player
     }
 
-    private tintHoveredField(_player: IPlayer, field: IFieldView): void {
+    private tintHoveredField(field: IFieldView): void {
         if (this.canBeTinted(field)) {
             field.visualizeHovered()
         }
@@ -79,7 +78,7 @@ export default class PlayerAiController extends AiController {
         return this.isTurnOfPlayer(this.ownedPlayer) && currentPlayer.doesOwnThisField(field.field) && !this.selectedField
     }
 
-    private clearTintFromHoveredField(_player: IPlayer, field: IFieldView): void {
+    private clearTintFromHoveredField(field: IFieldView): void {
         if (this.canBeTinted(field)) {
             field.visualizeUnhovered()
         }

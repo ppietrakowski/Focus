@@ -7,7 +7,6 @@ import { IPlayer } from './Player'
 import { ReserveViewOnPlayerTurnDecorator } from './ReserveViewOnPlayerTurnDecorator'
 import { IGameBoard } from './IGameBoard'
 import { ForEachFieldInView, IGameBoardView, IPoolClickedListener } from './IGameBoardView'
-import { FieldViewDecorator } from './FieldViewDecorator'
 import EventEmitter from 'eventemitter3'
 import { getLegalMovesFromField } from './LegalMovesFactory'
 
@@ -45,13 +44,8 @@ export class GameBoardView implements IGameBoardView {
         this.game.events.on(EventMovedField, () => this.erasePossibleMoves())
         this.gameBoard.each(
             element => {
-                let e: IFieldView = new FieldView(this.game, element)
+                const e: IFieldView = new FieldView(element)
                 board.appendChild(e.domElement)
-
-                if (PLAYER_GREEN.doesOwnThisField(e.field))
-                    e = new FieldViewDecorator(e, PLAYER_GREEN)
-                else
-                    e = new FieldViewDecorator(e, PLAYER_RED)
                 this.board[element.posX + 8 * element.posY] = e
             }
         )
