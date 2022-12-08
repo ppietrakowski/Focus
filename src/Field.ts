@@ -11,18 +11,18 @@ export interface IOvergrown {
 }
 
 export class Field implements IField {
-    private _state: FieldState
-    private _underThisField: FieldState[]
-    private _x: number
-    private _y: number
+    private state: FieldState
+    private underThisField: FieldState[]
+    private x: number
+    private y: number
 
     public overgrownCallback: IOvergrown
 
     constructor(state: FieldState, x: number, y: number) {
-        this._state = state
-        this._underThisField = []
-        this._x = x
-        this._y = y
+        this.state = state
+        this.underThisField = []
+        this.x = x
+        this.y = y
     }
 
     moveToThisField(fromWhichField: IField, additionalDistance?: number): boolean {
@@ -32,11 +32,11 @@ export class Field implements IField {
 
         additionalDistance = additionalDistance || this.getDistanceToField(fromWhichField)
 
-        const oldState = fromWhichField.state
+        const oldState = fromWhichField.fieldState
 
         // one move is just a changing of state
-        this._underThisField = this.getNewUnderElements(fromWhichField, additionalDistance - 1)
-        this._state = oldState
+        this.underThisField = this.getNewUnderElements(fromWhichField, additionalDistance - 1)
+        this.state = oldState
 
         this.reduceOverGrown()
 
@@ -45,7 +45,7 @@ export class Field implements IField {
 
     reduceOverGrown(): void {
         while (this.isOvergrown) {
-            const fieldState = this._underThisField.pop()
+            const fieldState = this.underThisField.pop()
             if (this.overgrownCallback)
                 this.overgrownCallback(this, fieldState)
         }
@@ -58,34 +58,36 @@ export class Field implements IField {
             return underElements
         }
 
-        return underElements.concat([this.state]).concat(this._underThisField)
+        return underElements.concat([this.fieldState]).concat(this.underThisField)
     }
 
     private shiftElements(n: number): FieldState[] {
         const firstElements: FieldState[] = []
 
-        while (n-- > 0) {
-            const element = this._underThisField.shift() || null
+        while (n > 0) {
+            const element = this.underThisField.shift() || null
 
             if (element) {
                 firstElements.push(element)
             }
+            
+            n--
         }
 
         // update the this.state to next element under
-        this._state = this._underThisField.shift() || FieldState.Empty
+        this.state = this.underThisField.shift() || FieldState.Empty
         return firstElements
     }
 
     placeAtTop(state: FieldState): void {
-        this._underThisField = [this._state].concat(this._underThisField)
-        this._state = state
+        this.underThisField = [this.state].concat(this.underThisField)
+        this.state = state
 
         this.reduceOverGrown()
     }
 
     getDistanceToField(anotherField: IField): number {
-        const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
+        const v = { x: anotherField.posX - this.posX, y: anotherField.posY - this.posY }
 
         if (Math.abs(v.x) > 0) {
             return Math.abs(v.x)
@@ -95,40 +97,40 @@ export class Field implements IField {
     }
 
     getDirectionToField(anotherField: IField): Direction {
-        const v = { x: anotherField.x - this.x, y: anotherField.y - this.y }
+        const v = { x: anotherField.posX - this.posX, y: anotherField.posY - this.posY }
 
-        if (!this.canJump(v)) {
+        if (!this.canJumpInDirection(v)) {
             return { x: 0, y: 0 }
         }
 
         return getDirectionFromOffset(v.x, v.y)
     }
 
-    private canJump(v: Direction): boolean {
-        return Math.abs(v.x) <= this.height && Math.abs(v.y) <= this.height
+    private canJumpInDirection(direction: Direction): boolean {
+        return Math.abs(direction.x) <= this.height && Math.abs(direction.y) <= this.height
     }
 
     possessByPlayer(player: IPlayer): void {
-        this._state = player.state
+        this.state = player.state
     }
 
-    get state(): FieldState {
-        return this._state
+    get fieldState(): FieldState {
+        return this.state
     }
 
-    get x(): number {
-        return this._x
+    get posX(): number {
+        return this.x
     }
 
-    get y(): number {
-        return this._y
+    get posY(): number {
+        return this.y
     }
 
     get height(): number {
-        return this._underThisField.length + 1
+        return this.underThisField.length + 1
     }
     get towerStructure(): FieldState[] {
-        return [this.state].concat(this._underThisField)
+        return [this.fieldState].concat(this.underThisField)
     }
 
     get isOvergrown(): boolean {
@@ -136,10 +138,10 @@ export class Field implements IField {
     }
 
     get isEmpty(): boolean {
-        return !!(this._state & FieldState.Empty)
+        return !!(this.state & FieldState.Empty)
     }
 
     get isPlayable() {
-        return !(this._state & FieldState.Unplayable)
+        return !(this.state & FieldState.Unplayable)
     }
 }

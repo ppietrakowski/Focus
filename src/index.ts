@@ -58,7 +58,7 @@ const player2Select = document.getElementById('player2') as HTMLSelectElement
 
 const beginPlay = document.getElementById('BeginPlayButton') as HTMLButtonElement
 
-function getPlayer(name: string, player: IPlayer): IAiController {
+function getPlayerController(name: string, player: IPlayer): IAiController {
 
     if (name === 'human') {
         return new PlayerAiController(player, focus, gameBoardView)
@@ -92,8 +92,8 @@ beginPlay.addEventListener('click', () => {
     let p2
 
     try {
-        p1 = getPlayer(player1Select.options[player1Select.selectedIndex].value, PLAYER_RED)
-        p2 = getPlayer(player2Select.options[player2Select.selectedIndex].value, PLAYER_GREEN)
+        p1 = getPlayerController(player1Select.options[player1Select.selectedIndex].value, PLAYER_RED)
+        p2 = getPlayerController(player2Select.options[player2Select.selectedIndex].value, PLAYER_GREEN)
     } catch (e) {
         alert(e)
         return

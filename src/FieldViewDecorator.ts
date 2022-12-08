@@ -9,10 +9,10 @@ export class FieldViewDecorator implements IFieldView {
     field: IField
     domElement: HTMLDivElement
 
-    constructor(private readonly _fieldView: IFieldView, private readonly _owningPlayer: IPlayer) {
-        this.domElement = this._fieldView.domElement
-        this.field = this._fieldView.field
-        this.events = this._fieldView.events
+    constructor(private readonly decoratedFieldView: IFieldView, private readonly owningPlayer: IPlayer) {
+        this.domElement = this.decoratedFieldView.domElement
+        this.field = this.decoratedFieldView.field
+        this.events = this.decoratedFieldView.events
 
         this.domElement.addEventListener('mouseover', () => this.onMouseOver())
         this.domElement.addEventListener('mouseleave', () => this.onMouseLeave())
@@ -20,15 +20,15 @@ export class FieldViewDecorator implements IFieldView {
     }
 
     addClickListener<T>(clickListener: IClickListener, context: T, backup?: boolean): void {
-        this._fieldView.addClickListener(clickListener, context, backup)
+        this.decoratedFieldView.addClickListener(clickListener, context, backup)
     }
 
     backupClickListeners(): void {
-        this._fieldView.backupClickListeners()
+        this.decoratedFieldView.backupClickListeners()
     }
 
     restoreClickListeners(): void {
-        this._fieldView.restoreClickListeners()
+        this.decoratedFieldView.restoreClickListeners()
     }
 
 
@@ -37,22 +37,22 @@ export class FieldViewDecorator implements IFieldView {
     }
 
     private onMouseLeave(): void {
-        this.events.emit(EventMouseLeaveField, this._owningPlayer, this)
+        this.events.emit(EventMouseLeaveField, this.owningPlayer, this)
     }
 
     private onMouseOver(): void {
-        this.events.emit(EventMouseOverField, this._owningPlayer, this)
+        this.events.emit(EventMouseOverField, this.owningPlayer, this)
     }
 
     isInRange(anotherField: IField, range: { x: number; y: number; }): boolean {
-        return this._fieldView.isInRange(anotherField, range)
+        return this.decoratedFieldView.isInRange(anotherField, range)
     }
 
     visualizeHovered(): void {
-        this._fieldView.visualizeHovered()
+        this.decoratedFieldView.visualizeHovered()
     }
 
     visualizeUnhovered(): void {
-        this._fieldView.visualizeUnhovered()
+        this.decoratedFieldView.visualizeUnhovered()
     }
 }

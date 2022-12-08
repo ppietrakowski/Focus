@@ -59,9 +59,9 @@ export interface IFocus {
     getNextPlayer(player?: IPlayer): IPlayer
     nextTurn(): void
 
-    get currentPlayer(): IPlayer
-    set currentPlayer(player: IPlayer)
-    get hasEnded(): boolean
+    get currentPlayingColor(): IPlayer
+    set currentPlayingColor(player: IPlayer)
+    get hasGameEnded(): boolean
 
     setHasPoolToPut(): void
 

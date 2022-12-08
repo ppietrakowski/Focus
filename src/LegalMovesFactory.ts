@@ -65,12 +65,12 @@ type IAvailableMoves = AiMove[]
 export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
     const enemyPlayer = player.state === PLAYER_RED.state ? PLAYER_GREEN : PLAYER_RED
 
-    const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f.state))
-    const enemyFields: IField[] = board.filter(f => enemyPlayer.doesOwnThisField(f.state))
+    const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f.fieldState))
+    const enemyFields: IField[] = board.filter(f => enemyPlayer.doesOwnThisField(f.fieldState))
 
     yourFields.sort((a, b) => b.height - a.height)
 
-    let aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.x, f.y))
+    let aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.posX, f.posY))
         .map<AiMove>(convertMoveToAiMove.bind(undefined, board, player))
 
     // accumulate each place moves
@@ -97,13 +97,13 @@ function accumulateEachPlaceMove(enemyFields: IField[], board: IGameBoard, playe
     const aiMoves: AiMove[] = []
 
     enemyFields.forEach(v => {
-        const afterPlaceMove = board.getBoardAfterPlace(v.x, v.y, player)
+        const afterPlaceMove = board.getBoardAfterPlace(v.posX, v.posY, player)
 
         const move: AiMove = {
             gameBoardAfterMove: afterPlaceMove.gameBoard,
             move: {
-                x: v.x,
-                y: v.y,
+                x: v.posX,
+                y: v.posY,
                 shouldPlaceSomething: true,
                 redPawns: afterPlaceMove.redCount,
                 greenPawns: afterPlaceMove.greenCount

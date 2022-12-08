@@ -9,18 +9,16 @@ import { IPlayer } from './Player'
 
 
 export class NegaMaxPlayer extends AiController {
-    bestMove: Move
-
-    constructor(aiOwnedPlayer: IPlayer, _game: IFocus, _gameBoard: IGameBoardView) {
-        super(aiOwnedPlayer, _game, _gameBoard)
+    
+    constructor(aiOwnedPlayer: IPlayer, game: IFocus, gameBoard: IGameBoardView) {
+        super(aiOwnedPlayer, game, gameBoard)
     }
 
     depth = 3
 
-    move(): boolean {
-        this.negamax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
-
-        return super.move()
+    supplyBestMove(): Move {
+        this.negamax(this.gameBoard, this.depth, this.ownedPlayer)
+        return this.bestMove
     }
 
     private negamax(board: IGameBoard, depth: number, player: IPlayer, sign = 1): number {
@@ -31,7 +29,7 @@ export class NegaMaxPlayer extends AiController {
         const moves = getAvailableMoves(board, player)
 
         if ((moves.length === 0))
-            return evaluateMove(board, player, this._game)
+            return evaluateMove(board, player, this.game)
 
         let evaluation = -Infinity
 

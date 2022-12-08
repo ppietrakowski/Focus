@@ -21,18 +21,16 @@ export type JustMinMaxValue = {
 }
 
 export class MinMaxAiPlayerController extends AiController {
-    bestMove: Move
-
-    constructor(aiOwnedPlayer: IPlayer, _game: IFocus, _gameBoard: IGameBoardView) {
-        super(aiOwnedPlayer, _game, _gameBoard)
+    
+    constructor(aiOwnedPlayer: IPlayer, game: IFocus, gameBoard: IGameBoardView) {
+        super(aiOwnedPlayer, game, gameBoard)
     }
 
     depth = 3
 
-    move(): boolean {
-        this.minMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
-
-        return super.move()
+    supplyBestMove(): Move {
+        this.minMax(this.gameBoard, this.depth, this.ownedPlayer)
+        return this.bestMove
     }
 
     private minMax(board: IGameBoard, depth: number, player: IPlayer): number {
@@ -43,13 +41,13 @@ export class MinMaxAiPlayerController extends AiController {
         const moves = getAvailableMoves(board, player)
 
         if ((moves.length === 0))
-            return evaluateMove(board, player, this._game)
+            return evaluateMove(board, player, this.game)
 
-        if (player === this._game.currentPlayer) {
+        if (player === this.game.currentPlayingColor) {
             let evaluation = -Infinity
 
             for (let i = 0; i < moves.length; i++) {
-                player = this._game.getNextPlayer(player)
+                player = this.game.getNextPlayer(player)
                 const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, player)
 
                 if (current > evaluation) {
@@ -68,7 +66,7 @@ export class MinMaxAiPlayerController extends AiController {
 
 
             for (let i = 0; i < moves.length; i++) {
-                player = this._game.getNextPlayer(player)
+                player = this.game.getNextPlayer(player)
 
                 const current = this.minMax(moves[i].gameBoardAfterMove, depth - 1, player)
 

@@ -8,22 +8,21 @@ import { getAvailableMoves } from './LegalMovesFactory'
 import { IPlayer } from './Player'
 
 export class AbNegaMaxPlayer extends AiController {
-    bestMove: Move
     alpha = -Infinity
     beta = Infinity
 
-    constructor(aiOwnedPlayer: IPlayer, _game: IFocus, _gameBoard: IGameBoardView) {
-        super(aiOwnedPlayer, _game, _gameBoard)
+    constructor(aiOwnedPlayer: IPlayer, game: IFocus, gameBoard: IGameBoardView) {
+        super(aiOwnedPlayer, game, gameBoard)
     }
 
     depth = 5
 
-    move(): boolean {
+    supplyBestMove(): Move {
         this.alpha = -Infinity
         this.beta = Infinity
-        this.abNegaMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer, this.alpha, this.beta)
+        this.abNegaMax(this.gameBoardView.gameBoard, this.depth, this.ownedPlayer, this.alpha, this.beta)
 
-        return super.move()
+        return this.bestMove
     }
 
     private abNegaMax(board: IGameBoard, depth: number, player: IPlayer, alpha: number, beta: number, sign = 1): number {
@@ -34,7 +33,7 @@ export class AbNegaMaxPlayer extends AiController {
         const moves = getAvailableMoves(board, this.ownedPlayer)
 
         if ((moves.length === 0))
-            return evaluateMove(board, player, this._game)
+            return evaluateMove(board, player, this.game)
 
         let evaluation = -Infinity
 

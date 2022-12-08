@@ -2,9 +2,7 @@ import { EventNewTurn, IFocus, Move } from './IFocus'
 import { IPlayer } from './Player'
 import { IGameBoardView } from './IGameBoardView'
 import { IAiController, IGameBoardController } from './IGameBoardController'
-import { Direction, FieldState, IField } from './IField'
-import { IPredicate, randomInteger } from './GameUtils'
-import { GameBoard } from './GameBoard'
+import { FieldState, IField } from './IField'
 import { runTimeout } from './Timing'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { evaluateMove } from './EvaluationFunction'
@@ -15,71 +13,71 @@ export type PlaceMoveType = {
     y: number
 }
 
-let ownedPlayer: IPlayer = null
-let _game: IFocus = null
-
-function availablePlaceMovesComparator(a: PlaceMoveType, b: PlaceMoveType) {
-    return evaluateMove(b.afterPlaceMove.gameBoard, ownedPlayer, _game) - evaluateMove(a.afterPlaceMove.gameBoard, ownedPlayer, _game)
+function availablePlaceMovesComparator(game: IFocus, ownedPlayer: IPlayer, a: PlaceMoveType, b: PlaceMoveType) {
+    return evaluateMove(b.afterPlaceMove.gameBoard, ownedPlayer, game) - evaluateMove(a.afterPlaceMove.gameBoard, ownedPlayer, game)
 }
 
-function enemyFieldToPlaceMoveType(field: IField) {
-    return { afterPlaceMove: _game.gameBoard.getBoardAfterPlace(field.x, field.y, ownedPlayer), x: field.x, y: field.y }
+function enemyFieldToPlaceMoveType(game: IFocus, ownedPlayer: IPlayer, field: IField) {
+    return { afterPlaceMove: game.gameBoard.getBoardAfterPlace(field.posX, field.posY, ownedPlayer), x: field.posX, y: field.posY }
 }
 
 export abstract class AiController implements IAiController {
-
     readonly ownedPlayer: IPlayer
-    protected _gameBoardController: IGameBoardController
+    protected gameBoardController: IGameBoardController
     protected bestMove: Move
+    protected gameBoard: IGameBoard
 
-    constructor(aiOwnedPlayer: IPlayer, protected readonly _game: IFocus, protected readonly _gameBoard: IGameBoardView) {
+    constructor(aiOwnedPlayer: IPlayer, protected readonly game: IFocus, protected readonly gameBoardView: IGameBoardView) {
         this.ownedPlayer = aiOwnedPlayer
-        this._gameBoard = _gameBoard
+        this.gameBoardView = gameBoardView
+        this.gameBoard = this.gameBoardView.gameBoard
 
-        this._game.events.on(EventNewTurn, this.checkIsYourTurn, this)
+        this.game.events.on(EventNewTurn, this.checkIsYourTurn, this)
     }
 
     attachGameBoardController(controller: IGameBoardController): void {
-        this._gameBoardController = controller
+        this.gameBoardController = controller
     }
 
+    abstract supplyBestMove(): Move
+
     move(): boolean {
-        if (!this.bestMove && !this.bestMove.shouldPlaceSomething) {
+        this.bestMove = this.supplyBestMove()
+
+        if (!this.bestMove) {
             throw Error('BestMove is not calculated')
         }
 
         if (this.bestMove.shouldPlaceSomething) {
             console.log(`placed at ${this.bestMove.x}, ${this.bestMove.y}`)
-            this._game.placeField(this.bestMove.x, this.bestMove.y, this.ownedPlayer)
+            this.game.placeField(this.bestMove.x, this.bestMove.y, this.ownedPlayer)
             return true
         }
 
-        const pr = this._game.moveToField(this.bestMove.x,
+        const pr = this.game.moveToField(this.bestMove.x,
             this.bestMove.y, this.bestMove.direction, this.bestMove.moveCount)
 
         return pr
     }
 
     onPlaceStateStarted(): void {
-        const enemyFields: IField[] = this._game.gameBoard.filter(f => !this.ownedPlayer.doesOwnThisField(f))
-
-        ownedPlayer = this.ownedPlayer
-        _game = this._game
+        const enemyFields: IField[] = this.game.gameBoard.filter(f => !this.ownedPlayer.doesOwnThisField(f))
 
         const availablePlaceMoves: PlaceMoveType[] = enemyFields
-            .map(enemyFieldToPlaceMoveType)
-            .sort(availablePlaceMovesComparator)
+            .map(enemyFieldToPlaceMoveType.bind(undefined, this.game, this.ownedPlayer))
+            .sort(availablePlaceMovesComparator.bind(undefined, this.game, this.ownedPlayer))
 
         const best = availablePlaceMoves[0]
 
-        this._game.placeField(best.x, best.y, this.ownedPlayer)
+        this.game.placeField(best.x, best.y, this.ownedPlayer)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     stopMoving(): void {
-        this._game
     }
+
     checkIsYourTurn(player: IPlayer): Promise<void> {
-        if (this._game.hasEnded)
+        if (this.game.hasGameEnded)
             return Promise.resolve()
 
         if (player == this.ownedPlayer) {
@@ -92,20 +90,8 @@ export abstract class AiController implements IAiController {
         return Promise.resolve()
     }
 
-    protected getRandomFieldPosition(predicate: IPredicate<IField>): Direction {
-        let x = 0
-        let y = 0
-
-        while (!predicate(this._game.gameBoard.getFieldAt(x, y))) {
-            x = randomInteger(0, GameBoard.GAME_BOARD_WIDTH)
-            y = randomInteger(0, GameBoard.GAME_BOARD_HEIGHT)
-        }
-
-        return { x, y }
-    }
-
     protected hasReachedEndConditions(board: IGameBoard, depth: number) {
-        return board.countPlayersFields(this._game.getNextPlayer(this.ownedPlayer)) === 0 ||
+        return board.countPlayersFields(this.game.getNextPlayer(this.ownedPlayer)) === 0 ||
             board.countPlayersFields(this.ownedPlayer) === 0 ||
             depth === 0
     }
@@ -113,11 +99,11 @@ export abstract class AiController implements IAiController {
     protected calculateOnEndConditions(board: IGameBoard, player: IPlayer) {
         if (board.countPlayersFields(this.ownedPlayer) === 0) {
             // owned player wins
-            const result = -evaluateMove(board, player, this._game)
+            const result = -evaluateMove(board, player, this.game)
             return result
         }
 
-        const result = evaluateMove(board, player, this._game)
+        const result = evaluateMove(board, player, this.game)
         return result
     }
 }
