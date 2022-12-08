@@ -1,11 +1,12 @@
 import { Focus, PLAYER_GREEN, PLAYER_RED } from './Game'
 import { GameBoardView } from './GameBoardView'
-import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory } from './IFocus'
+import { EventAddedToPool, EventEnemyHasPool, EventNewTurn, EventVictory, IFocus } from './IFocus'
 import { GameBoardController } from './GameBoardController'
 import { IPlayer } from './Player'
 import { getPlayerName } from './AiController'
 import { initializeTiming, runTimeout } from './Timing'
 import { getPlayerController } from './getPlayerController'
+import { IAiController } from './IGameBoardController'
 
 
 export const focus = new Focus()
@@ -14,6 +15,13 @@ export const gameBoardView = new GameBoardView(focus)
 
 class LoggingListener {
     useLogging = true
+
+    constructor(focus: IFocus) {
+        focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
+        focus.events.on(EventVictory, logging.onVictory, logging)
+        focus.events.on(EventEnemyHasPool, logging.onEnemyHasPool, logging)
+        focus.events.on(EventNewTurn, logging.onNextTurnBegin, logging)
+    }
 
     onAddedToPool(toWhichPlayer: IPlayer): void {
         if (this.useLogging)
@@ -35,30 +43,25 @@ class LoggingListener {
     }
 }
 
-const logging = new LoggingListener()
+const logging = new LoggingListener(focus)
 logging.useLogging = true
 
-focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
-focus.events.on(EventVictory, logging.onVictory, logging)
-focus.events.on(EventEnemyHasPool, logging.onEnemyHasPool, logging)
-focus.events.on(EventNewTurn, logging.onNextTurnBegin, logging)
+hideGameBoard()
 
-const gameBoard = document.querySelector('.gameBoard') as HTMLDivElement
-gameBoard.style.visibility = 'hidden'
-gameBoard.style.opacity = '0'
-
-const player1Select = document.getElementById('player1') as HTMLSelectElement
-const player2Select = document.getElementById('player2') as HTMLSelectElement
+const playerRedSelect = document.getElementById('player1') as HTMLSelectElement
+const playerGreenSelect = document.getElementById('player2') as HTMLSelectElement
 
 const beginPlay = document.getElementById('BeginPlayButton') as HTMLButtonElement
 
 beginPlay.addEventListener('click', () => {
-    let p1
-    let p2
+    const gameBoard = document.querySelector('.gameBoard') as HTMLDivElement
+
+    let redController: IAiController
+    let greenController: IAiController
 
     try {
-        p1 = getPlayerController(player1Select.options[player1Select.selectedIndex].value, PLAYER_RED)
-        p2 = getPlayerController(player2Select.options[player2Select.selectedIndex].value, PLAYER_GREEN)
+        redController = getPlayerController(playerRedSelect.options[playerRedSelect.selectedIndex].value, PLAYER_RED)
+        greenController = getPlayerController(playerGreenSelect.options[playerGreenSelect.selectedIndex].value, PLAYER_GREEN)
     } catch (e) {
         alert(e)
         return
@@ -68,17 +71,24 @@ beginPlay.addEventListener('click', () => {
     gameBoard.style.opacity = '1.0'
 
     const parent = beginPlay.parentElement as HTMLSelectElement
-    
+
     parent.disabled = true
 
-    const controller = new GameBoardController(gameBoardView, p1, p2)
+    const controller = new GameBoardController(gameBoardView, redController, greenController)
+    
     focus.events.on(EventVictory, p => {
         alert(`${getPlayerName(p)} won`)
         document.location.reload()
-    }
-    )
+    })
 
     initializeTiming()
 
     runTimeout(1).then(() => controller.start())
 })
+
+function hideGameBoard() {
+    const gameBoard = document.querySelector('.gameBoard') as HTMLDivElement
+    gameBoard.style.visibility = 'hidden'
+    gameBoard.style.opacity = '0'
+}
+
