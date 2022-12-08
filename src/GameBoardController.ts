@@ -7,41 +7,42 @@ import { IPlayer } from './Player'
 export class GameBoardController implements IGameBoardController {
     static readonly MOVE_AVAILABLE = 'MoveAvailable'
 
-    constructor(private readonly _gameBoardView: IGameBoardView, private readonly _playerA: IAiController, private readonly _playerB: IAiController) {
-        _playerA.attachGameBoardController(this)
-        _playerB.attachGameBoardController(this)
+    constructor(private readonly gameBoardView: IGameBoardView, private readonly playerAController: IAiController, private readonly playerBController: IAiController) {
+        playerAController.attachGameBoardController(this)
+        playerBController.attachGameBoardController(this)
 
         this.game.events.on(EventEnemyHasPool, this.onEnemyHasPool, this)
-        this.game.events.on(EventVictory, () => _gameBoardView.erasePossibleMoves())
+        this.game.events.on(EventVictory, () => gameBoardView.erasePossibleMoves())
     }
 
     start(): void {
-        this._playerA.checkIsYourTurn(this.game.currentPlayer)
+        this.playerAController.checkIsYourTurn(this.game.currentPlayingColor)
     }
 
     get game(): IFocus {
-        return this._gameBoardView.game
+        return this.gameBoardView.game
     }
 
     private onEnemyHasPool(enemy: IPlayer): void {
         this.game.setHasPoolToPut()
 
-        if (this.game.currentPlayer !== enemy)
+        if (this.game.currentPlayingColor !== enemy) {
             this.game.nextTurn()
+        }
 
         this.switchToPoolState(enemy)
     }
 
     switchToPoolState(player: IPlayer): void {
-        if (player === this._playerA.ownedPlayer) {
-            this.placePoolState(player, this._playerA)
+        if (player === this.playerAController.ownedPlayer) {
+            this.placePoolState(player, this.playerAController)
         } else {
-            this.placePoolState(player, this._playerB)
+            this.placePoolState(player, this.playerBController)
         }
     }
 
     placePoolState(player: IPlayer, aicontroller: IAiController): void {
-        if (this.game.currentPlayer !== player) {
+        if (this.game.currentPlayingColor !== player) {
             return
         }
 

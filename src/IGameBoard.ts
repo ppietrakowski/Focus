@@ -1,4 +1,4 @@
-import { FieldState, IField } from './IField'
+import { IField } from './IField'
 import { IPlayer } from './Player'
 import { ForEachCallback } from './GameBoard'
 import { IPredicate } from './GameUtils'
@@ -19,24 +19,6 @@ export interface IGameBoard {
     countPlayersFields(player: IPlayer): number
     length(): number
 
-    getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): AfterPlaceMove
+    getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): IGameBoard
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
-}
-
-export function getAllFieldBelongingToPlayer(board: IGameBoard, player: IPlayer): IField[] {
-    const fields: IField[] = []
-
-    for (let x = 0; x < 8; x++) {
-        for (let y = 0; y < 8; y++) {
-            const f = board.getFieldAt(x, y)
-
-            if (f.isEmpty || (f.state & FieldState.Unplayable))
-                continue
-            
-            if (f.state === player.state)
-                fields.push(f)
-        }
-    }
-
-    return fields
 }

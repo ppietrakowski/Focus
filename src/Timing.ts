@@ -1,9 +1,9 @@
-import { TimeTask } from './TimeTask'
+import { ITimeTask, TimeTask } from './TimeTask'
 
 const TimingContext = {
     delta: 0,
     lastTime: 0,
-    tasks: [] as TimeTask[],
+    tasks: [] as ITimeTask[],
     initialized: false
 }
 
@@ -12,8 +12,8 @@ export function initializeTiming(): void {
     TimingContext.initialized = true
 }
 
-function endTask(task: TimeTask): void {
-    task.onExpired.call(task.onExpiredContext)
+function endTask(task: ITimeTask): void {
+    task.onExpired.call(task.getContext())
 }
 
 function animationTimeFunction(time: number): void {
@@ -40,7 +40,7 @@ type TimeResolveFn = {
     (): void
 }
 
-function createNewTimeTask(time: number, resolve: TimeResolveFn, reject: TimeRejectFn): TimeTask {
+function createNewTimeTask(time: number, resolve: TimeResolveFn, reject: TimeRejectFn): ITimeTask {
     if (!TimingContext.initialized) {
         reject(Error('Timing not initialized'))
         return null
@@ -61,7 +61,7 @@ export function runTimeout(time: number): Promise<void> {
     return new Promise<void>((resolve, reject) => createNewTimeTask(time, resolve, reject))
 }
 
-export function addTimeTask(task: TimeTask): void {
+export function addTimeTask<TContext>(task: TimeTask<TContext>): void {
     if (!task.hasExpired) {
         TimingContext.tasks.push(task)
     }
