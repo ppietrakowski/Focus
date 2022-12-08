@@ -66,21 +66,21 @@ export class Focus implements IFocus {
         this._currentPlayer = player
     }
 
-    moveToField(x: number, y: number, direction: { x: number, y: number }, howManyFieldWantMove: number) {
+    moveToField(x: number, y: number, direction: Direction, howManyFieldWantMove: number): boolean {
         const fromField = this.gameBoard.getFieldAt(x, y)
         
         if (!this._currentPlayer.doesOwnThisField(fromField)) {
-            return Promise.reject(false)
+            return false
         }
 
         const toField = this.getFieldBasedOnDirectionAndMoveCount(fromField as Field, direction, howManyFieldWantMove)
         if (!toField.isPlayable) {
-            return Promise.reject(false)
+            return false
         }
 
         if (!toField.moveToThisField(fromField, howManyFieldWantMove)) {
             console.warn('unable to move there')
-            return Promise.reject(false)
+            return false
         }
 
         let timeTask = new TimeTask(0.1, () => this.events.emit(EventMovedField, x, y, fromField, toField), this)
@@ -90,7 +90,7 @@ export class Focus implements IFocus {
         timeTask = new TimeTask(0.2, this.nextTurn, this)
         addTimeTask(timeTask)
         
-        return Promise.resolve(true)
+        return true
     }
 
     placeField(x: number, y: number, owner: IPlayer) {

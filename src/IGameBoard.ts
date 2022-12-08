@@ -1,4 +1,4 @@
-import { FieldState, IField } from './IField'
+import { IField } from './IField'
 import { IPlayer } from './Player'
 import { ForEachCallback } from './GameBoard'
 import { IPredicate } from './GameUtils'

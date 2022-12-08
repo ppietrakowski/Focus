@@ -53,7 +53,7 @@ export interface IFocus {
     readonly events: EventEmitter
     readonly gameBoard: IGameBoard
 
-    moveToField(x: number, y: number, direction: { x: number; y: number; }, howManyFieldWantMove: number): Promise<boolean>
+    moveToField(x: number, y: number, direction: Direction, howManyFieldWantMove: number): boolean
     placeField(x: number, y: number, owner: IPlayer): void
     getOffsetBasedOnDirection(field: IField, direction: { x: number; y: number; }, howManyFieldWantMove: number): { x: number; y: number; }
     getNextPlayer(player?: IPlayer): IPlayer

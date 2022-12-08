@@ -19,7 +19,7 @@ export class AlphaBetaPlayerController extends AiController {
 
     depth = 3
 
-    move(): Promise<boolean> {
+    move(): boolean {
         this.alphaBeta(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
         return super.move()

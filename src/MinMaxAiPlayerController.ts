@@ -1,6 +1,5 @@
 import { AiController } from './AiController'
 import { evaluateMove } from './EvaluationFunction'
-import { PLAYER_RED } from './Game'
 import { IFocus, Move } from './IFocus'
 import { IGameBoard } from './IGameBoard'
 import { IGameBoardView } from './IGameBoardView'
@@ -30,7 +29,7 @@ export class MinMaxAiPlayerController extends AiController {
 
     depth = 3
 
-    move(): Promise<boolean> {
+    move(): boolean {
         this.minMax(this._gameBoard.gameBoard, this.depth, this.ownedPlayer)
 
         return super.move()

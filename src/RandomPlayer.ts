@@ -13,7 +13,7 @@ export class RandomPlayer extends AiController {
         super(aiOwnedPlayer, game, gameBoard)
     }
 
-    move(): Promise<boolean> {
+    move(): boolean {
         let moves: Move[] = []
 
         const yourFields: IField[] = this._gameBoard.gameBoard.filter(f => this.ownedPlayer.doesOwnThisField(f))
@@ -25,6 +25,6 @@ export class RandomPlayer extends AiController {
             return this._game.moveToField(randomMove.x, randomMove.y, randomMove.direction, randomMove.moveCount)
         }
 
-        return Promise.reject('not move founded')
+        throw Error('Not move found')
     }
 }   

@@ -1,7 +1,7 @@
 import { IPlayer } from './Player'
 
 export interface IAiController {
-    move(): Promise<boolean>
+    move(): boolean
     stopMoving(): void
     checkIsYourTurn(player: IPlayer): Promise<void>
 

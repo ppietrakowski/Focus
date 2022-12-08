@@ -43,15 +43,15 @@ export abstract class AiController implements IAiController {
         this._gameBoardController = controller
     }
 
-    move(): Promise<boolean> {
+    move(): boolean {
         if (!this.bestMove && !this.bestMove.shouldPlaceSomething) {
-            return Promise.reject(!this.bestMove)
+            throw Error('BestMove is not calculated')
         }
 
         if (this.bestMove.shouldPlaceSomething) {
             console.log(`placed at ${this.bestMove.x}, ${this.bestMove.y}`)
             this._game.placeField(this.bestMove.x, this.bestMove.y, this.ownedPlayer)
-            return Promise.resolve(true)
+            return true
         }
 
         const pr = this._game.moveToField(this.bestMove.x,
@@ -85,10 +85,6 @@ export abstract class AiController implements IAiController {
         if (player == this.ownedPlayer) {
             runTimeout(0.2)
                 .then(() => this.move())
-            // .catch(() => {
-            // console.log('Illegal move or not move available')
-            // this._game.nextTurn()
-            // })
         } else {
             this.stopMoving()
         }

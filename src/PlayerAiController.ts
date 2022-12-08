@@ -88,8 +88,8 @@ export default class PlayerAiController extends AiController {
         fieldView.addClickListener(this.onFieldViewClick, this, true)
     }
 
-    move(): Promise<boolean> {
-        return Promise.resolve(true)
+    move(): boolean {
+        return true
     }
 
     stopMoving(): void {
