@@ -1,6 +1,5 @@
 import EventEmitter from 'eventemitter3'
 import { Direction, FieldState, IField } from './IField'
-import { IFocus } from './IFocus'
 import { IPlayer } from './Player'
 
 export interface IClickListener {
@@ -44,11 +43,11 @@ export class FieldView implements IFieldView {
     readonly events: EventEmitter
     domElement: HTMLDivElement
 
-    private _backupClickListeners: IClickListenerBackup[]
+    private backedUpClickListeners: IClickListenerBackup[]
     private tower: number[]
     private rootNodeChilds: HTMLDivElement[]
 
-    constructor(private readonly game: IFocus, field: IField) {
+    constructor(field: IField) {
         this.field = field
         this.events = new EventEmitter()
 
@@ -67,16 +66,32 @@ export class FieldView implements IFieldView {
             createSubNodeToRootNode()
         }
 
-        this.domElement.children[0].className = this.getUnhoveredClassName(field.state)
+        this.domElement.children[0].className = this.getUnhoveredClassName(field.fieldState)
 
-        this._backupClickListeners = []
+        this.backedUpClickListeners = []
+
+        this.domElement.addEventListener('mouseover', () => this.onMouseOver())
+        this.domElement.addEventListener('mouseleave', () => this.onMouseLeave())
+        this.domElement.addEventListener('click', () => this.onClick())
+    }
+
+    private onClick(): void {
+        this.events.emit(EventClickField, this)
+    }
+
+    private onMouseLeave(): void {
+        this.events.emit(EventMouseLeaveField, this)
+    }
+
+    private onMouseOver(): void {
+        this.events.emit(EventMouseOverField, this)
     }
 
     addClickListener<T>(clickListener: IClickListener, context: T, backup?: boolean): void {
         this.events.on(EventClickField, clickListener, context)
 
         if (backup) {
-            this._backupClickListeners.push({ listener: clickListener, context: context })
+            this.backedUpClickListeners.push({ listener: clickListener, context: context })
         }
     }
 
@@ -87,7 +102,7 @@ export class FieldView implements IFieldView {
     restoreClickListeners(): void {
         this.events.removeAllListeners(EventClickField)
 
-        for (const listener of this._backupClickListeners) {
+        for (const listener of this.backedUpClickListeners) {
             this.events.on(EventClickField, listener.listener, listener.context)
         }
     }
@@ -133,8 +148,8 @@ export class FieldView implements IFieldView {
     }
 
     isInRange(anotherField: IField, range: Direction): boolean {
-        return (anotherField.x - range.x >= this.field.x && anotherField.x + range.x <= this.field.x) &&
-            (anotherField.y - range.y >= this.field.y && anotherField.y + range.y <= this.field.y)
+        return (anotherField.posX - range.x >= this.field.posX && anotherField.posX + range.x <= this.field.posX) &&
+            (anotherField.posY - range.y >= this.field.posY && anotherField.posY + range.y <= this.field.posY)
     }
 
     private getHoveredClassName(state: number): string {

@@ -20,18 +20,16 @@ export class Focus implements IFocus {
     readonly events: EventEmitter
     readonly gameBoard: IGameBoard
 
-    private _hasPoolToPut: boolean
-    private _currentPlayer: IPlayer
-    private _hasEnded = false
+    private hasPoolToPut: boolean
+    private currentPlayer: IPlayer
+    private hasEnded = false
 
     constructor() {
         this.events = new EventEmitter()
         this.gameBoard = GameBoard.loadFromJSON(board)
 
-        this._currentPlayer = PLAYER_RED
-        this._hasPoolToPut = false
-
-        //this.events.on(EventMovedField, this.onMoveField, this)
+        this.currentPlayer = PLAYER_RED
+        this.hasPoolToPut = false
 
         this.gameBoard.each(v => {
             const f = v as Field
@@ -41,7 +39,7 @@ export class Focus implements IFocus {
     }
 
     private onOverGrownField(_field: IField, stateThatWasPoped: FieldState): void {
-        if (this.currentPlayer.doesOwnThisField(stateThatWasPoped))
+        if (this.currentPlayingColor.doesOwnThisField(stateThatWasPoped))
             this.increaseCurrentPlayersPool()
     }
 
@@ -49,38 +47,38 @@ export class Focus implements IFocus {
         const player = this.getNextPlayer()
 
         const countOfEnemyFields = this.gameBoard.countPlayersFields(player)
-        const countOfCurrentPlayerFields = this.gameBoard.countPlayersFields(this.currentPlayer)
+        const countOfCurrentPlayerFields = this.gameBoard.countPlayersFields(this.currentPlayingColor)
 
         if (countOfEnemyFields === 0) {
-            this.checkForPoolAvailability(this.currentPlayer, player)
+            this.checkForPoolAvailability(this.currentPlayingColor, player)
         } else if (countOfCurrentPlayerFields === 0) {
-            this.checkForPoolAvailability(player, this.currentPlayer)
+            this.checkForPoolAvailability(player, this.currentPlayingColor)
         }
     }
 
-    get currentPlayer(): IPlayer {
-        return this._currentPlayer
+    get currentPlayingColor(): IPlayer {
+        return this.currentPlayer
     }
 
-    set currentPlayer(player: IPlayer) {
-        this._currentPlayer = player
+    set currentPlayingColor(player: IPlayer) {
+        this.currentPlayer = player
     }
 
-    moveToField(x: number, y: number, direction: { x: number, y: number }, howManyFieldWantMove: number) {
+    moveToField(x: number, y: number, direction: Direction, howManyFieldWantMove: number): boolean {
         const fromField = this.gameBoard.getFieldAt(x, y)
         
-        if (!this._currentPlayer.doesOwnThisField(fromField)) {
-            return Promise.reject(false)
+        if (!this.currentPlayer.doesOwnThisField(fromField)) {
+            return false
         }
 
         const toField = this.getFieldBasedOnDirectionAndMoveCount(fromField as Field, direction, howManyFieldWantMove)
         if (!toField.isPlayable) {
-            return Promise.reject(false)
+            return false
         }
 
         if (!toField.moveToThisField(fromField, howManyFieldWantMove)) {
             console.warn('unable to move there')
-            return Promise.reject(false)
+            return false
         }
 
         let timeTask = new TimeTask(0.1, () => this.events.emit(EventMovedField, x, y, fromField, toField), this)
@@ -90,7 +88,7 @@ export class Focus implements IFocus {
         timeTask = new TimeTask(0.2, this.nextTurn, this)
         addTimeTask(timeTask)
         
-        return Promise.resolve(true)
+        return true
     }
 
     placeField(x: number, y: number, owner: IPlayer) {
@@ -109,7 +107,7 @@ export class Focus implements IFocus {
 
     getFieldBasedOnDirectionAndMoveCount(field: Field, direction: Direction, howManyFieldWantMove: number) {
         const offset = this.getOffsetBasedOnDirection(field, direction, howManyFieldWantMove)
-        const foundField = this.gameBoard.getFieldAt(field.x + offset.x, field.y + offset.y)
+        const foundField = this.gameBoard.getFieldAt(field.posX + offset.x, field.posY + offset.y)
 
         return foundField
     }
@@ -130,7 +128,7 @@ export class Focus implements IFocus {
 
     getNextPlayer(toPlayer?: IPlayer) {
         if (!toPlayer) {
-            toPlayer = this.currentPlayer
+            toPlayer = this.currentPlayingColor
         }
 
         if (toPlayer.doesOwnThisField(FieldState.Red)) {
@@ -145,41 +143,40 @@ export class Focus implements IFocus {
             return
         }
 
-        if (this._hasPoolToPut) {
-            this._currentPlayer = this.getNextPlayer()
-            this._hasPoolToPut = false
+        if (this.hasPoolToPut) {
+            this.currentPlayer = this.getNextPlayer()
+            this.hasPoolToPut = false
             return
         }
 
-        if (this.hasEnded)
+        if (this.hasGameEnded)
             return
 
 
         this.onMoveField()
-        this._currentPlayer = this.getNextPlayer()
-        this.events.emit(EventNewTurn, this._currentPlayer)
+        this.currentPlayer = this.getNextPlayer()
+        this.events.emit(EventNewTurn, this.currentPlayer)
     }
 
     setHasPoolToPut(): void {
-        this._hasPoolToPut = true
+        this.hasPoolToPut = true
     }
 
     mustEnd = false
 
     private increaseCurrentPlayersPool() {
-        debugLog(`${getPlayerName(this._currentPlayer)} has ${this._currentPlayer === PLAYER_GREEN ? this.gameBoard.greenPlayerPawnCount : this.gameBoard.redPlayerPawnCount}`)
-        if (this._currentPlayer instanceof Player && PLAYER_GREEN === this._currentPlayer)
+        debugLog(`${getPlayerName(this.currentPlayer)} has ${this.currentPlayer === PLAYER_GREEN ? this.gameBoard.greenPlayerPawnCount : this.gameBoard.redPlayerPawnCount}`)
+        if (this.currentPlayer instanceof Player && PLAYER_GREEN === this.currentPlayer)
             this.gameBoard.greenPlayerPawnCount++
-        else if (this._currentPlayer instanceof Player && PLAYER_RED === this._currentPlayer)
+        else if (this.currentPlayer instanceof Player && PLAYER_RED === this.currentPlayer)
             this.gameBoard.redPlayerPawnCount++
 
-        this.events.emit(EventAddedToPool, this._currentPlayer)
+        this.events.emit(EventAddedToPool, this.currentPlayer)
     }
 
-    get hasEnded(): boolean {
-        return this._hasEnded
+    get hasGameEnded(): boolean {
+        return this.hasEnded
     }
-
 
     private checkForPoolAvailability(playerWhoWon: IPlayer, playerWhoFail: IPlayer) {
         let hasPool = false
@@ -195,7 +192,7 @@ export class Focus implements IFocus {
             return
         }
 
-        this._hasEnded = true
+        this.hasEnded = true
         // no pawns = Victory
         this.events.emit(EventVictory, playerWhoWon)
     }

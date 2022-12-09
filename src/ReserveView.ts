@@ -27,11 +27,11 @@ export class ReserveView implements IReserveView {
     readonly events: EventEmitter
     reserveFields: HTMLDivElement[]
 
-    private _howManyReserveHas: number
+    private howManyReserveHas: number
 
-    constructor(private readonly _game: IFocus, private readonly _reserveBar: HTMLDivElement, readonly owner: IPlayer) {
+    constructor(private readonly game: IFocus, private readonly reserveBar: HTMLDivElement, readonly owner: IPlayer) {
         this.events = new EventEmitter()
-        const reserveElements = _reserveBar.getElementsByClassName('reserveEmptyPawn')
+        const reserveElements = reserveBar.getElementsByClassName('reserveEmptyPawn')
 
         this.reserveFields = []
 
@@ -39,7 +39,7 @@ export class ReserveView implements IReserveView {
             this.reserveFields.push(reserveElements[i] as HTMLDivElement)
         }
 
-        this._howManyReserveHas = 0
+        this.howManyReserveHas = 0
     }
 
     emptyAllFields(): void {
@@ -60,19 +60,19 @@ export class ReserveView implements IReserveView {
 
     addToReserve(): boolean {
         this.emptyAllFields()
-        if (this._howManyReserveHas >= this.reserveFields.length) {
+        if (this.howManyReserveHas >= this.reserveFields.length) {
             console.log('what happened')
             return false
         }
 
-        console.log(this._game.gameBoard)
+        console.log(this.game.gameBoard)
 
         if (this.owner === PLAYER_RED)
-            this._howManyReserveHas = this._game.gameBoard.redPlayerPawnCount
+            this.howManyReserveHas = this.game.gameBoard.redPlayerPawnCount
         else
-            this._howManyReserveHas = this._game.gameBoard.greenPlayerPawnCount
+            this.howManyReserveHas = this.game.gameBoard.greenPlayerPawnCount
 
-        for (let i = 0; i < this._howManyReserveHas; i++) {
+        for (let i = 0; i < this.howManyReserveHas; i++) {
             this.reserveFields[i].className = getClassNameOfElement(this.owner)
         }
 
@@ -83,22 +83,22 @@ export class ReserveView implements IReserveView {
         this.emptyAllFields()
 
         if (this.owner === PLAYER_RED)
-            this._howManyReserveHas = this._game.gameBoard.redPlayerPawnCount
+            this.howManyReserveHas = this.game.gameBoard.redPlayerPawnCount
         else
-            this._howManyReserveHas = this._game.gameBoard.greenPlayerPawnCount
+            this.howManyReserveHas = this.game.gameBoard.greenPlayerPawnCount
 
         if (!this.isSomethingInPool()) {
             return this.triedToUseEmptyPool()
         }
 
-        if (this._howManyReserveHas > this.reserveFields.length) {
+        if (this.howManyReserveHas > this.reserveFields.length) {
             console.warn('What reserve has oversize in REMOVE function ?')
-            this._howManyReserveHas = this.reserveFields.length
+            this.howManyReserveHas = this.reserveFields.length
         }
 
         const ownerClassName = getClassNameOfElement(this.owner)
 
-        for (let i = 0; i < this._howManyReserveHas; i++) {
+        for (let i = 0; i < this.howManyReserveHas; i++) {
             this.reserveFields[i].className = ownerClassName
         }
 
@@ -106,13 +106,13 @@ export class ReserveView implements IReserveView {
     }
 
     private triedToUseEmptyPool(): boolean {
-        this._howManyReserveHas = Math.max(this._howManyReserveHas, 0)
+        this.howManyReserveHas = Math.max(this.howManyReserveHas, 0)
 
         console.warn('Trying to click unexisting item in reserve')
         return false
     }
 
     private isSomethingInPool(): boolean {
-        return this._howManyReserveHas > 0
+        return this.howManyReserveHas > 0
     }
 }

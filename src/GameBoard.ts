@@ -39,17 +39,16 @@ export class GameBoard implements IGameBoard {
     static readonly GAME_BOARD_WIDTH = 8
     static readonly GAME_BOARD_HEIGHT = 8
 
-    private _fields: IField[][]
+    private board: IField[][]
 
     constructor() {
-        this._fields = []
-
+        this.board = []
 
         for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
-            this._fields[x] = []
+            this.board[x] = []
 
             for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
-                this._fields[x][y] = new Field(FieldState.Empty, x, y)
+                this.board[x][y] = new Field(FieldState.Empty, x, y)
             }
         }
 
@@ -62,8 +61,8 @@ export class GameBoard implements IGameBoard {
 
         for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
             for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
-                if (predicate(this._fields[x][y])) {
-                    fields.push(this._fields[x][y])
+                if (predicate(this.board[x][y])) {
+                    fields.push(this.board[x][y])
                 }
             }
         }
@@ -83,11 +82,11 @@ export class GameBoard implements IGameBoard {
         gameBoard.redPlayerPawnCount = this.redPlayerPawnCount
 
         f.overgrownCallback = (field: IField, state: FieldState) => {
-            if (state == FieldState.Green && field.state === player.state) {
+            if (state == FieldState.Green && field.fieldState === player.state) {
                 gameBoard.greenPlayerPawnCount++
             }
 
-            if (state == FieldState.Red && field.state === player.state) {
+            if (state == FieldState.Red && field.fieldState === player.state) {
                 gameBoard.redPlayerPawnCount++
             }
         }
@@ -97,22 +96,20 @@ export class GameBoard implements IGameBoard {
         return { gameBoard, redCount: gameBoard.redPlayerPawnCount, greenCount: gameBoard.greenPlayerPawnCount }
     }
 
-    getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): AfterPlaceMove {
+    getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): IGameBoard {
         const gameBoard = new GameBoard()
 
         for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
             for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
-                gameBoard._fields[x][y] = new Field(this._fields[x][y].state, x, y)
+                gameBoard.board[x][y] = new Field(this.board[x][y].fieldState, x, y)
             }
         }
 
-        const field = gameBoard.getFieldAt(fromField.x, fromField.y) as Field
-        const outField = gameBoard.getFieldAt(toField.x, toField.y) as Field
+        const field = gameBoard.getFieldAt(fromField.posX, fromField.posY) as Field
+        const outField = gameBoard.getFieldAt(toField.posX, toField.posY) as Field
 
         gameBoard.greenPlayerPawnCount = this.greenPlayerPawnCount
         gameBoard.redPlayerPawnCount = this.redPlayerPawnCount
-
-
 
         outField.overgrownCallback = (field: IField, state: FieldState) => {
             if (state === player.state) {
@@ -129,7 +126,7 @@ export class GameBoard implements IGameBoard {
 
         outField.moveToThisField(field)
 
-        return { gameBoard, redCount: gameBoard.redPlayerPawnCount, greenCount: gameBoard.greenPlayerPawnCount }
+        return gameBoard
     }
 
     static loadFromJSON(json: GameBoardJson): IGameBoard {
@@ -149,9 +146,9 @@ export class GameBoard implements IGameBoard {
     }
 
     each(callback: ForEachCallback): void {
-        for (let x = 0; x < this._fields.length; x++) {
-            for (let y = 0; y < this._fields[x].length; y++) {
-                callback(this._fields[x][y], x, y)
+        for (let x = 0; x < this.board.length; x++) {
+            for (let y = 0; y < this.board[x].length; y++) {
+                callback(this.board[x][y], x, y)
             }
         }
     }
@@ -161,18 +158,18 @@ export class GameBoard implements IGameBoard {
             throw new Error(`point (${x}, ${y}) is out of bounds`)
         }
 
-        return this._fields[x][y] || null
+        return this.board[x][y] || null
     }
 
     countPlayersFields(player: IPlayer): number {
-        return this._fields.reduce((accumulated, value) => {
+        return this.board.reduce((accumulated, value) => {
             value.filter(v => player.doesOwnThisField(v)).forEach(() => accumulated++)
             return accumulated
         }, 0)
     }
 
     length(): number {
-        return this._fields.length
+        return this.board.length
     }
 
     private addNewFieldFromJson({elements}: GameBoardJson, fieldId: number): void {
@@ -185,7 +182,7 @@ export class GameBoard implements IGameBoard {
             throw new Error(`Missing object at (${x}, ${y}) id=${fieldId}`)
         }
 
-        this._fields[x][y] = new Field(boardToStateMask(elements[fieldId].state), x, y)
+        this.board[x][y] = new Field(boardToStateMask(elements[fieldId].state), x, y)
     }
 
     private isOutOfBoundsInXAxis(x: number): boolean {

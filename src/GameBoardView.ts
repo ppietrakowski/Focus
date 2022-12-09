@@ -7,7 +7,6 @@ import { IPlayer } from './Player'
 import { ReserveViewOnPlayerTurnDecorator } from './ReserveViewOnPlayerTurnDecorator'
 import { IGameBoard } from './IGameBoard'
 import { ForEachFieldInView, IGameBoardView, IPoolClickedListener } from './IGameBoardView'
-import { FieldViewDecorator } from './FieldViewDecorator'
 import EventEmitter from 'eventemitter3'
 import { getLegalMovesFromField } from './LegalMovesFactory'
 
@@ -17,22 +16,21 @@ export class GameBoardView implements IGameBoardView {
 
     game: IFocus
     gameBoard: IGameBoard
-    board: HTMLDivElement
     greenReserve: IReserveView
     redReserve: IReserveView
     events: EventEmitter
 
-    private _fields: IFieldView[]
-    private _selectedField: IFieldView | null
+    private board: IFieldView[]
+    private selectedField: IFieldView | null
 
     constructor(game: IFocus) {
         this.events = new EventEmitter()
         this.gameBoard = game.gameBoard
 
         this.game = game
-        this._fields = []
+        this.board = []
 
-        this.board = document.getElementsByClassName('virtualGameBoard')[0] as HTMLDivElement
+        const board = document.getElementsByClassName('virtualGameBoard')[0] as HTMLDivElement
 
         this.greenReserve = new ReserveView(game, document.getElementsByClassName('reserveGreen')[0] as HTMLDivElement, PLAYER_GREEN)
         this.redReserve = new ReserveView(game, document.getElementsByClassName('reserveRed')[0] as HTMLDivElement, PLAYER_RED)
@@ -46,18 +44,13 @@ export class GameBoardView implements IGameBoardView {
         this.game.events.on(EventMovedField, () => this.erasePossibleMoves())
         this.gameBoard.each(
             element => {
-                let e: IFieldView = new FieldView(this.game, element)
-                this.board.appendChild(e.domElement)
-
-                if (PLAYER_GREEN.doesOwnThisField(e.field))
-                    e = new FieldViewDecorator(e, PLAYER_GREEN)
-                else
-                    e = new FieldViewDecorator(e, PLAYER_RED)
-                this._fields[element.x + 8 * element.y] = e
+                const e: IFieldView = new FieldView(element)
+                board.appendChild(e.domElement)
+                this.board[element.posX + 8 * element.posY] = e
             }
         )
         this.game.events.on(EventVictory, () => this.erasePossibleMoves())
-        this._selectedField = null
+        this.selectedField = null
     }
 
     private onPoolClicked(player: IPlayer, reserve: IReserveView): void {
@@ -73,46 +66,46 @@ export class GameBoardView implements IGameBoardView {
     }
 
     getFieldAt(i: number): IFieldView {
-        return this._fields[i]
+        return this.board[i]
     }
 
     each(callback: ForEachFieldInView): void {
-        for (const child of this._fields) {
+        for (const child of this.board) {
             callback(child)
         }
     }
 
     renderPossibleMoves(selectedField: IFieldView): void {
-        this._selectedField = selectedField
+        this.selectedField = selectedField
 
-        const isMoveFromThisField = function (move: Move) {
-            return move.x === selectedField.field.x && move.y === selectedField.field.y
-        }
-
-        const movesFromThisField = getLegalMovesFromField(this.gameBoard, selectedField.field.x, selectedField.field.y)
-            .filter(isMoveFromThisField, this)
+        const movesFromThisField = getLegalMovesFromField(this.gameBoard, selectedField.field.posX, selectedField.field.posY)
+            .filter(this.isMoveFromThisField, this)
 
         
         for (let i = 0; i < movesFromThisField.length; i++) {
-            if (this._selectedField === null) {
+            if (this.selectedField === null) {
                 return
             }
 
-            const { field } = this._selectedField
+            const { field } = this.selectedField
             const offset = this.game.getOffsetBasedOnDirection(field, movesFromThisField[i].direction, movesFromThisField[i].moveCount)
 
-            const neighbours = this._fields.filter(v => v.isInRange(field, offset))
+            const neighbours = this.board.filter(v => v.isInRange(field, offset))
 
             neighbours.forEach(v => v.visualizeHovered())
         }
     }
 
+    private isMoveFromThisField(move: Move): boolean {
+        return move.x === this.selectedField.field.posX && move.y === this.selectedField.field.posY
+    }
+
     get isSomethingSelected(): boolean {
-        return !!this._selectedField
+        return !!this.selectedField
     }
 
     erasePossibleMoves(): void {
-        this._fields.forEach(v => v.visualizeUnhovered())
-        this._selectedField = null
+        this.board.forEach(v => v.visualizeUnhovered())
+        this.selectedField = null
     }
 }

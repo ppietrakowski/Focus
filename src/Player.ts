@@ -15,16 +15,16 @@ export const EventPoolDecreased = 'PoolDecreased'
 export const EventPoolIncreased = 'PoolIncreased'
 
 export class Player implements IPlayer {
-    private _state: FieldState
+    private color: FieldState
     readonly events: EventEmitter
 
     constructor(state: number) {
-        this._state = state
+        this.color = state
         this.events = new EventEmitter()
     }
 
     get state(): FieldState {
-        return this._state
+        return this.color
     }
 
     doesOwnThisField(field: number | IField): boolean {
@@ -32,7 +32,7 @@ export class Player implements IPlayer {
             return !!(field & this.state)
         }
 
-        return !!(field.state & this.state)
+        return !!(field.fieldState & this.state)
     }
 
     possessField(field: IField): void {

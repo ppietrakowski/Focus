@@ -1,7 +1,7 @@
 import { PLAYER_GREEN, PLAYER_RED } from './Game'
 import { Direction, DirectionEast, DirectionNorth, DirectionSouth, DirectionWest, FieldState, IField } from './IField'
 import { Move } from './IFocus'
-import { AfterPlaceMove, IGameBoard } from './IGameBoard'
+import { IGameBoard } from './IGameBoard'
 import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
@@ -33,25 +33,6 @@ function isMoveLegal(board: IGameBoard, x: number, y: number, direction: Directi
     }
 }
 
-export function getNeighbours(board: IGameBoard, x: number, y: number, maxMove: number): IField[] {
-    const neighbours: IField[] = []
-
-    for (let i = 1; i < maxMove; i++) {
-        if (y > maxMove)
-            neighbours.push(board.getFieldAt(x, y + DirectionNorth.y * i))
-        if (y < maxMove)
-            neighbours.push(board.getFieldAt(x, y + DirectionSouth.y * i))
-
-        if (x < maxMove)
-            neighbours.push(board.getFieldAt(x + DirectionEast.x * i, y))
-
-        if (x > maxMove)
-            neighbours.push(board.getFieldAt(x + DirectionWest.x * i, y))
-    }
-
-    return neighbours
-}
-
 export function getMovesFromDirection(board: IGameBoard, field: IField, x: number, y: number, direction: Direction): Move[] {
     const moves: Move[] = []
 
@@ -61,6 +42,7 @@ export function getMovesFromDirection(board: IGameBoard, field: IField, x: numbe
             moves.push({ direction: direction, x: x, y: y, moveCount: moveCount })
         }
     }
+
     return moves
 }
 
@@ -81,32 +63,47 @@ export function getLegalMovesFromField(board: IGameBoard, x: number, y: number):
 export type IAvailableMoves = AiMove[]
 
 export function getAvailableMoves(board: IGameBoard, player: IPlayer): IAvailableMoves {
-    
-
     const enemyPlayer = player.state === PLAYER_RED.state ? PLAYER_GREEN : PLAYER_RED
-    const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f.state))
-    const enemyFields: IField[] = board.filter(f => enemyPlayer.doesOwnThisField(f.state))
-    
-    yourFields.sort((a, b) => b.height - a.height)
-    
-    const aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.x, f.y))
-        .map<AiMove>(v => {
-            return {
-                gameBoardAfterMove: board.getBoardAfterMove(board.getFieldAt(v.x, v.y),
-                    board.getFieldAt(v.x + v.direction.x * v.moveCount, v.y + v.direction.y * v.moveCount), player).gameBoard, move: v
-            }
-        })
 
+    const yourFields: IField[] = board.filter(f => player.doesOwnThisField(f.fieldState))
+    const enemyFields: IField[] = board.filter(f => enemyPlayer.doesOwnThisField(f.fieldState))
+
+    yourFields.sort((a, b) => b.height - a.height)
+
+    let aiMoves = yourFields.flatMap(f => getLegalMovesFromField(board, f.posX, f.posY))
+        .map<AiMove>(convertMoveToAiMove.bind(undefined, board, player))
+
+    // accumulate each place moves
+    aiMoves = aiMoves.concat(accumulateEachPlaceMove(enemyFields, board, player))
+
+    return aiMoves
+}
+
+function convertMoveToAiMove(board: IGameBoard, player: IPlayer, move: Move): AiMove {
+    const xOffset = move.x + move.direction.x * move.moveCount
+    const yOffset = move.y + move.direction.y * move.moveCount
+
+    const gameBoardAfterMove = board.getBoardAfterMove(
+        board.getFieldAt(move.x, move.y),
+        board.getFieldAt(xOffset, yOffset), player)
+
+    return {
+        gameBoardAfterMove, move
+    }
+}
+
+function accumulateEachPlaceMove(enemyFields: IField[], board: IGameBoard, player: IPlayer) {
+
+    const aiMoves: AiMove[] = []
 
     enemyFields.forEach(v => {
-        const afterPlaceMove = board.getBoardAfterPlace(v.x, v.y, player)
+        const afterPlaceMove = board.getBoardAfterPlace(v.posX, v.posY, player)
 
         const move: AiMove = {
-
             gameBoardAfterMove: afterPlaceMove.gameBoard,
             move: {
-                x: v.x,
-                y: v.y,
+                x: v.posX,
+                y: v.posY,
                 shouldPlaceSomething: true,
                 redPawns: afterPlaceMove.redCount,
                 greenPawns: afterPlaceMove.greenCount

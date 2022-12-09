@@ -17,7 +17,6 @@ export interface IPoolClickedListener {
 export interface IGameBoardView {
     gameBoard: IGameBoard;
     game: IFocus;
-    board: HTMLDivElement;
 
     getFieldAt(i: number): IFieldView;
 

@@ -41,11 +41,11 @@ export interface IField {
     * Returns a height of this field, should not be greater than 5
     */
     get height(): number
-    get state(): FieldState
+    get fieldState(): FieldState
     get towerStructure(): Array<number>
 
-    get x(): number
-    get y(): number
+    get posX(): number
+    get posY(): number
 
     get isEmpty(): boolean
     get isPlayable(): boolean

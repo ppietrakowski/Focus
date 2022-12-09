@@ -9,51 +9,53 @@ export class ReserveViewOnPlayerTurnDecorator implements IReserveView {
     readonly owner: IPlayer
     readonly events: EventEmitter
 
-    constructor(private readonly _reserveView: IReserveView, private readonly _game: IFocus) {
-        this.events = _reserveView.events
-        this.owner = this._reserveView.owner
+    constructor(private readonly reserveView: IReserveView, private readonly game: IFocus) {
+        this.events = reserveView.events
+        this.owner = this.reserveView.owner
 
-        if (_reserveView instanceof ReserveView) {
-            _reserveView.reserveFields.forEach(v => v.addEventListener('click', () => this.broadcastClickMessage()))
+        if (reserveView instanceof ReserveView) {
+            reserveView.reserveFields.forEach(v => v.addEventListener('click', () => this.broadcastClickMessage()))
         }
 
-        this._game.events.on(EventAddedToPool, this.addToReserve, this)
+        this.game.events.on(EventAddedToPool, this.addToReserve, this)
     }
 
     addPoolClickedListener<T>(listener: IPoolClickedListener, context: T): void {
-        this._reserveView.addPoolClickedListener(listener, context)
+        this.reserveView.addPoolClickedListener(listener, context)
     }
 
     emitPoolClicked(player: IPlayer, reserve: IReserveView): void {
-        this._reserveView.emitPoolClicked(player, reserve)
+        this.reserveView.emitPoolClicked(player, reserve)
     }
 
     getFieldAt(i: number): HTMLDivElement {
-        return this._reserveView.getFieldAt(i)
+        return this.reserveView.getFieldAt(i)
     }
 
     addToReserve(toWhichPlayer: IPlayer): void {
         if (toWhichPlayer === this.owner) {
-            if (this._reserveView instanceof ReserveView)
-                this._reserveView.emptyAllFields()
-            this._reserveView.addToReserve(toWhichPlayer)
+            if (this.reserveView instanceof ReserveView) {
+                this.reserveView.emptyAllFields()
+            }
+            this.reserveView.addToReserve(toWhichPlayer)
         }
     }
 
     removeFromReserve(): boolean {
-        if (this._reserveView instanceof ReserveView)
-            this._reserveView.emptyAllFields()
+        if (this.reserveView instanceof ReserveView) {
+            this.reserveView.emptyAllFields()
+        }
 
-        return this._reserveView.removeFromReserve()
+        return this.reserveView.removeFromReserve()
     }
 
     private broadcastClickMessage(): void {
         if (this.canAccess()) {
-            this._reserveView.emitPoolClicked(this.owner, this)
+            this.reserveView.emitPoolClicked(this.owner, this)
         }
     }
 
     private canAccess(): boolean {
-        return this._game.currentPlayer === this.owner
+        return this.game.currentPlayingColor === this.owner
     }
 }
