@@ -6,7 +6,7 @@ import { IPlayer } from './Player'
 
 export class MonteCarloSearch extends AiController {
     private simulationsCount = 0
-    private maxCooldown = 18
+    private maxCooldown = 200
     private r = 0
     private bestProbability = -1
     private currentPlayer: IPlayer
@@ -30,6 +30,8 @@ export class MonteCarloSearch extends AiController {
             this.simulateMove(move)
         }
 
+        console.log(this.bestProbability)
+
         return this.bestMove
     }
 
@@ -37,7 +39,7 @@ export class MonteCarloSearch extends AiController {
         this.r = 0
         this.simulationsCount = 0
         this.startTime = Date.now()
-        this.maxWaitingTime = this.startTime + (this.maxCooldown / this.moves.length)
+        this.maxWaitingTime = this.startTime + this.maxCooldown
 
         while (Date.now() < this.maxWaitingTime) {
             this.simulateNextMove(move)
@@ -83,7 +85,7 @@ export class MonteCarloSearch extends AiController {
             this.currentPlayer = this.game.getNextPlayer(this.currentPlayer)
             return
         }
-
+        
         const randomIndex = Math.floor(Math.random() * availableMoves.length)
         const randomMove = availableMoves[randomIndex]
         this.tempBoard = this.tempBoard.getBoardAfterSpecifiedMove(randomMove, this.currentPlayer)
