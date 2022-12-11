@@ -46,11 +46,11 @@ export class GameBoard implements IGameBoard {
     constructor() {
         this.board = []
 
-        for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
-            this.board[x] = []
+        for (let y = 0; y < GameBoard.GAME_BOARD_WIDTH; y++) {
+            this.board[y] = []
 
-            for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
-                this.board[x][y] = new Field(FieldState.Empty, x, y)
+            for (let x = 0; x < GameBoard.GAME_BOARD_HEIGHT; x++) {
+                this.board[y][x] = new Field(FieldState.Empty, x, y)
             }
         }
 
@@ -74,10 +74,10 @@ export class GameBoard implements IGameBoard {
                 }
             }
 
-            this.board[move.x][move.y] = new Field(player.state, move.x, move.y)
+            this.board[move.y][move.x] = new Field(player.state, move.x, move.y)
         } else {
-            const fromField = this.board[move.x][move.y]
-            const toField = this.board[move.x + move.direction.x * move.moveCount][move.y + move.direction.y * move.moveCount]
+            const fromField = this.board[move.y][move.y]
+            const toField = this.board[move.y + move.direction.y * move.moveCount][move.x + move.direction.x * move.moveCount]
 
             if (fromField instanceof Field) {
                 fromField.overgrownCallback = (field: IField, state: FieldState) => {
@@ -120,7 +120,7 @@ export class GameBoard implements IGameBoard {
 
     getBoardAfterSpecifiedMove(move: Move, player: IPlayer): IGameBoard {
         if (move.direction) {
-            return this.getBoardAfterMove(this.board[move.x][move.y], this.board[move.x + move.direction.x * move.moveCount][move.y + move.direction.y * move.moveCount], player)
+            return this.getBoardAfterMove(this.board[move.y][move.x], this.board[move.y + move.direction.y * move.moveCount][move.x + move.direction.x * move.moveCount], player)
         }
 
         return this.getBoardAfterPlace(move.x, move.y, player).gameBoard
@@ -129,10 +129,10 @@ export class GameBoard implements IGameBoard {
     filter(predicate: IPredicate<IField>): IField[] {
         const fields: IField[] = []
 
-        for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
-            for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
-                if (predicate(this.board[x][y])) {
-                    fields.push(this.board[x][y])
+        for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
+            for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
+                if (predicate(this.board[y][x])) {
+                    fields.push(this.board[y][x])
                 }
             }
         }
@@ -169,9 +169,9 @@ export class GameBoard implements IGameBoard {
     getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): IGameBoard {
         const gameBoard = new GameBoard()
 
-        for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
-            for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
-                gameBoard.board[x][y] = new Field(this.board[x][y].fieldState, x, y)
+        for (let y = 0; y < GameBoard.GAME_BOARD_HEIGHT; y++) {
+            for (let x = 0; x < GameBoard.GAME_BOARD_WIDTH; x++) {
+                gameBoard.board[y][x] = new Field(this.board[x][y].fieldState, x, y)
             }
         }
 
@@ -228,7 +228,7 @@ export class GameBoard implements IGameBoard {
             throw new Error(`point (${x}, ${y}) is out of bounds`)
         }
 
-        return this.board[x][y] || null
+        return this.board[y][x] || null
     }
 
     countPlayersFields(player: IPlayer): number {
@@ -245,14 +245,14 @@ export class GameBoard implements IGameBoard {
     private addNewFieldFromJson({ elements }: GameBoardJson, fieldId: number): void {
         const field = elements.find((v: BoardState) => v.id === fieldId) || null
 
-        const x = (fieldId % GameBoard.GAME_BOARD_WIDTH)
-        const y = Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)
+        const y = (fieldId % GameBoard.GAME_BOARD_HEIGHT)
+        const x = Math.floor(fieldId / GameBoard.GAME_BOARD_WIDTH)
 
         if (field === null) {
             throw new Error(`Missing object at (${x}, ${y}) id=${fieldId}`)
         }
 
-        this.board[x][y] = new Field(boardToStateMask(elements[fieldId].state), x, y)
+        this.board[y][x] = new Field(boardToStateMask(elements[fieldId].state), x, y)
     }
 
     private isOutOfBoundsInXAxis(x: number): boolean {

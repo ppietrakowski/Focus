@@ -46,7 +46,7 @@ export class GameBoardView implements IGameBoardView {
             element => {
                 const e: IFieldView = new FieldView(element)
                 board.appendChild(e.domElement)
-                this.board[element.posX + 8 * element.posY] = e
+                this.board[element.posY + 8 * element.posX] = e
             }
         )
         this.game.events.on(EventVictory, () => this.erasePossibleMoves())
