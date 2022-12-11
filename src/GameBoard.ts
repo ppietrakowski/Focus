@@ -5,6 +5,7 @@ import { IPlayer } from './Player'
 import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { FieldState } from './IField'
 import { IPredicate } from './GameUtils'
+import { Move } from './IFocus'
 
 
 interface BoardState {
@@ -54,6 +55,10 @@ export class GameBoard implements IGameBoard {
 
         this.redPlayerPawnCount = 0
         this.greenPlayerPawnCount = 0
+    }
+
+    getBoardAfterSpecifiedMove(move: Move, player: IPlayer): IGameBoard {
+        return this.getBoardAfterMove(this.board[move.x][move.y], this.board[move.x + move.direction.x * move.moveCount][move.y + move.direction.y * move.moveCount], player)
     }
 
     filter(predicate: IPredicate<IField>): IField[] {
