@@ -12,11 +12,11 @@ export class MonteCarloSearch extends AiController {
     }
 
     private monteCarloSearch(): Move {
-        let bestMove: Move = null
         let bestProbability = -1
         const moves = getAvailableMoves(this.gameBoard, this.ownedPlayer).map(m => m.move)
         let player = this.ownedPlayer
-
+        let bestMove: Move = moves[0]
+        
         for (const move of moves) {
             let r = 0
             let numberOfSimulations = 0

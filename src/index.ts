@@ -17,10 +17,10 @@ class LoggingListener {
     useLogging = true
 
     constructor(focus: IFocus) {
-        focus.events.on(EventAddedToPool, logging.onAddedToPool, logging)
-        focus.events.on(EventVictory, logging.onVictory, logging)
-        focus.events.on(EventEnemyHasPool, logging.onEnemyHasPool, logging)
-        focus.events.on(EventNewTurn, logging.onNextTurnBegin, logging)
+        focus.events.on(EventAddedToPool, this.onAddedToPool, this)
+        focus.events.on(EventVictory, this.onVictory, this)
+        focus.events.on(EventEnemyHasPool, this.onEnemyHasPool, this)
+        focus.events.on(EventNewTurn, this.onNextTurnBegin, this)
     }
 
     onAddedToPool(toWhichPlayer: IPlayer): void {
