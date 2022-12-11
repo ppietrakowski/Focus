@@ -23,4 +23,12 @@ export interface IGameBoard {
     getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): IGameBoard
     getBoardAfterSpecifiedMove(move: Move, player: IPlayer): IGameBoard
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
+
+    isTerminalForPlayer(player: IPlayer): boolean
+
+
+    winner: IPlayer
+
+    checkForVictoryCondition(): boolean
+    makeMoveOnThisInstance(move: Move, currentPlayer: IPlayer): void
 }

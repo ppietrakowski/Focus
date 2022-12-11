@@ -6,6 +6,7 @@ import { AfterPlaceMove, IGameBoard } from './IGameBoard'
 import { FieldState } from './IField'
 import { IPredicate } from './GameUtils'
 import { Move } from './IFocus'
+import { PLAYER_GREEN, PLAYER_RED } from './Game'
 
 
 interface BoardState {
@@ -32,7 +33,7 @@ function boardToStateMask(boardState: number) {
 }
 
 interface GameBoardJson {
-    elements: {id: number, state: number}[]
+    elements: { id: number, state: number }[]
 }
 
 export class GameBoard implements IGameBoard {
@@ -57,8 +58,72 @@ export class GameBoard implements IGameBoard {
         this.greenPlayerPawnCount = 0
     }
 
+    makeMoveOnThisInstance(move: Move, player: IPlayer): void {
+
+        if (move.shouldPlaceSomething) {
+            const fromField = this.board[move.x][move.y]
+            if (fromField instanceof Field) {
+                fromField.overgrownCallback = (field: IField, state: FieldState) => {
+                    if (state == FieldState.Green && field.fieldState === player.state) {
+                        this.greenPlayerPawnCount++
+                    }
+
+                    if (state == FieldState.Red && field.fieldState === player.state) {
+                        this.redPlayerPawnCount++
+                    }
+                }
+            }
+
+            this.board[move.x][move.y] = new Field(player.state, move.x, move.y)
+        } else {
+            const fromField = this.board[move.x][move.y]
+            const toField = this.board[move.x + move.direction.x * move.moveCount][move.y + move.direction.y * move.moveCount]
+
+            if (fromField instanceof Field) {
+                fromField.overgrownCallback = (field: IField, state: FieldState) => {
+                    if (state == FieldState.Green && field.fieldState === player.state) {
+                        this.greenPlayerPawnCount++
+                    }
+
+                    if (state == FieldState.Red && field.fieldState === player.state) {
+                        this.redPlayerPawnCount++
+                    }
+                }
+            }
+
+            toField.moveToThisField(fromField)
+            console.log('smth')
+        }
+
+    }
+
+    winner: IPlayer
+    checkForVictoryCondition(): boolean {
+        if (this.isTerminalForPlayer(PLAYER_RED)) {
+            this.winner = PLAYER_GREEN
+            return true
+        }
+
+        if (this.isTerminalForPlayer(PLAYER_GREEN)) {
+            this.winner = PLAYER_RED
+            return true
+        }
+
+        return false
+    }
+
+    isTerminalForPlayer(player: IPlayer): boolean {
+        const hasPool = player === PLAYER_RED ? this.redPlayerPawnCount > 0 : this.greenPlayerPawnCount > 0
+
+        return this.countPlayersFields(player) === 0 && !hasPool
+    }
+
     getBoardAfterSpecifiedMove(move: Move, player: IPlayer): IGameBoard {
-        return this.getBoardAfterMove(this.board[move.x][move.y], this.board[move.x + move.direction.x * move.moveCount][move.y + move.direction.y * move.moveCount], player)
+        if (move.direction) {
+            return this.getBoardAfterMove(this.board[move.x][move.y], this.board[move.x + move.direction.x * move.moveCount][move.y + move.direction.y * move.moveCount], player)
+        }
+
+        return this.getBoardAfterPlace(move.x, move.y, player).gameBoard
     }
 
     filter(predicate: IPredicate<IField>): IField[] {
@@ -177,7 +242,7 @@ export class GameBoard implements IGameBoard {
         return this.board.length
     }
 
-    private addNewFieldFromJson({elements}: GameBoardJson, fieldId: number): void {
+    private addNewFieldFromJson({ elements }: GameBoardJson, fieldId: number): void {
         const field = elements.find((v: BoardState) => v.id === fieldId) || null
 
         const x = (fieldId % GameBoard.GAME_BOARD_WIDTH)
