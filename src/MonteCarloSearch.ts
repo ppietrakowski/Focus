@@ -2,6 +2,7 @@ import { AiController } from './AiController'
 import { Move } from './IFocus'
 import { IGameBoard } from './IGameBoard'
 import { getAvailableMoves, IAvailableMoves } from './LegalMovesFactory'
+import { AiMove } from './MinMaxAiPlayerController'
 import { IPlayer } from './Player'
 
 export class MonteCarloSearch extends AiController {
@@ -10,7 +11,7 @@ export class MonteCarloSearch extends AiController {
     private currentPlayer: IPlayer
     private firstMoveBoard: IGameBoard
     private tempBoard: IGameBoard
-    private moves: Move[]
+    private moves: AiMove[]
     private maxSimulationCount = 3
     private probability = 0
 
@@ -20,7 +21,7 @@ export class MonteCarloSearch extends AiController {
 
     private monteCarloSearch(): Move {
         this.bestProbability = -1
-        this.moves = getAvailableMoves(this.gameBoard, this.ownedPlayer).map(m => m.move)
+        this.moves = getAvailableMoves(this.gameBoard, this.ownedPlayer)
         this.currentPlayer = this.ownedPlayer
         this.bestMove = null
 
@@ -33,7 +34,7 @@ export class MonteCarloSearch extends AiController {
         return this.bestMove
     }
 
-    private simulateMove(move: Move) {
+    private simulateMove(move: AiMove) {
         this.r = 0
 
         for (let i = 0; i < this.maxSimulationCount; i++) {
@@ -51,13 +52,13 @@ export class MonteCarloSearch extends AiController {
         return this.probability > this.bestProbability
     }
 
-    private updateToNewMove(move: Move) {
-        this.bestMove = move
+    private updateToNewMove(move: AiMove) {
+        this.bestMove = move.move
         this.bestProbability = this.probability
     }
 
-    private simulateNextMove(move: Move) {
-        this.firstMoveBoard = this.gameBoard.getBoardAfterSpecifiedMove(move, this.currentPlayer)
+    private simulateNextMove(move: AiMove) {
+        this.firstMoveBoard = move.gameBoardAfterMove
         this.currentPlayer = this.game.getNextPlayer(this.currentPlayer)
 
         this.tempBoard = this.firstMoveBoard
@@ -72,23 +73,10 @@ export class MonteCarloSearch extends AiController {
     }
 
     simulateUntilWin() {
-        const availableMoves = getAvailableMoves(this.tempBoard, this.currentPlayer).map(m => m.move)
-        if (this.shouldPlaceSomething(this.currentPlayer)) {
-            const allPlacingMoves = availableMoves.filter(m => !!m.shouldPlaceSomething)
-            const randomIndex = Math.floor(Math.random() * allPlacingMoves.length)
-            const randomMove = allPlacingMoves[randomIndex]
-            this.tempBoard = this.tempBoard.getBoardAfterPlace(randomMove.x, randomMove.y, this.currentPlayer).gameBoard
-            this.currentPlayer = this.game.getNextPlayer(this.currentPlayer)
-            return
-        }
-
+        const availableMoves = getAvailableMoves(this.tempBoard, this.currentPlayer)
         const randomIndex = Math.floor(Math.random() * availableMoves.length)
         const randomMove = availableMoves[randomIndex]
-        if (randomMove.direction) {
-            this.tempBoard = this.tempBoard.getBoardAfterSpecifiedMove(randomMove, this.currentPlayer)
-        } else {
-            this.tempBoard = this.tempBoard.getBoardAfterPlace(randomMove.x, randomMove.y, this.currentPlayer).gameBoard
-        }
+        this.tempBoard = randomMove.gameBoardAfterMove
 
         this.currentPlayer = this.game.getNextPlayer(this.currentPlayer)
     }
