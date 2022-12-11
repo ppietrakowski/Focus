@@ -7,6 +7,7 @@ import { NegaMaxPlayer } from './NegaMaxAiPlayerController'
 import { AlphaBetaPlayerController } from './AlphaBetaPlayerController'
 import { AbNegaMaxPlayer } from './AbNegaMaxPlayerController'
 import { focus, gameBoardView } from './index'
+import { MonteCarloSearch } from './MonteCarloSearch'
 
 export function getPlayerController(name: string, player: IPlayer): IAiController {
 
@@ -34,5 +35,9 @@ export function getPlayerController(name: string, player: IPlayer): IAiControlle
         return new AbNegaMaxPlayer(player, focus, gameBoardView)
     }
 
+    if (name === 'monteCarloSearch') {
+        return new MonteCarloSearch(player, focus, gameBoardView)
+    }
+    
     throw new Error('Selected unavailable player controller')
 }

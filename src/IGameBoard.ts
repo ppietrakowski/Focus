@@ -2,6 +2,7 @@ import { IField } from './IField'
 import { IPlayer } from './Player'
 import { ForEachCallback } from './GameBoard'
 import { IPredicate } from './GameUtils'
+import { Move } from './IFocus'
 
 export interface AfterPlaceMove {
     gameBoard: IGameBoard
@@ -20,5 +21,14 @@ export interface IGameBoard {
     length(): number
 
     getBoardAfterMove(fromField: IField, toField: IField, player: IPlayer): IGameBoard
+    getBoardAfterSpecifiedMove(move: Move, player: IPlayer): IGameBoard
     getBoardAfterPlace(x: number, y: number, player: IPlayer): AfterPlaceMove
+
+    isTerminalForPlayer(player: IPlayer): boolean
+
+
+    winner: IPlayer
+
+    checkForVictoryCondition(): boolean
+    makeMoveOnThisInstance(move: Move, currentPlayer: IPlayer): void
 }
