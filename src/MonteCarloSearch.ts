@@ -15,6 +15,8 @@ export class MonteCarloSearch extends AiController {
     private firstMoveBoard: IGameBoard
     private tempBoard: IGameBoard
     private moves: Move[]
+    private maxSimulationCount = 6
+
 
     supplyBestMove(): Move {
         return this.monteCarloSearch()
@@ -39,9 +41,9 @@ export class MonteCarloSearch extends AiController {
         this.r = 0
         this.simulationsCount = 0
         this.startTime = Date.now()
-        this.maxWaitingTime = this.startTime + this.maxCooldown
+        this.maxWaitingTime = this.startTime + (this.maxCooldown / this.moves.length)
 
-        while (Date.now() < this.maxWaitingTime) {
+        for (let i = 0; i < this.maxSimulationCount; i++) {
             this.simulateNextMove(move)
         }
 
@@ -51,12 +53,12 @@ export class MonteCarloSearch extends AiController {
     }
 
     private isBetterMoveThanPrevious() {
-        return this.r / this.simulationsCount > this.bestProbability
+        return this.r / this.maxSimulationCount > this.bestProbability
     }
 
     private updateToNewMove(move: Move) {
         this.bestMove = move
-        this.bestProbability = this.r / this.simulationsCount
+        this.bestProbability = this.r / this.maxSimulationCount
     }
 
     private simulateNextMove(move: Move) {
@@ -70,7 +72,7 @@ export class MonteCarloSearch extends AiController {
             this.simulateUntilWin()
         }
 
-        if (this.tempBoard.countPlayersFields(this.game.getNextPlayer(this.ownedPlayer)) == 0) {
+        if (this.tempBoard.countPlayersFields(this.game.getNextPlayer(this.ownedPlayer)) < this.tempBoard.countPlayersFields(this.ownedPlayer)) {
             this.r++
         }
     }
@@ -93,7 +95,7 @@ export class MonteCarloSearch extends AiController {
     }
 
     hasMeetFinalCondition(board: IGameBoard, player: IPlayer) {
-        return board.countPlayersFields(player) <= 0 && !this.hasPlayerPool(board, player)
+        return (board.countPlayersFields(player) <= 0 || board.countPlayersFields(this.game.getNextPlayer(player)) <= 0) && !this.hasPlayerPool(board, player)
     }
 
     hasPlayerPool(board: IGameBoard, player: IPlayer): boolean {
