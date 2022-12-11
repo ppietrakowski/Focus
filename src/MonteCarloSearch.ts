@@ -29,8 +29,6 @@ export class MonteCarloSearch extends AiController {
             this.simulateMove(move)
         }
 
-        console.log(this.bestProbability)
-
         return this.bestMove
     }
 
