@@ -1,5 +1,6 @@
 import { cloneField, Field } from "./field.js";
 import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
+import { setAvailableForMove } from "./gameloop.js";
 import { board } from "./index.js";
 
 /**
@@ -49,6 +50,7 @@ export class Ai {
         }
 
         moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, this.ownedPlayer);
+        setAvailableForMove();
     }
 
     mustPlace() {
@@ -66,6 +68,7 @@ export class Ai {
         const move = p[0];
 
         placeAtGameBoard(this.gameBoard, move.x, move.y, this.ownedPlayer);
+        setAvailableForMove();
     }
 }
 
@@ -176,7 +179,6 @@ export class MinMaxPlayer extends AiAlgorithm {
         this.maximizingPlayer = player;
 
         this.minMax(this.depth, player);
-
         return this.bestMove;
     }
 

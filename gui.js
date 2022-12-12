@@ -1,7 +1,7 @@
 import { EventEmitterObj } from "./eventemmiter3.js";
 import { Field, FIELD_STATE_EMPTY, FIELD_STATE_GREEN, FIELD_STATE_RED, FIELD_STATE_UNPLAYABLE } from "./field.js";
 import { CURRENT_PLAYER_INDEX, getMovesFromField, GREEN_PLAYER_RESERVE_INDEX, isCurrentPlayerControlledByPlayer, moveInGameboard, placeAtGameBoard, PLAYER_GREEN, PLAYER_RED, RED_PLAYER_RESERVE_INDEX, switchToNextPlayer } from "./gameboard.js";
-import { setAvailableForMove } from "./gameloop.js";
+import { isAvailableForMove, setAvailableForMove } from "./gameloop.js";
 
 
 let fields = [[document.querySelector('div')]];
