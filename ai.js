@@ -164,6 +164,21 @@ function evaluateMove(board, player) {
     return evalValue
 }
 
+function hasMeetFinalCondition(gameboard, depth) {
+    return checkForVictoryCondition(gameboard) || depth === 0;
+}
+
+function onFinalConditionOccured(gameboard, player, maximizingPlayer) {
+    if (gameboard[WINNER_PLAYER_INDEX] !== maximizingPlayer) {
+        // owned player wins
+        const result = -evaluateMove(gameboard, player);
+        return result;
+    }
+
+    const result = evaluateMove(gameboard, player);
+    return result;
+}
+
 export class MinMaxPlayer extends AiAlgorithm {
 
     constructor () {
@@ -183,15 +198,8 @@ export class MinMaxPlayer extends AiAlgorithm {
     }
 
     minMax(depth, player) {
-        if (checkForVictoryCondition(this.gameBoard) || depth === 0) {
-            if (this.gameBoard[WINNER_PLAYER_INDEX] !== this.maximizingPlayer) {
-                // owned player wins
-                const result = -evaluateMove(this.gameBoard, player);
-                return result;
-            }
-
-            const result = evaluateMove(this.gameBoard, player);
-            return result;
+        if (hasMeetFinalCondition(this.gameBoard, depth)) {
+            return onFinalConditionOccured(this.gameBoard, player, this.maximizingPlayer);
         }
 
         const moves = getAvailableMovesForPlayer(this.gameBoard, player);
@@ -253,6 +261,108 @@ export class MinMaxPlayer extends AiAlgorithm {
                 switchToNextPlayer(this.gameBoard);
 
                 let score = this.minMax(depth - 1, player);
+                this.gameBoard[move.y][move.x] = backupField;
+                
+                if (!!backupField2) {
+                    this.gameBoard[move.outY][move.outX] = backupField2;
+                }
+                
+                if (bestScore > score) {
+                    if (depth === this.depth) {
+                        this.bestMove = move;
+                        bestScore = score;
+                    }
+                }
+            }
+
+            return bestScore;
+        }
+    }
+}
+
+
+export class NegaMaxPlayer extends AiAlgorithm {
+
+    constructor () {
+        super();
+
+        this.bestMove = null;
+        this.gameBoard = null;
+        this.depth = 3;
+    }
+
+    supplyBestMove(board, player) {
+        this.gameBoard = cloneGameBoard(board);
+        this.maximizingPlayer = player;
+
+        this.negamax(this.depth, player);
+        return this.bestMove;
+    }
+
+    negamax(depth, player, sign = 1) {
+        if (hasMeetFinalCondition(this.gameBoard, depth)) {
+            return onFinalConditionOccured(this.gameBoard, player, this.maximizingPlayer);
+        }
+
+        const moves = getAvailableMovesForPlayer(this.gameBoard, player);
+
+        if (moves.length === 0) {
+            return evaluateMove(this.gameBoard, player);
+        }
+
+        if (this.maximizingPlayer === this.gameBoard[CURRENT_PLAYER_INDEX]) {
+            let bestScore = -Infinity;
+
+            for (let move of moves) {
+                const backupField = cloneField(this.gameBoard[move.y][move.x]);
+                let backupField2 = null;
+                
+                if (move.shouldPlaceSomething) {
+                    placeAtGameBoard(this.gameBoard, move.x, move.y, player);
+                } else {
+                    backupField2 = cloneField(this.gameBoard[move.outY][move.outX]);
+
+                    moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
+                }
+
+                player = getNextPlayer(this.gameBoard, player);
+                switchToNextPlayer(this.gameBoard);
+
+                let score = this.negamax(depth - 1, player);
+                this.gameBoard[move.y][move.x] = backupField;
+                
+                if (!!backupField2) {
+                    this.gameBoard[move.outY][move.outX] = backupField2;
+                }
+                
+                if (bestScore < score) {
+                    if (depth === this.depth) {
+                        this.bestMove = move;
+                        bestScore = score;
+                    }
+                }
+            }
+
+            return bestScore;
+        } else {
+            let bestScore = Infinity;
+            
+            for (let move of moves) {
+                const backupField = cloneField(this.gameBoard[move.y][move.x]);
+                let backupField2 = null;
+                
+                if (move.shouldPlaceSomething) {
+                    placeAtGameBoard(this.gameBoard, move.x, move.y, player);
+                } else {
+                    backupField2 = cloneField(this.gameBoard[move.outY][move.outX]);
+
+                    moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
+                }
+
+                player = getNextPlayer(this.gameBoard, player);
+                switchToNextPlayer(this.gameBoard);
+
+                let score = this.negamax(depth - 1, player);
                 this.gameBoard[move.y][move.x] = backupField;
                 
                 if (!!backupField2) {
