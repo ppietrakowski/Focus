@@ -218,6 +218,7 @@ export class MinMaxPlayer extends AiAlgorithm {
         const bestScore = this.minMax(this.depth, player, this.rootNode);
         this.rootNode.text = bestScore;
         chartConfig.nodeStructure = this.rootNode;
+        console.log(bestScore);
 
         return this.bestMove;
     }
@@ -267,9 +268,6 @@ export class MinMaxPlayer extends AiAlgorithm {
 
                 childDrawnNode.text = score.toString();
                 
-                if (nodeSize++ < 15) {
-                    rootNode.children.push(childDrawnNode);
-                }
 
                 player = getNextPlayer(this.gameBoard, player);
                 switchToNextPlayer(this.gameBoard);
@@ -283,6 +281,7 @@ export class MinMaxPlayer extends AiAlgorithm {
                         this.bestMove = move;
                     }
                     bestScore = score;
+                    rootNode.children.push(childDrawnNode);
                 }
 
                 alpha = Math.max(alpha, score);
@@ -323,11 +322,6 @@ export class MinMaxPlayer extends AiAlgorithm {
                 let score = this.minMax(depth - 1, player, childDrawnNode, alpha, beta);
                 this.gameBoard[move.y][move.x] = backupField;
 
-                childDrawnNode.text = score.toString();
-                if (nodeSize++ < 15) {
-                    rootNode.children.push(childDrawnNode);
-                }
-
                 player = getNextPlayer(this.gameBoard, player);
                 switchToNextPlayer(this.gameBoard);
 
@@ -340,6 +334,7 @@ export class MinMaxPlayer extends AiAlgorithm {
                         this.bestMove = move;
                     }
                     bestScore = score;
+                    rootNode.children.push(childDrawnNode);
                 }
 
                 beta = Math.min(beta, score);
@@ -370,11 +365,23 @@ export class NegaMaxPlayer extends AiAlgorithm {
         this.gameBoard = cloneGameBoard(board);
         this.maximizingPlayer = player;
 
-        this.negamax(this.depth, player);
+        this.rootNode = {
+            text: 'minimax',
+            children: []
+        };
+
+        
+
+        const bestScore = this.negamax(this.depth, player, this.rootNode);
+        
+        this.rootNode.text = bestScore;
+        chartConfig.nodeStructure = this.rootNode;
+        console.log(bestScore);
+
         return this.bestMove;
     }
 
-    negamax(depth, player, alpha = -Infinity, beta = Infinity, sign = 1) {
+    negamax(depth, player, rootNode, alpha = -Infinity, beta = Infinity, sign = 1) {
 
         if (depth === 0) {
             return evaluateMove(this.gameBoard, player);
@@ -393,6 +400,11 @@ export class NegaMaxPlayer extends AiAlgorithm {
         let bestScore = -Infinity;
 
         for (let move of moves) {
+            let childDrawnNode = {
+                text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move)},
+                children: []
+            };
+
             const backupField = cloneField(this.gameBoard[move.y][move.x]);
             let backupField2 = null;
 
@@ -407,7 +419,7 @@ export class NegaMaxPlayer extends AiAlgorithm {
             player = getNextPlayer(this.gameBoard, player);
             switchToNextPlayer(this.gameBoard);
 
-            let score = -this.negamax(depth - 1, player, -beta, -alpha, -sign);
+            let score = -this.negamax(depth - 1, player, childDrawnNode, -beta, -alpha, -sign);
 
             player = getNextPlayer(this.gameBoard, player);
             switchToNextPlayer(this.gameBoard);
@@ -423,6 +435,7 @@ export class NegaMaxPlayer extends AiAlgorithm {
                     this.bestMove = move;
                 }
                 bestScore = score;
+                rootNode.children.push(childDrawnNode);
             }
 
             alpha = Math.max(alpha, score)
@@ -456,6 +469,7 @@ export class MonteCarloSearch extends AiAlgorithm {
         this.beforeMovingGameBoard = board;
         this.maximizingPlayer = player;
 
+
         return this.monteCarloSearch();
     }
 
@@ -464,6 +478,11 @@ export class MonteCarloSearch extends AiAlgorithm {
         this.moves = getAvailableMovesForPlayer(this.beforeMovingGameBoard, this.maximizingPlayer)
         this.currentPlayer = this.maximizingPlayer
         this.bestMove = null
+
+        this.rootNode = {
+            text: 'minimax',
+            children: []
+        };
 
         for (const move of this.moves) {
 
