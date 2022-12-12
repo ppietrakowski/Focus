@@ -213,7 +213,7 @@ export function checkForVictoryCondition(board) {
 }
 
 export function switchToNextPlayer(board) {
-    board[CURRENT_PLAYER_INDEX] = getNextPlayer(board);
+    board[CURRENT_PLAYER_INDEX] = getNextPlayer(board, board[CURRENT_PLAYER_INDEX]);
 }
 
 export function getNextPlayer(board, player) {

@@ -412,124 +412,58 @@ export class MonteCarloSearch extends AiAlgorithm {
         this.bestMove = null
 
         for (const move of this.moves) {
-            this.gameBoard = cloneGameBoard(this.beforeMovingGameBoard);
 
             this.r = 0;
+            for (let i = 0; i < this.maxSimulationCount; i++) {
+                this.currentPlayer = this.maximizingPlayer;
+                
+                this.gameBoard = cloneGameBoard(this.beforeMovingGameBoard);
 
-            if (!move.shouldPlaceSomething) {
-                moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY);
-            } else {
-                placeAtGameBoard(this.gameBoard, move.x, move.y, this.currentPlayer);
-            }
-
-            this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
-            switchToNextPlayer(this.gameBoard);
-
-            while (checkForVictoryCondition(this.gameBoard)) {
-                const randomIndex = Math.floor(Math.random() * moves.length);
-                const randomMove = moves[randomIndex];
-
-                if (!randomMove.shouldPlaceSomething) {
-                    moveInGameboard(this.gameBoard, randomMove.x, randomMove.y, randomMove.outX, randomMove.outY);
+                if (!move.shouldPlaceSomething) {
+                    moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY);
                 } else {
-                    placeAtGameBoard(this.gameBoard, randomMove.x, randomMove.y, this.currentPlayer);
+                    placeAtGameBoard(this.gameBoard, move.x, move.y, this.currentPlayer);
                 }
 
                 this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
                 switchToNextPlayer(this.gameBoard);
+
+                while (checkForVictoryCondition(this.gameBoard)) {
+                    const moves = getAvailableMovesForPlayer(this.gameBoard, this.currentPlayer);
+
+                    const randomIndex = Math.floor(Math.random() * moves.length);
+                    const randomMove = moves[randomIndex];
+
+                    if (!randomMove.shouldPlaceSomething) {
+                        moveInGameboard(this.gameBoard, randomMove.x, randomMove.y, randomMove.outX, randomMove.outY);
+                    } else {
+                        placeAtGameBoard(this.gameBoard, randomMove.x, randomMove.y, this.currentPlayer);
+                    }
+
+                    this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
+                    switchToNextPlayer(this.gameBoard);
+                }
+
+                if (this.gameBoard[WINNER_PLAYER_INDEX] === this.maximizingPlayer) {
+                    this.r++;
+                }
             }
 
-            if (this.gameBoard[WINNER_PLAYER_INDEX] === this.maximizingPlayer) {
-                this.r++
-            }
-
-            this.probability = this.r / this.maxSimulationCount
+            this.probability = this.r / this.maxSimulationCount;
             if (this.isBetterMoveThanPrevious()) {
-                this.updateToNewMove(move)
+                this.updateToNewMove(move);
             }
         }
 
-        return this.bestMove
-    }
-
-    simulateMove(move) {
-        this.r = 0
-
-        for (let i = 0; i < this.maxSimulationCount; i++) {
-            this.simulateNextMove(move)
-        }
-
-        this.probability = this.r / this.maxSimulationCount
-
-        if (this.isBetterMoveThanPrevious()) {
-            this.updateToNewMove(move)
-        }
+        return this.bestMove;
     }
 
     isBetterMoveThanPrevious() {
-        return this.probability > this.bestProbability
+        return this.probability > this.bestProbability;
     }
 
     updateToNewMove(move) {
         this.bestMove = move;
         this.bestProbability = this.probability;
-    }
-
-    simulateNextMove(move) {
-        this.gameBoard = cloneGameBoard(this.beforeMovingGameBoard);
-        this.currentPlayer = this.maximizingPlayer;
-        this.makeMove(move);
-
-        while (!checkForVictoryCondition(this.gameBoard)) {
-            if (!this.simulateUntilWin()) {
-                break;
-            }
-        }
-
-        if (this.gameBoard[WINNER_PLAYER_INDEX] === this.maximizingPlayer) {
-            this.r++
-        }
-    }
-
-    simulateUntilWin() {
-        const availableMoves = getAvailableMovesForPlayer(this.gameBoard, this.currentPlayer);
-
-        if (availableMoves.length === 0) {
-
-            if (countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) > 0) {
-                const placeMoves = [];
-
-                const enemyFields = filterGameboard(this.gameBoard, f => f.fieldState !== this.currentPlayer);
-
-                for (let i = 0; i < enemyFields.length; i++) {
-                    placeMoves.push(new AiMove(board, enemyFields[i].posX, enemyFields[i].posY, 0, 0, true));
-                }
-
-                const randomIndex = Math.floor(Math.random() * placeMoves.length);
-                const randomMove = placeMoves[randomIndex];
-
-                this.makeMove(randomMove);
-                return true;
-            }
-
-            return false;
-        }
-
-        const randomIndex = Math.floor(Math.random() * availableMoves.length);
-        const randomMove = availableMoves[randomIndex];
-
-        this.makeMove(randomMove);
-        return true;
-    }
-
-    makeMove(move) {
-        if (move.shouldPlaceSomething) {
-            placeAtGameBoard(this.gameBoard, move.x, move.y, this.currentPlayer);
-        } else {
-            moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, this.currentPlayer);
-        }
-
-        this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
-        switchToNextPlayer(this.gameBoard);
     }
 }

@@ -44,18 +44,18 @@ function animationRequestHack(time) {
             clearAllBoard();
             updateReserve();
             switchToNextPlayer(_board);
-            isAvailableForMove = false;
-
-            if (!isCurrentPlayerControlledByPlayer(_board[CURRENT_PLAYER_INDEX])) {
+            
+            if (!isCurrentPlayerControlledByPlayer(_board)) {
                 isAvailableForMove = true;
                 return;
             }
+            isAvailableForMove = false;
 
             return;
         } else {
             switchToNextPlayer(_board);
-
-            if (!isCurrentPlayerControlledByPlayer(_board[CURRENT_PLAYER_INDEX])) {
+            
+            if (!isCurrentPlayerControlledByPlayer(_board)) {
                 isAvailableForMove = true;
                 return;
             }

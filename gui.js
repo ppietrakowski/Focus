@@ -151,8 +151,7 @@ export function onFieldClick(e) {
         console.log('trying to click not own field')
         return;
     }
-
-    debugger;
+    
     if (selectedField === null) {
         if (attachedBoard[this.y][this.x].fieldState === attachedBoard[CURRENT_PLAYER_INDEX]) {
             selectedField = attachedBoard[this.y][this.x];
