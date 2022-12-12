@@ -76,10 +76,10 @@ export function initializeGuiForBoard(board) {
     initialized = true;
 }
 
-var inPlacingMode = false;
+var isCurrentPlayerInPlacingMode = false;
 
 function onPlayerReserveClick(attachedPlayer) {
-    if (inPlacingMode) {
+    if (isCurrentPlayerInPlacingMode) {
         console.log('cancelled');
         updateReserve();
         clearAllBoard();
@@ -89,7 +89,7 @@ function onPlayerReserveClick(attachedPlayer) {
                 fields[y][x].onclick = onFieldClick; 
             }
         }
-        inPlacingMode = false;
+        isCurrentPlayerInPlacingMode = false;
         return;
     }
 
@@ -99,7 +99,7 @@ function onPlayerReserveClick(attachedPlayer) {
                 fields[y][x].onclick = placeAtField; 
             }
         }
-        inPlacingMode = true;
+        isCurrentPlayerInPlacingMode = true;
     }
 }
 
@@ -114,6 +114,8 @@ function placeAtField() {
                 fields[y][x].onclick = onFieldClick; 
             }
         }
+
+        isCurrentPlayerInPlacingMode = false;
 
         setAvailableForMove();
     }
