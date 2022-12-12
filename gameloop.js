@@ -1,7 +1,7 @@
 
 import { Ai, RandomPlayer } from './ai.js';
 import {EventEmitterObj} from './eventemmiter3.js'
-import { CURRENT_PLAYER_INDEX, isCurrentPlayerControlledByPlayer, PLAYER_GREEN, PLAYER_RED, switchToNextPlayer } from './gameboard.js';
+import { countPlayerFields, CURRENT_PLAYER_INDEX, isCurrentPlayerControlledByPlayer, PLAYER_GREEN, PLAYER_RED, switchToNextPlayer } from './gameboard.js';
 import { clearAllBoard, GUI_EVENTS, updateReserve } from './gui.js';
 import { board } from './index.js';
 
@@ -37,6 +37,10 @@ function animationRequestHack(time) {
         } else {
             isAvailableForMove = false;
             switchToNextPlayer(_board);
+        }
+
+        if (countPlayerFields(_board, _board[CURRENT_PLAYER_INDEX]) === 0) {
+            
         }
 
         if (!isCurrentPlayerControlledByPlayer(_board)) {

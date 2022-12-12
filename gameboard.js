@@ -151,6 +151,11 @@ export function cloneGameBoard(board) {
     return tempBoard;
 }
 
+export function playerMustPlace(board, player) {
+
+    
+}
+
 /**
  * 
  * @param {Field[][]} board 

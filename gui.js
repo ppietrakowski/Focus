@@ -103,6 +103,17 @@ function onPlayerReserveClick(attachedPlayer) {
     }
 }
 
+
+export function playerMustPlace(board, player) {
+    board[CURRENT_PLAYER_INDEX] = player;
+
+    for (let y = 0; y < 8; y++) {
+        for (let x = 0; x < 8; x++) {
+            fields[y][x].onclick = placeAtField; 
+        }
+    }
+}
+
 function placeAtField() {
     if (attachedBoard[this.y][this.x] !== FIELD_STATE_UNPLAYABLE) {
         placeAtGameBoard(attachedBoard, this.x, this.y, attachedBoard[CURRENT_PLAYER_INDEX]);

@@ -50,6 +50,23 @@ export class Ai {
 
         moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, this.ownedPlayer);
     }
+
+    mustPlace() {
+        const p = getAllPlaceMoves(this.gameBoard, this.ownedPlayer);
+
+        p.sort((a, b) => {
+            const aGameBoard = cloneGameBoard(this.gameBoard);
+            const bGameBoard = cloneGameBoard(this.gameBoard);
+            placeAtGameBoard(aGameBoard, a.x, a.y, this.ownedPlayer);
+            placeAtGameBoard(bGameBoard, b.x, b.y, this.ownedPlayer);
+
+            return evaluateMove(bGameBoard, this.ownedPlayer) - evaluateMove(aGameBoard, this.ownedPlayer);
+        });
+        
+        const move = p[0];
+
+        placeAtGameBoard(this.gameBoard, move.x, move.y, this.ownedPlayer);
+    }
 }
 
 /**
