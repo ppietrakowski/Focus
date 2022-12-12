@@ -70,34 +70,45 @@ export function initializeGuiForBoard(board) {
         }
     }
 
-    let { children } = redReservePanel;
-
-    for (let i = 0; i < children.length; i++) {
-        children[i].addEventListener('click', onPlayerReserveClick.bind(children[i], PLAYER_RED));
-    }
-
-    ({ children } = greenReservePanel);
-
-    for (let i = 0; i < children.length; i++) {
-        children[i].addEventListener('click', onPlayerReserveClick.bind(children[i], PLAYER_GREEN));
-    }
+    redReservePanel.onclick = onPlayerReserveClick.bind(redReservePanel, PLAYER_RED);
+    greenReservePanel.onclick = onPlayerReserveClick.bind(greenReservePanel, PLAYER_GREEN);
 
     initialized = true;
 }
 
+var inPlacingMode = false;
+
 function onPlayerReserveClick(attachedPlayer) {
+    if (inPlacingMode) {
+        console.log('cancelled');
+        updateReserve();
+        clearAllBoard();
+
+        for (let y = 0; y < 8; y++) {
+            for (let x = 0; x < 8; x++) {
+                fields[y][x].onclick = onFieldClick; 
+            }
+        }
+        inPlacingMode = false;
+        return;
+    }
+
     if (attachedBoard[CURRENT_PLAYER_INDEX] === attachedPlayer && isCurrentPlayerControlledByPlayer(attachedBoard)) {
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
                 fields[y][x].onclick = placeAtField; 
             }
         }
+        inPlacingMode = true;
     }
 }
 
 function placeAtField() {
     if (attachedBoard[this.y][this.x] !== FIELD_STATE_UNPLAYABLE) {
         placeAtGameBoard(attachedBoard, this.x, this.y, attachedBoard[CURRENT_PLAYER_INDEX]);
+        updateReserve();
+        clearAllBoard();
+        
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
                 fields[y][x].onclick = onFieldClick; 
