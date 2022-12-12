@@ -27,6 +27,15 @@ export class AiAlgorithm {
     }
 }
 
+var chartConfig = {
+    chart: {
+        container: "#tree-simple"
+    },
+    nodeStructure: {
+        children: [],
+        text: 'ai'
+    }
+};
 
 export class Ai {
     /**
@@ -46,10 +55,17 @@ export class Ai {
 
         if (move.shouldPlaceSomething) {
             placeAtGameBoard(this.gameBoard, move.x, move.y, this.ownedPlayer);
-            return;
+        } else {
+            moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, this.ownedPlayer);
+        }
+        
+        chartConfig.nodeStructure = this.algorithm.rootNode;
+        console.log('drawing chart');
+
+        if (!(this.algorithm instanceof RandomPlayer)) {
+            const treant = new Treant(chartConfig);
         }
 
-        moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, this.ownedPlayer);
         setAvailableForMove();
     }
 
@@ -194,11 +210,19 @@ export class MinMaxPlayer extends AiAlgorithm {
         this.gameBoard = cloneGameBoard(board);
         this.maximizingPlayer = player;
 
-        this.minMax(this.depth, player);
+        this.rootNode = {
+            text: 'minimax',
+            children: []
+        };
+
+        const bestScore = this.minMax(this.depth, player, this.rootNode);
+        this.rootNode.text = bestScore;
+        chartConfig.nodeStructure = this.rootNode;
+
         return this.bestMove;
     }
 
-    minMax(depth, player, alpha = -Infinity, beta = Infinity) {
+    minMax(depth, player, rootNode, alpha = -Infinity, beta = Infinity) {
         if (depth === 0) {
             return evaluateMove(this.gameBoard, player);
         }
@@ -213,10 +237,17 @@ export class MinMaxPlayer extends AiAlgorithm {
             return evaluateMove(this.gameBoard, player);
         }
 
+        let nodeSize = 0;
+
         if (this.maximizingPlayer === this.gameBoard[CURRENT_PLAYER_INDEX]) {
             let bestScore = -Infinity;
 
             for (let move of moves) {
+                let childDrawnNode = {
+                    text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move)},
+                    children: []
+                };
+
                 const backupField = cloneField(this.gameBoard[move.y][move.x]);
                 let backupField2 = null;
 
@@ -228,11 +259,20 @@ export class MinMaxPlayer extends AiAlgorithm {
                     moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
                 }
 
-                player = getNextPlayer(this.gameBoard, player, alpha, beta);
+                player = getNextPlayer(this.gameBoard, player);
                 switchToNextPlayer(this.gameBoard);
 
-                let score = this.minMax(depth - 1, player);
+                let score = this.minMax(depth - 1, player, childDrawnNode, alpha, beta);
                 this.gameBoard[move.y][move.x] = backupField;
+
+                childDrawnNode.text = score.toString();
+                
+                if (nodeSize++ < 15) {
+                    rootNode.children.push(childDrawnNode);
+                }
+
+                player = getNextPlayer(this.gameBoard, player);
+                switchToNextPlayer(this.gameBoard);
 
                 if (!!backupField2) {
                     this.gameBoard[move.outY][move.outX] = backupField2;
@@ -252,11 +292,20 @@ export class MinMaxPlayer extends AiAlgorithm {
                 }
             }
 
+            
             return bestScore;
         } else {
             let bestScore = Infinity;
 
+            let nodeSize = 0;
+
             for (let move of moves) {
+    
+                let childDrawnNode = {
+                    text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move)},
+                    children: []
+                };
+
                 const backupField = cloneField(this.gameBoard[move.y][move.x]);
                 let backupField2 = null;
 
@@ -271,8 +320,13 @@ export class MinMaxPlayer extends AiAlgorithm {
                 player = getNextPlayer(this.gameBoard, player);
                 switchToNextPlayer(this.gameBoard);
 
-                let score = this.minMax(depth - 1, player, alpha, beta);
+                let score = this.minMax(depth - 1, player, childDrawnNode, alpha, beta);
                 this.gameBoard[move.y][move.x] = backupField;
+
+                childDrawnNode.text = score.toString();
+                if (nodeSize++ < 15) {
+                    rootNode.children.push(childDrawnNode);
+                }
 
                 player = getNextPlayer(this.gameBoard, player);
                 switchToNextPlayer(this.gameBoard);
@@ -416,7 +470,7 @@ export class MonteCarloSearch extends AiAlgorithm {
             this.r = 0;
             for (let i = 0; i < this.maxSimulationCount; i++) {
                 this.currentPlayer = this.maximizingPlayer;
-                
+
                 this.gameBoard = cloneGameBoard(this.beforeMovingGameBoard);
 
                 if (!move.shouldPlaceSomething) {
