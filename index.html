@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <script src='index.js' type="module"></script>
+</head>
+<body>
+    <div id="gameStyles" class="buttonBoard">
+        <fieldset>
+          <label for="player1">Red player: </label>
+          <select name="player1" id="player1">
+            <option value="human">Human player</option>
+            <option value="random">Random</option>
+            <option value="minimax">Minimax (D:3)</option>
+            <option value="negamax">Negamax (D:3)</option>
+            <option value="abminimax">A-B Pr. Minimax (D:5)</option>
+            <option value="abnegaminimax">A-B Pr. Negamax (D:5)</option>
+            <option value="monteCarloSearch">Monte carlo search</option>
+          </select>
+    
+          <label for="player2">Green player: </label>
+          <select name="player2" id="player2">
+            <option value="human">Human player</option>
+            <option value="random">Random</option>
+            <option value="minimax">Minimax (D:3)</option>
+            <option value="negamax">Negamax (D:3)</option>
+            <option value="abminimax">A-B Pr. Minimax (D:6)</option>
+            <option value="abnegaminimax">A-B Pr. Negamax (D:6)</option>
+            <option value="monteCarloSearch">Monte carlo search</option>
+          </select>
+          <button id="BeginPlayButton">Begin play</button>
+        </fieldset>
+      </div>
+    
+      <div id="board">
+        <div class="reserveRed">
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+          <div class="reserveEmptyPawn"></div>
+        </div>
+        <div id="virtualBoard">
+            
+        </div>
+        <div class="reserveGreen">
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+            <div class="reserveEmptyPawn"></div>
+          </div>
+    </div>
+</body>
+</html>
