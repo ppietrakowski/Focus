@@ -181,12 +181,13 @@ function onFinalConditionOccured(gameboard, player, maximizingPlayer) {
 
 export class MinMaxPlayer extends AiAlgorithm {
 
-    constructor() {
+    constructor(mustUseAlphaBetaPrunning) {
         super();
 
         this.bestMove = null;
         this.gameBoard = null;
         this.depth = 3;
+        this.mustUseAlphaBetaPrunning = mustUseAlphaBetaPrunning;
     }
 
     supplyBestMove(board, player) {
@@ -197,7 +198,7 @@ export class MinMaxPlayer extends AiAlgorithm {
         return this.bestMove;
     }
 
-    minMax(depth, player) {
+    minMax(depth, player, alpha = -Infinity, beta = Infinity) {
         if (hasMeetFinalCondition(this.gameBoard, depth)) {
             return onFinalConditionOccured(this.gameBoard, player, this.maximizingPlayer);
         }
@@ -223,7 +224,7 @@ export class MinMaxPlayer extends AiAlgorithm {
                     moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
                 }
 
-                player = getNextPlayer(this.gameBoard, player);
+                player = getNextPlayer(this.gameBoard, player, alpha, beta);
                 switchToNextPlayer(this.gameBoard);
 
                 let score = this.minMax(depth - 1, player);
@@ -238,6 +239,12 @@ export class MinMaxPlayer extends AiAlgorithm {
                         this.bestMove = move;
                         bestScore = score;
                     }
+                }
+
+                alpha = Math.max(alpha, score);
+
+                if (this.mustUseAlphaBetaPrunning && alpha >= beta) {
+                    break;
                 }
             }
 
@@ -260,7 +267,7 @@ export class MinMaxPlayer extends AiAlgorithm {
                 player = getNextPlayer(this.gameBoard, player);
                 switchToNextPlayer(this.gameBoard);
 
-                let score = this.minMax(depth - 1, player);
+                let score = this.minMax(depth - 1, player, alpha, beta);
                 this.gameBoard[move.y][move.x] = backupField;
 
                 if (!!backupField2) {
@@ -272,6 +279,12 @@ export class MinMaxPlayer extends AiAlgorithm {
                         this.bestMove = move;
                         bestScore = score;
                     }
+                }
+
+                beta = Math.min(beta, score);
+
+                if (this.mustUseAlphaBetaPrunning && alpha >= beta) {
+                    break;
                 }
             }
 

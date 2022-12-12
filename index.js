@@ -7,7 +7,8 @@ export const board = makeGameboardFromJson();
 
 initializeGuiForBoard(board);
 
-const ai = new Ai(new NegaMaxPlayer(), PLAYER_RED, board);
+const ai = new Ai(new MinMaxPlayer(true), PLAYER_RED, board);
+
 setPlayerType('red', PLAYER_TYPE_AI);
 
 initializeGameLoop(board, ai, null);
