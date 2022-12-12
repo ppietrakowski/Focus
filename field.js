@@ -18,6 +18,7 @@ export function Field(state, x, y) {
 export function cloneField(field) {
     const f = new Field(field.fieldState, field.posX, field.posY);
     f.underField = JSON.parse(JSON.stringify(field.underField));
+    f.onOvergrown = field.onOvergrown;
 
     return f;
 }
@@ -89,6 +90,7 @@ Field.prototype.placeAtTop = function(newState) {
     this.underField = [this.fieldState].concat(this.underField);
     this.fieldState = newState;
 
+    this.tower = [this.fieldState].concat(this.underField);
     reduceOverGrown(this);
     this.tower = [this.fieldState].concat(this.underField);
 }
