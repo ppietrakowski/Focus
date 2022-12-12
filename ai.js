@@ -296,12 +296,13 @@ export class MinMaxPlayer extends AiAlgorithm {
 
 export class NegaMaxPlayer extends AiAlgorithm {
 
-    constructor() {
+    constructor(mustUseAlphaBetaPrunning) {
         super();
 
         this.bestMove = null;
         this.gameBoard = null;
         this.depth = 3;
+        this.mustUseAlphaBetaPrunning = mustUseAlphaBetaPrunning;
     }
 
     supplyBestMove(board, player) {
@@ -312,7 +313,7 @@ export class NegaMaxPlayer extends AiAlgorithm {
         return this.bestMove;
     }
 
-    negamax(depth, player, sign = 1) {
+    negamax(depth, player, alpha = -Infinity, beta = Infinity, sign = 1) {
         if (hasMeetFinalCondition(this.gameBoard, depth)) {
             return onFinalConditionOccured(this.gameBoard, player, this.maximizingPlayer);
         }
@@ -340,7 +341,7 @@ export class NegaMaxPlayer extends AiAlgorithm {
             player = getNextPlayer(this.gameBoard, player);
             switchToNextPlayer(this.gameBoard);
 
-            let score = -this.negamax(depth - 1, player, -sign);
+            let score = -this.negamax(depth - 1, player, -beta, -alpha, -sign);
             
             this.gameBoard[move.y][move.x] = backupField;
 
@@ -353,6 +354,12 @@ export class NegaMaxPlayer extends AiAlgorithm {
                     this.bestMove = move;
                     bestScore = score;
                 }
+            }
+
+            alpha = Math.max(alpha, score)
+
+            if (this.mustUseAlphaBetaPrunning && alpha >= beta) {
+                break;
             }
         }
 
