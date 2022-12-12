@@ -73,5 +73,6 @@ function animationRequestHack(time) {
     if (checkForVictoryCondition(_board)) {
         alert(`Winner is ${_board[WINNER_PLAYER_INDEX]}`);
         gameEnded = true;
+        document.location.reload(true);
     }
 }
