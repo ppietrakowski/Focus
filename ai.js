@@ -160,7 +160,7 @@ function evaluateMove(board, player) {
     const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + + current.getFieldHeight() - 1, 0)
 
     const evalValue = 10 * ratio + 1 * ratioInReserve + 2 * (heightOfYourFields - heightOfEnemyFields)
-    
+
     return evalValue
 }
 
@@ -199,6 +199,10 @@ export class MinMaxPlayer extends AiAlgorithm {
     }
 
     minMax(depth, player, alpha = -Infinity, beta = Infinity) {
+        if (depth === 0) {
+            return evaluateMove(this.gameBoard, player);
+        }
+
         if (hasMeetFinalCondition(this.gameBoard, depth)) {
             return onFinalConditionOccured(this.gameBoard, player, this.maximizingPlayer);
         }
@@ -269,6 +273,9 @@ export class MinMaxPlayer extends AiAlgorithm {
 
                 let score = this.minMax(depth - 1, player, alpha, beta);
                 this.gameBoard[move.y][move.x] = backupField;
+
+                player = getNextPlayer(this.gameBoard, player);
+                switchToNextPlayer(this.gameBoard);
 
                 if (!!backupField2) {
                     this.gameBoard[move.outY][move.outX] = backupField2;
@@ -405,7 +412,41 @@ export class MonteCarloSearch extends AiAlgorithm {
         this.bestMove = null
 
         for (const move of this.moves) {
-            this.simulateMove(move)
+            this.gameBoard = cloneGameBoard(this.beforeMovingGameBoard);
+
+            this.r = 0;
+
+            if (!move.shouldPlaceSomething) {
+                moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY);
+            } else {
+                placeAtGameBoard(this.gameBoard, move.x, move.y, this.currentPlayer);
+            }
+
+            this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
+            switchToNextPlayer(this.gameBoard);
+
+            while (checkForVictoryCondition(this.gameBoard)) {
+                const randomIndex = Math.floor(Math.random() * moves.length);
+                const randomMove = moves[randomIndex];
+
+                if (!randomMove.shouldPlaceSomething) {
+                    moveInGameboard(this.gameBoard, randomMove.x, randomMove.y, randomMove.outX, randomMove.outY);
+                } else {
+                    placeAtGameBoard(this.gameBoard, randomMove.x, randomMove.y, this.currentPlayer);
+                }
+
+                this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
+                switchToNextPlayer(this.gameBoard);
+            }
+
+            if (this.gameBoard[WINNER_PLAYER_INDEX] === this.maximizingPlayer) {
+                this.r++
+            }
+
+            this.probability = this.r / this.maxSimulationCount
+            if (this.isBetterMoveThanPrevious()) {
+                this.updateToNewMove(move)
+            }
         }
 
         return this.bestMove
@@ -457,16 +498,16 @@ export class MonteCarloSearch extends AiAlgorithm {
 
             if (countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) > 0) {
                 const placeMoves = [];
-                
+
                 const enemyFields = filterGameboard(this.gameBoard, f => f.fieldState !== this.currentPlayer);
-                
+
                 for (let i = 0; i < enemyFields.length; i++) {
                     placeMoves.push(new AiMove(board, enemyFields[i].posX, enemyFields[i].posY, 0, 0, true));
                 }
-                
+
                 const randomIndex = Math.floor(Math.random() * placeMoves.length);
                 const randomMove = placeMoves[randomIndex];
-                
+
                 this.makeMove(randomMove);
                 return true;
             }
