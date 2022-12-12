@@ -1,4 +1,4 @@
-import { cloneField, Field } from "./field.js";
+import { cloneField, Field, FIELD_STATE_EMPTY } from "./field.js";
 import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
 import { setAvailableForMove } from "./gameloop.js";
 import { board } from "./index.js";
@@ -58,7 +58,7 @@ export class Ai {
         } else {
             moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, this.ownedPlayer);
         }
-        
+
         chartConfig.nodeStructure = this.algorithm.rootNode;
         console.log('drawing chart');
 
@@ -245,7 +245,7 @@ export class MinMaxPlayer extends AiAlgorithm {
 
             for (let move of moves) {
                 let childDrawnNode = {
-                    text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move)},
+                    text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move) },
                     children: []
                 };
 
@@ -267,7 +267,7 @@ export class MinMaxPlayer extends AiAlgorithm {
                 this.gameBoard[move.y][move.x] = backupField;
 
                 childDrawnNode.text = score.toString();
-                
+
 
                 player = getNextPlayer(this.gameBoard, player);
                 switchToNextPlayer(this.gameBoard);
@@ -291,7 +291,7 @@ export class MinMaxPlayer extends AiAlgorithm {
                 }
             }
 
-            
+
             return bestScore;
         } else {
             let bestScore = Infinity;
@@ -299,9 +299,9 @@ export class MinMaxPlayer extends AiAlgorithm {
             let nodeSize = 0;
 
             for (let move of moves) {
-    
+
                 let childDrawnNode = {
-                    text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move)},
+                    text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move) },
                     children: []
                 };
 
@@ -370,10 +370,10 @@ export class NegaMaxPlayer extends AiAlgorithm {
             children: []
         };
 
-        
+
 
         const bestScore = this.negamax(this.depth, player, this.rootNode);
-        
+
         this.rootNode.text = bestScore;
         chartConfig.nodeStructure = this.rootNode;
         console.log(bestScore);
@@ -401,7 +401,7 @@ export class NegaMaxPlayer extends AiAlgorithm {
 
         for (let move of moves) {
             let childDrawnNode = {
-                text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move)},
+                text: { name: "MAX " + this.maximizingPlayer + " " + JSON.stringify(move) },
                 children: []
             };
 
@@ -454,21 +454,20 @@ export class MonteCarloSearch extends AiAlgorithm {
     constructor() {
         super();
 
-        this.r = 0
-        this.bestProbability = -1
+        this.r = 0;
+        this.bestProbability = -1;
         this.currentPlayer = null;
         this.firstMoveBoard = null;
         this.tempBoard = null;
         this.moves = null;
-        this.maxSimulationCount = 3
-        this.probability = 0
+        this.maxSimulationCount = 1;
+        this.probability = 0;
         this.beforeMovingGameBoard = null;
     }
 
     supplyBestMove(board, player) {
         this.beforeMovingGameBoard = board;
         this.maximizingPlayer = player;
-
 
         return this.monteCarloSearch();
     }
@@ -485,9 +484,13 @@ export class MonteCarloSearch extends AiAlgorithm {
         };
 
         for (const move of this.moves) {
-
             this.r = 0;
-            for (let i = 0; i < this.maxSimulationCount; i++) {
+
+            var startTime = Date.now();
+            let numberOfSimulations = 0;
+
+            while (Date.now() < startTime + 10 / this.moves.length) {
+                numberOfSimulations++
                 this.currentPlayer = this.maximizingPlayer;
 
                 this.gameBoard = cloneGameBoard(this.beforeMovingGameBoard);
@@ -501,11 +504,27 @@ export class MonteCarloSearch extends AiAlgorithm {
                 this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
                 switchToNextPlayer(this.gameBoard);
 
-                while (checkForVictoryCondition(this.gameBoard)) {
-                    const moves = getAvailableMovesForPlayer(this.gameBoard, this.currentPlayer);
+                let counter = 1;
 
-                    const randomIndex = Math.floor(Math.random() * moves.length);
-                    const randomMove = moves[randomIndex];
+
+                while (countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) < 10 + countPlayerFields(this.gameBoard, this.currentPlayer)) {
+                    if (countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) === 0 && getPlayerReserve(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) > 0) {
+                        const movesDuringPlace = getAllPlaceMoves(this.gameBoard, this.currentPlayer);
+
+                        const randomIndex = Math.floor(Math.random() * movesDuringPlace.length);
+                        const randomMove = movesDuringPlace[randomIndex];
+
+                        placeAtGameBoard(this.gameBoard, randomMove.x, randomMove.y, this.currentPlayer);
+                        this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
+                        switchToNextPlayer(this.gameBoard);
+                        console.log('should place')
+                        break;
+                    }
+
+                    const randomMoves = getAvailableMovesForPlayer(this.gameBoard, this.currentPlayer).sort((a, b) => b.outX - a.outX + b.outY - a.outY);
+
+                    const randomIndex = Math.floor(Math.random() * randomMoves.length);
+                    let randomMove = randomMoves[randomIndex];
 
                     if (!randomMove.shouldPlaceSomething) {
                         moveInGameboard(this.gameBoard, randomMove.x, randomMove.y, randomMove.outX, randomMove.outY);
@@ -513,13 +532,19 @@ export class MonteCarloSearch extends AiAlgorithm {
                         placeAtGameBoard(this.gameBoard, randomMove.x, randomMove.y, this.currentPlayer);
                     }
 
+                    counter++;
+
                     this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
                     switchToNextPlayer(this.gameBoard);
                 }
 
-                if (this.gameBoard[WINNER_PLAYER_INDEX] === this.maximizingPlayer) {
+                checkForVictoryCondition(this.gameBoard);
+
+                
+                if (countPlayerFields(this.gameBoard, this.maximizingPlayer) > countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.maximizingPlayer))) {
                     this.r++;
                 }
+                console.log(this.r);
             }
 
             this.probability = this.r / this.maxSimulationCount;
