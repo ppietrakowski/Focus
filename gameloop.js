@@ -29,13 +29,23 @@ function animationRequestHack(time) {
     requestAnimationFrame(animationRequestHack);
 
     if (isAvailableForMove) {
-        switchToNextPlayer(_board);
-        isAvailableForMove = false;
+        if (!isCurrentPlayerControlledByPlayer(_board)) {
+            _ais[_board[CURRENT_PLAYER_INDEX]].move();
+            clearAllBoard();
+            updateReserve();
+            switchToNextPlayer(_board);
+        } else {
+            isAvailableForMove = false;
+            switchToNextPlayer(_board);
+        }
 
         if (!isCurrentPlayerControlledByPlayer(_board)) {
             _ais[_board[CURRENT_PLAYER_INDEX]].move();
             clearAllBoard();
             updateReserve();
+            switchToNextPlayer(_board);
+        } else {
+            isAvailableForMove = false;
             switchToNextPlayer(_board);
         }
     }
