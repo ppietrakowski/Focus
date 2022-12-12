@@ -22,7 +22,7 @@ body {
 .buttonBoard {
     width: 600px;
     padding: 20px 120px 10px 120px;
-    float: left;
+    float: inline;
 }
 
 .playOptionButton {
