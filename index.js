@@ -18,6 +18,30 @@ const playerGreenSelect = document.getElementById('player2')
 
 const beginPlay = document.getElementById('BeginPlayButton')
 
+var simple_chart_config = {
+    chart: {
+        container: "#tree-simple"
+    },
+    
+    nodeStructure: {
+        text: { name: "Parent node" },
+        children: [
+            {
+                text: { name: "First child" },
+                children: [
+                    { text: { name: 'Fuck off' } }
+                ]
+            },
+            {
+                text: { name: "Second child" }
+            }
+        ]
+    }
+};
+
+var my_chart = new Treant(simple_chart_config);
+console.log(my_chart);
+
 function getAlgorithmForPlayer(option, player) {
     let ai = null;
 
