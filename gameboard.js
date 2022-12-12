@@ -209,7 +209,13 @@ function checkForVictory(board, player) {
 export function checkForVictoryCondition(board) {
     board[WINNER_PLAYER_INDEX] = null;
 
-    return checkForVictory(board, currentPlayer) || checkForVictory(board, getNextPlayer(board, currentPlayer));
+    if (checkForVictory(board, currentPlayer))
+        return true;
+
+    if (checkForVictory(board, getNextPlayer(board, currentPlayer)))
+        return true;
+
+    return false;
 }
 
 export function switchToNextPlayer(board) {
