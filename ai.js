@@ -1,5 +1,5 @@
 import { cloneField, Field } from "./field.js";
-import { cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer } from "./gameboard.js";
+import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
 import { board } from "./index.js";
 
 /**
@@ -181,15 +181,15 @@ export class MinMaxPlayer extends AiAlgorithm {
     }
 
     minMax(depth, player) {
-        if (countPlayerFields(this.gameBoard, player) === 0 || countPlayerFields(this.gameBoard, getNextPlayer(board, player)) === 0 || depth === 0) {
-            if (countPlayerFields(this.gameBoard, player) === 0) {
+        if (checkForVictoryCondition(this.gameBoard) || depth === 0) {
+            if (this.gameBoard[WINNER_PLAYER_INDEX] !== this.maximizingPlayer) {
                 // owned player wins
-                const result = -evaluateMove(this.gameBoard, player)
-                return result
+                const result = -evaluateMove(this.gameBoard, player);
+                return result;
             }
 
-            const result = evaluateMove(this.gameBoard, player,)
-            return result
+            const result = evaluateMove(this.gameBoard, player);
+            return result;
         }
 
         const moves = getAvailableMovesForPlayer(this.gameBoard, player);

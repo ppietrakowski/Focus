@@ -9,6 +9,4 @@ initializeGuiForBoard(board);
 
 const ai = new Ai(new MinMaxPlayer(), PLAYER_GREEN, board);
 
-setPlayerType('green', PLAYER_TYPE_AI);
-
-initializeGameLoop(board, null, ai);
+initializeGameLoop(board, null, null);

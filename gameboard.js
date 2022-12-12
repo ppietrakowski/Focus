@@ -151,10 +151,6 @@ export function cloneGameBoard(board) {
     return tempBoard;
 }
 
-export function playerMustPlace(board, player) {
-
-    
-}
 
 /**
  * 
@@ -204,14 +200,16 @@ function checkForVictory(board, player) {
     const count = countPlayerFields(board, player);
 
     if (count === 0 && getPlayerReserve(board, player) === 0) {
-        board[WINNER_PLAYER_INDEX] = getNextPlayer(player);
+        board[WINNER_PLAYER_INDEX] = getNextPlayer(board, player);
     }
 
     return board[WINNER_PLAYER_INDEX] !== null;
 }
 
 export function checkForVictoryCondition(board) {
-    return checkForVictory(board, currentPlayer) || checkForVictory(board, getNextPlayer(currentPlayer));
+    board[WINNER_PLAYER_INDEX] = null;
+
+    return checkForVictory(board, currentPlayer) || checkForVictory(board, getNextPlayer(board, currentPlayer));
 }
 
 export function switchToNextPlayer(board) {
