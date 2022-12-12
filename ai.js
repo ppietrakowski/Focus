@@ -62,7 +62,7 @@ export class Ai {
         chartConfig.nodeStructure = this.algorithm.rootNode;
         console.log('drawing chart');
 
-        if (!(this.algorithm instanceof RandomPlayer)) {
+        if (!(this.algorithm instanceof RandomPlayer) && this.algorithm.rootNode) {
             const treant = new Treant(chartConfig);
         }
 
