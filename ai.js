@@ -154,7 +154,7 @@ function evaluateMove(board, player) {
 
     controlledByYou = yourFields.length
     controlledByEnemy = enemyFields.length
-    const ratio = controlledByYou - (2 * controlledByEnemy)
+    const ratio = (controlledByYou - controlledByEnemy)^(1.4)
 
     const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.getFieldHeight() - 1, 0)
     const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + + current.getFieldHeight() - 1, 0)
