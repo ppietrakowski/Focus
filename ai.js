@@ -35,7 +35,7 @@ export class Ai {
      * @param {*} ownedPlayer 
      * @param {Field[][]} gameBoard 
      */
-    constructor (algorithm, ownedPlayer, gameBoard) {
+    constructor(algorithm, ownedPlayer, gameBoard) {
         this.algorithm = algorithm;
         this.ownedPlayer = ownedPlayer;
         this.gameBoard = gameBoard;
@@ -64,7 +64,7 @@ export class Ai {
 
             return evaluateMove(bGameBoard, this.ownedPlayer) - evaluateMove(aGameBoard, this.ownedPlayer);
         });
-        
+
         const move = p[0];
 
         placeAtGameBoard(this.gameBoard, move.x, move.y, this.ownedPlayer);
@@ -181,7 +181,7 @@ function onFinalConditionOccured(gameboard, player, maximizingPlayer) {
 
 export class MinMaxPlayer extends AiAlgorithm {
 
-    constructor () {
+    constructor() {
         super();
 
         this.bestMove = null;
@@ -214,7 +214,7 @@ export class MinMaxPlayer extends AiAlgorithm {
             for (let move of moves) {
                 const backupField = cloneField(this.gameBoard[move.y][move.x]);
                 let backupField2 = null;
-                
+
                 if (move.shouldPlaceSomething) {
                     placeAtGameBoard(this.gameBoard, move.x, move.y, player);
                 } else {
@@ -228,11 +228,11 @@ export class MinMaxPlayer extends AiAlgorithm {
 
                 let score = this.minMax(depth - 1, player);
                 this.gameBoard[move.y][move.x] = backupField;
-                
+
                 if (!!backupField2) {
                     this.gameBoard[move.outY][move.outX] = backupField2;
                 }
-                
+
                 if (bestScore < score) {
                     if (depth === this.depth) {
                         this.bestMove = move;
@@ -244,11 +244,11 @@ export class MinMaxPlayer extends AiAlgorithm {
             return bestScore;
         } else {
             let bestScore = Infinity;
-            
+
             for (let move of moves) {
                 const backupField = cloneField(this.gameBoard[move.y][move.x]);
                 let backupField2 = null;
-                
+
                 if (move.shouldPlaceSomething) {
                     placeAtGameBoard(this.gameBoard, move.x, move.y, player);
                 } else {
@@ -262,11 +262,11 @@ export class MinMaxPlayer extends AiAlgorithm {
 
                 let score = this.minMax(depth - 1, player);
                 this.gameBoard[move.y][move.x] = backupField;
-                
+
                 if (!!backupField2) {
                     this.gameBoard[move.outY][move.outX] = backupField2;
                 }
-                
+
                 if (bestScore > score) {
                     if (depth === this.depth) {
                         this.bestMove = move;
@@ -283,7 +283,7 @@ export class MinMaxPlayer extends AiAlgorithm {
 
 export class NegaMaxPlayer extends AiAlgorithm {
 
-    constructor () {
+    constructor() {
         super();
 
         this.bestMove = null;
@@ -310,74 +310,39 @@ export class NegaMaxPlayer extends AiAlgorithm {
             return evaluateMove(this.gameBoard, player);
         }
 
-        if (this.maximizingPlayer === this.gameBoard[CURRENT_PLAYER_INDEX]) {
-            let bestScore = -Infinity;
+        let bestScore = -Infinity;
 
-            for (let move of moves) {
-                const backupField = cloneField(this.gameBoard[move.y][move.x]);
-                let backupField2 = null;
-                
-                if (move.shouldPlaceSomething) {
-                    placeAtGameBoard(this.gameBoard, move.x, move.y, player);
-                } else {
-                    backupField2 = cloneField(this.gameBoard[move.outY][move.outX]);
+        for (let move of moves) {
+            const backupField = cloneField(this.gameBoard[move.y][move.x]);
+            let backupField2 = null;
 
-                    moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
-                }
+            if (move.shouldPlaceSomething) {
+                placeAtGameBoard(this.gameBoard, move.x, move.y, player);
+            } else {
+                backupField2 = cloneField(this.gameBoard[move.outY][move.outX]);
 
-                player = getNextPlayer(this.gameBoard, player);
-                switchToNextPlayer(this.gameBoard);
-
-                let score = this.negamax(depth - 1, player);
-                this.gameBoard[move.y][move.x] = backupField;
-                
-                if (!!backupField2) {
-                    this.gameBoard[move.outY][move.outX] = backupField2;
-                }
-                
-                if (bestScore < score) {
-                    if (depth === this.depth) {
-                        this.bestMove = move;
-                        bestScore = score;
-                    }
-                }
+                moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
             }
 
-            return bestScore;
-        } else {
-            let bestScore = Infinity;
+            player = getNextPlayer(this.gameBoard, player);
+            switchToNextPlayer(this.gameBoard);
+
+            let score = -this.negamax(depth - 1, player, -sign);
             
-            for (let move of moves) {
-                const backupField = cloneField(this.gameBoard[move.y][move.x]);
-                let backupField2 = null;
-                
-                if (move.shouldPlaceSomething) {
-                    placeAtGameBoard(this.gameBoard, move.x, move.y, player);
-                } else {
-                    backupField2 = cloneField(this.gameBoard[move.outY][move.outX]);
+            this.gameBoard[move.y][move.x] = backupField;
 
-                    moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
-                }
-
-                player = getNextPlayer(this.gameBoard, player);
-                switchToNextPlayer(this.gameBoard);
-
-                let score = this.negamax(depth - 1, player);
-                this.gameBoard[move.y][move.x] = backupField;
-                
-                if (!!backupField2) {
-                    this.gameBoard[move.outY][move.outX] = backupField2;
-                }
-                
-                if (bestScore > score) {
-                    if (depth === this.depth) {
-                        this.bestMove = move;
-                        bestScore = score;
-                    }
-                }
+            if (!!backupField2) {
+                this.gameBoard[move.outY][move.outX] = backupField2;
             }
 
-            return bestScore;
+            if (score > bestScore) {
+                if (depth === this.depth) {
+                    this.bestMove = move;
+                    bestScore = score;
+                }
+            }
         }
+
+        return bestScore;
     }
 }
