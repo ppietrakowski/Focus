@@ -156,11 +156,11 @@ function evaluateMove(board, player) {
     controlledByEnemy = enemyFields.length
     const ratio = controlledByYou - (2 * controlledByEnemy)
 
-    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height - 1, 0)
-    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + current.height - 1, 0)
+    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.getFieldHeight() - 1, 0)
+    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + + current.getFieldHeight() - 1, 0)
 
     const evalValue = 10 * ratio + 1 * ratioInReserve + 2 * (heightOfYourFields - heightOfEnemyFields)
-
+    
     return evalValue
 }
 
@@ -234,11 +234,11 @@ export class MinMaxPlayer extends AiAlgorithm {
                     this.gameBoard[move.outY][move.outX] = backupField2;
                 }
 
-                if (bestScore < score) {
+                if (score > bestScore) {
                     if (depth === this.depth) {
                         this.bestMove = move;
-                        bestScore = score;
                     }
+                    bestScore = score;
                 }
 
                 alpha = Math.max(alpha, score);
@@ -274,11 +274,11 @@ export class MinMaxPlayer extends AiAlgorithm {
                     this.gameBoard[move.outY][move.outX] = backupField2;
                 }
 
-                if (bestScore > score) {
+                if (score < bestScore) {
                     if (depth === this.depth) {
                         this.bestMove = move;
-                        bestScore = score;
                     }
+                    bestScore = score;
                 }
 
                 beta = Math.min(beta, score);
@@ -314,6 +314,11 @@ export class NegaMaxPlayer extends AiAlgorithm {
     }
 
     negamax(depth, player, alpha = -Infinity, beta = Infinity, sign = 1) {
+
+        if (depth === 0) {
+            return evaluateMove(this.gameBoard, player);
+        }
+
         if (hasMeetFinalCondition(this.gameBoard, depth)) {
             return onFinalConditionOccured(this.gameBoard, player, this.maximizingPlayer);
         }
@@ -343,6 +348,9 @@ export class NegaMaxPlayer extends AiAlgorithm {
 
             let score = -this.negamax(depth - 1, player, -beta, -alpha, -sign);
 
+            player = getNextPlayer(this.gameBoard, player);
+            switchToNextPlayer(this.gameBoard);
+
             this.gameBoard[move.y][move.x] = backupField;
 
             if (!!backupField2) {
@@ -352,8 +360,8 @@ export class NegaMaxPlayer extends AiAlgorithm {
             if (score > bestScore) {
                 if (depth === this.depth) {
                     this.bestMove = move;
-                    bestScore = score;
                 }
+                bestScore = score;
             }
 
             alpha = Math.max(alpha, score)

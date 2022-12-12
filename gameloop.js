@@ -45,6 +45,12 @@ function animationRequestHack(time) {
             updateReserve();
             switchToNextPlayer(_board);
             isAvailableForMove = false;
+
+            if (!isCurrentPlayerControlledByPlayer(_board[CURRENT_PLAYER_INDEX])) {
+                isAvailableForMove = true;
+                return;
+            }
+
             return;
         } else {
             switchToNextPlayer(_board);
