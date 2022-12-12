@@ -1,5 +1,6 @@
 import { Field } from "./field.js";
-import { filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard } from "./gameboard.js";
+import { cloneGameBoard, countPlayerFields, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard } from "./gameboard.js";
+import { board } from "./index.js";
 
 /**
  * 
@@ -61,8 +62,8 @@ function getAvailableMovesForPlayer(board, player) {
     const yourFields = filterGameboard(board, f => f.fieldState === player);
 
     const fieldsWithMoves = yourFields.flatMap(f => {
-        return {x: f.posX, y: f.posY, moves: getMovesFromField(board, f.posX, f.posY)};
-       });
+        return { x: f.posX, y: f.posY, moves: getMovesFromField(board, f.posX, f.posY) };
+    });
 
     let moves = [];
 
@@ -110,7 +111,77 @@ export class RandomPlayer extends AiAlgorithm {
         }
 
         const index = Math.floor(Math.random() * moves.length);
-        
+
         return moves[index];
+    }
+}
+
+function evaluateMove(board, player) {
+    let controlledByYou = 0
+
+    let controlledByEnemy = 0
+
+    let controlledInReserveByYou = 0
+    let controlledInReserveByEnemy = 0
+
+    controlledInReserveByYou = getPlayerReserve(board, player);
+    controlledInReserveByEnemy = getPlayerReserve(board, getNextPlayer(board, player));
+
+    let ratioInReserve = controlledInReserveByYou - controlledInReserveByEnemy
+    if (Number.isNaN(ratioInReserve))
+        ratioInReserve = 0.0
+
+    const yourFields = filterGameboard(board, f => player.doesOwnThisField(f))
+    const enemyFields = filterGameboard(board, f => game.getNextPlayer(player).doesOwnThisField(f))
+
+    controlledByYou = yourFields.length
+    controlledByEnemy = enemyFields.length
+    const ratio = controlledByYou - (2 * controlledByEnemy)
+
+    const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.height - 1, 0)
+    const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + current.height - 1, 0)
+
+    const evalValue = 10 * ratio + 1 * ratioInReserve + 2 * (heightOfYourFields - heightOfEnemyFields)
+
+    return evalValue
+}
+
+export class MinMaxPlayer extends AiAlgorithm {
+
+    constructor () {
+        this.bestMove = null;
+        this.gameBoard = null;
+    }
+
+    supplyBestMove(board, player) {
+        this.gameBoard = cloneGameBoard(board);
+        this.maximizingPlayer = player;
+
+        this.minMax(3, player);
+
+        return this.bestMove;
+    }
+
+    minMax(depth, player) {
+        if (countPlayerFields(this.gameBoard, player) === 0 || countPlayerFields(this.gameBoard, getNextPlayer(board, player)) || depth === 0) {
+            if (countPlayerFields(this.gameBoard, player) === 0) {
+                // owned player wins
+                const result = -evaluateMove(this.gameBoard, player)
+                return result
+            }
+
+            const result = evaluateMove(this.gameBoard, player,)
+            return result
+        }
+
+        const moves = getAvailableMovesForPlayer(this.gameBoard, player);
+        
+        if (moves.length === 0) {
+            return evaluateMove(this.gameBoard, player);
+        }
+
+        if (this.maximizingPlayer === player) {
+            
+        }
     }
 }
