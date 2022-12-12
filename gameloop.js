@@ -45,6 +45,12 @@ function animationRequestHack(time) {
             updateReserve();
             switchToNextPlayer(_board);
             
+            if (checkForVictoryCondition(_board)) {
+                alert(`Winner is ${_board[WINNER_PLAYER_INDEX]}`);
+                gameEnded = true;
+                return;
+            }
+
             if (!isCurrentPlayerControlledByPlayer(_board)) {
                 isAvailableForMove = true;
                 return;
