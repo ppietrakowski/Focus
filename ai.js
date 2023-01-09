@@ -170,7 +170,7 @@ function evaluateMove(board, player) {
 
     controlledByYou = yourFields.length
     controlledByEnemy = enemyFields.length
-    const ratio = (controlledByYou - controlledByEnemy)^(1.4)
+    const ratio = (controlledByYou - controlledByEnemy) ^ (1.4)
 
     const heightOfYourFields = yourFields.reduce((accumulated, current) => accumulated + current.getFieldHeight() - 1, 0)
     const heightOfEnemyFields = enemyFields.reduce((accumulated, current) => accumulated + + current.getFieldHeight() - 1, 0)
@@ -540,7 +540,7 @@ export class MonteCarloSearch extends AiAlgorithm {
 
                 checkForVictoryCondition(this.gameBoard);
 
-                
+
                 if (countPlayerFields(this.gameBoard, this.maximizingPlayer) > countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.maximizingPlayer))) {
                     this.r++;
                 }
@@ -563,5 +563,14 @@ export class MonteCarloSearch extends AiAlgorithm {
     updateToNewMove(move) {
         this.bestMove = move;
         this.bestProbability = this.probability;
+    }
+}
+
+export class MonteCarloSearch extends AiAlgorithm {
+    supplyBestMove(board, player) {
+        this.beforeMovingGameBoard = board;
+        this.maximizingPlayer = player;
+
+        return this.monteCarloSearch();
     }
 }

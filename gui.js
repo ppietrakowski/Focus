@@ -86,7 +86,7 @@ function onPlayerReserveClick(attachedPlayer) {
 
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
-                fields[y][x].onclick = onFieldClick; 
+                fields[y][x].onclick = onFieldClick;
             }
         }
         isCurrentPlayerInPlacingMode = false;
@@ -96,7 +96,7 @@ function onPlayerReserveClick(attachedPlayer) {
     if (attachedBoard[CURRENT_PLAYER_INDEX] === attachedPlayer && isCurrentPlayerControlledByPlayer(attachedBoard)) {
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
-                fields[y][x].onclick = placeAtField; 
+                fields[y][x].onclick = placeAtField;
             }
         }
         isCurrentPlayerInPlacingMode = true;
@@ -109,7 +109,7 @@ export function playerMustPlace(board, player) {
 
     for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
-            fields[y][x].onclick = placeAtField; 
+            fields[y][x].onclick = placeAtField;
         }
     }
 }
@@ -119,10 +119,10 @@ function placeAtField() {
         placeAtGameBoard(attachedBoard, this.x, this.y, attachedBoard[CURRENT_PLAYER_INDEX]);
         updateReserve();
         clearAllBoard();
-        
+
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
-                fields[y][x].onclick = onFieldClick; 
+                fields[y][x].onclick = onFieldClick;
             }
         }
 
@@ -151,7 +151,7 @@ export function onFieldClick(e) {
         console.log('trying to click not own field')
         return;
     }
-    
+
     if (selectedField === null) {
         if (attachedBoard[this.y][this.x].fieldState === attachedBoard[CURRENT_PLAYER_INDEX]) {
             selectedField = attachedBoard[this.y][this.x];

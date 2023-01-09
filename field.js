@@ -23,11 +23,11 @@ export function cloneField(field) {
     return f;
 }
 
-Field.prototype.getFieldHeight = function() {
+Field.prototype.getFieldHeight = function () {
     return this.underField.length + 1;
 }
 
-Field.prototype.moveToField = function(toField) {
+Field.prototype.moveToField = function (toField) {
 
     if (this.fieldState & FIELD_STATE_UNPLAYABLE) {
         throw Error('Trying to move unplayable field');
@@ -40,7 +40,7 @@ Field.prototype.moveToField = function(toField) {
     updateElements(this, toField, distance - 1);
     toField.fieldState = oldState;
 
-    
+
     toField.tower = [toField.fieldState].concat(toField.underField);
     this.tower = [this.fieldState].concat(this.underField);
     reduceOverGrown(toField);
@@ -65,7 +65,7 @@ function shiftElements(field, n) {
         if (element) {
             firstElements.push(element);
         }
-        
+
         n--;
     }
 
@@ -86,7 +86,7 @@ function reduceOverGrown(field) {
     }
 }
 
-Field.prototype.placeAtTop = function(newState) {
+Field.prototype.placeAtTop = function (newState) {
     this.underField = [this.fieldState].concat(this.underField);
     this.fieldState = newState;
 

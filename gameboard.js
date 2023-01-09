@@ -28,7 +28,7 @@ export function makeGameboardFromJson() {
 
     for (let y = 0; y < 8; y++) {
         board[y] = [];
-        
+
         for (let x = 0; x < 8; x++) {
             const element = Board.elements.find(e => e.id === y + 8 * x);
             board[y][x] = new Field(element.state, x, y);
@@ -57,7 +57,7 @@ export function filterGameboard(board, predicate) {
             if (predicate(board[y][x])) {
                 elements.push(board[y][x]);
             }
-        }    
+        }
     }
 
     return elements;
@@ -71,22 +71,22 @@ export function getMovesFromField(board, x, y) {
 
     for (let i = 1; i <= height; i++) {
         if (field.posX - i >= 0 && board[y][x - i].fieldState !== FIELD_STATE_UNPLAYABLE) {
-            moves.push({x: -i, y: 0});
+            moves.push({ x: -i, y: 0 });
         }
 
         if (field.posX + i < 8 && board[y][x + i].fieldState !== FIELD_STATE_UNPLAYABLE) {
-            moves.push({x: i, y: 0});
+            moves.push({ x: i, y: 0 });
         }
 
         if (field.posY - i >= 0 && board[field.posY - i][x].fieldState !== FIELD_STATE_UNPLAYABLE) {
-            moves.push({x: 0, y: -i});
+            moves.push({ x: 0, y: -i });
         }
 
         if (field.posY + i < 8 && board[field.posY + i][x].fieldState !== FIELD_STATE_UNPLAYABLE) {
-            moves.push({x: 0, y: i});
+            moves.push({ x: 0, y: i });
         }
     }
-    
+
     return moves;
 }
 
