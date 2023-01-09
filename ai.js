@@ -566,7 +566,7 @@ export class MonteCarloSearch extends AiAlgorithm {
     }
 }
 
-export class MonteCarloSearch extends AiAlgorithm {
+export class MonteCarloTreeSearch extends AiAlgorithm {
     supplyBestMove(board, player) {
         this.gameBoard = cloneGameBoard(board);
         this.maximizingPlayer = player;
@@ -591,7 +591,7 @@ export class MonteCarloSearch extends AiAlgorithm {
 
     treePolicy(current) {
         while (!checkForVictoryCondition(this.gameBoard)) {
-            if (current)
+            if (current) {}
         }
 
         return current;
