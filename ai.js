@@ -1,4 +1,4 @@
-import { cloneField, Field, FIELD_STATE_EMPTY } from "./field.js";
+import { cloneField, Field, FIELD_STATE_EMPTY, FIELD_STATE_UNPLAYABLE } from "./field.js";
 import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
 import { setAvailableForMove } from "./gameloop.js";
 import { board } from "./index.js";
@@ -126,7 +126,7 @@ function getAllPlaceMoves(board, player) {
     let moves = [];
 
     if (getPlayerReserve(board, player) > 0) {
-        const enemyFields = filterGameboard(board, f => f.fieldState !== player);
+        const enemyFields = filterGameboard(board, f => f.fieldState !== player && f.fieldState !== FIELD_STATE_UNPLAYABLE);
 
         for (let i = 0; i < enemyFields.length; i++) {
             moves.push(new AiMove(board, enemyFields[i].posX, enemyFields[i].posY, 0, 0, true));
@@ -566,7 +566,7 @@ export class MonteCarloSearch extends AiAlgorithm {
     }
 }
 
-export class MonteCarloSearch extends AiAlgorithm {
+export class MonteCarloTreeSearch extends AiAlgorithm {
     supplyBestMove(board, player) {
         this.gameBoard = cloneGameBoard(board);
         this.maximizingPlayer = player;
@@ -591,7 +591,7 @@ export class MonteCarloSearch extends AiAlgorithm {
 
     treePolicy(current) {
         while (!checkForVictoryCondition(this.gameBoard)) {
-            if (current)
+            if (current) {}
         }
 
         return current;
