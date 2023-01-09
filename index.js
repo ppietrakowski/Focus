@@ -79,16 +79,16 @@ beginPlay.addEventListener('click', () => {
         const redAiDepth = playerRedDepth.options[playerRedDepth.selectedIndex].value;
         console.log(redAiDepth);
         
-        redAi = getAlgorithmForPlayer(option, PLAYER_RED);
-        setPlayerType('red', PLAYER_TYPE_AI, redAiDepth);
+        redAi = getAlgorithmForPlayer(option, PLAYER_RED, redAiDepth);
+        setPlayerType('red', PLAYER_TYPE_AI);
     }
 
     if (playerGreenSelect.options[playerGreenSelect.selectedIndex].value !== 'human') {
         const option = playerGreenSelect.options[playerGreenSelect.selectedIndex].value;
         const greenAiDepth = playerGreenDepth.options[playerGreenDepth.selectedIndex].value;
         console.log(greenAiDepth);
-        greenAi = getAlgorithmForPlayer(option, PLAYER_GREEN);
-        setPlayerType('green', PLAYER_TYPE_AI, greenAiDepth);
+        greenAi = getAlgorithmForPlayer(option, PLAYER_GREEN, greenAiDepth);
+        setPlayerType('green', PLAYER_TYPE_AI);
     }
 
     const parent = beginPlay.parentElement;
