@@ -115,7 +115,7 @@ export function playerMustPlace(board, player) {
 }
 
 function placeAtField() {
-    if (attachedBoard[this.y][this.x] !== FIELD_STATE_UNPLAYABLE) {
+    if (attachedBoard[this.y][this.x].fieldState !== FIELD_STATE_UNPLAYABLE) {
         placeAtGameBoard(attachedBoard, this.x, this.y, attachedBoard[CURRENT_PLAYER_INDEX]);
         updateReserve();
         clearAllBoard();
