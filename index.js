@@ -55,7 +55,7 @@ playerRedSelect.addEventListener('click', () => {
 
 playerGreenSelect.addEventListener('click', () => {
     if (playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'human' ||
-        playerGreenSelect.options[playerRedSelect.selectedIndex].value == 'random' ||
+        playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'random' ||
         playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'monteCarloSearch' ||
         playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'monteCarloTreeSearch') {
             document.getElementById('depthPlayer2').style.display = 'none';
