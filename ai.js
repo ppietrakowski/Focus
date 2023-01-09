@@ -1,3 +1,4 @@
+
 import { cloneField, Field, FIELD_STATE_EMPTY, FIELD_STATE_UNPLAYABLE } from "./field.js";
 import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
 import { setAvailableForMove } from "./gameloop.js";
@@ -165,8 +166,8 @@ function evaluateMove(board, player) {
     if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0.0
 
-    const yourFields = filterGameboard(board, f => f.fieldState === player)
-    const enemyFields = filterGameboard(board, f => f.fieldState !== player)
+    const yourFields = filterGameboard(board, f => f.fieldState === player && f.fieldState !== FIELD_STATE_EMPTY && f.fieldState !== FIELD_STATE_UNPLAYABLE);
+    const enemyFields = filterGameboard(board, f => f.fieldState !== player && f.fieldState !== FIELD_STATE_EMPTY && f.fieldState !== FIELD_STATE_UNPLAYABLE)
 
     controlledByYou = yourFields.length
     controlledByEnemy = enemyFields.length
