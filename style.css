@@ -45,6 +45,7 @@ body {
     width: 30px;
     border: 0;
     float: left;
+    position: absolute;
 }
 
 .reserveRedPawn {
@@ -80,8 +81,8 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     background-blend-mode: multiply;
-    float: none;
-    position: fixed;
+    float: left;
+    position: absolute;
 }
 
 .playerRedField>img {
@@ -96,8 +97,8 @@ body {
     background-image: url(img/focusPawnRed.svg);
     background-repeat: no-repeat;
     background-position: center;
-    float: none;
-    position: fixed;
+    float: left;
+    position: absolute;
 }
 
 .playerRedFieldHovered>img {
@@ -111,8 +112,8 @@ body {
     background-image: url(img/focusPawnGreen.svg);
     background-repeat: no-repeat;
     background-position: center;
-    float: none;
-    position: fixed;
+    float: left;
+    position: absolute;
 }
 
 .rootClickableObject {
@@ -130,8 +131,8 @@ body {
     background-image: url(img/focusPawnGreen.svg);
     background-repeat: no-repeat;
     background-position: center;
-    float: none;
-    position: fixed;
+    float: left;
+    position: absolute;
 }
 
 .playerGreenField>img {
@@ -148,8 +149,8 @@ body {
     height: 80px;
     width: 80px;
     z-index: 2;
-    float: none;
-    position: fixed;
+    float: left;
+    position: absolute;
 }
 
 
