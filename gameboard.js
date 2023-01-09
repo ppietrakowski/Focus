@@ -191,6 +191,11 @@ export function moveInGameboard(board, x, y, toX, toY, player) {
 export function placeAtGameBoard(board, x, y, player) {
     const f = board[y][x];
 
+    if (f.fieldState === FIELD_STATE_UNPLAYABLE)
+    {
+        return;
+    }
+
     f.placeAtTop(player);
 
     board[playersReserve[player].index] -= 1;
