@@ -40,31 +40,30 @@ function getAlgorithmForPlayer(option, player, depth) {
     return ai;
 }
 
+function hasDepthProperty(select) {
+    return select.options[select.selectedIndex].value != 'human' &&
+        select.options[select.selectedIndex].value != 'random' &&
+        select.options[select.selectedIndex].value != 'monteCarloSearch' &&
+        select.options[select.selectedIndex].value != 'monteCarloTreeSearch'
+}
+
 //hide or show depth setting based on selected item
 playerRedSelect.addEventListener('click', () => {
-    if (playerRedSelect.options[playerRedSelect.selectedIndex].value == 'human' ||
-        playerRedSelect.options[playerRedSelect.selectedIndex].value == 'random' ||
-        playerRedSelect.options[playerRedSelect.selectedIndex].value == 'monteCarloSearch' ||
-        playerRedSelect.options[playerRedSelect.selectedIndex].value == 'monteCarloTreeSearch') {
-            document.getElementById('depthPlayer1').style.display = 'none';
-        }
+    if (!hasDepthProperty(playerRedSelect)) {
+        document.getElementById('depthPlayer1').style.display = 'none';
+    }
     else {
         document.getElementById('depthPlayer1').style.display = 'inline';
     }
-    console.log(playerRedSelect.options[playerRedSelect.selectedIndex].value);
 })
 
 playerGreenSelect.addEventListener('click', () => {
-    if (playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'human' ||
-        playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'random' ||
-        playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'monteCarloSearch' ||
-        playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'monteCarloTreeSearch') {
-            document.getElementById('depthPlayer2').style.display = 'none';
-        }
+    if (!hasDepthProperty(playerGreenSelect)) {
+        document.getElementById('depthPlayer2').style.display = 'none';
+    }
     else {
         document.getElementById('depthPlayer2').style.display = 'inline';
     }
-    console.log(playerRedSelect.options[playerRedSelect.selectedIndex].value);
 })
 
 //submit settings to start a game
@@ -78,7 +77,7 @@ beginPlay.addEventListener('click', () => {
         const option = playerRedSelect.options[playerRedSelect.selectedIndex].value;
         const redAiDepth = playerRedDepth.options[playerRedDepth.selectedIndex].value;
         console.log(redAiDepth);
-        
+
         redAi = getAlgorithmForPlayer(option, PLAYER_RED, redAiDepth);
         setPlayerType('red', PLAYER_TYPE_AI);
     }
