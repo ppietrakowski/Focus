@@ -568,9 +568,40 @@ export class MonteCarloSearch extends AiAlgorithm {
 
 export class MonteCarloSearch extends AiAlgorithm {
     supplyBestMove(board, player) {
-        this.beforeMovingGameBoard = board;
+        this.gameBoard = cloneGameBoard(board);
         this.maximizingPlayer = player;
 
-        return this.monteCarloSearch();
+        return this.monteCarloTreeSearch();
+    }
+
+    monteCarloTreeSearch() {
+        this.availableMoves = getAvailableMovesForPlayer(this.gameBoard, this.maximizingPlayer);
+        let current = this.availableMoves[0];
+        this.startTime = Date.now();
+
+        const maxLimit = 100;
+
+        while (Date.now() < this.startTime + maxLimit) {
+            current = this.treePolicy(current);
+            const reward = this.defaultPolicy(current);
+            this.backup(current, reward);
+        }
+
+    }
+
+    treePolicy(current) {
+        while (!checkForVictoryCondition(this.gameBoard)) {
+            if (current)
+        }
+
+        return current;
+    }
+
+    defaultPolicy(current) {
+
+    }
+
+    backup(current, reward) {
+
     }
 }
