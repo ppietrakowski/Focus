@@ -198,12 +198,12 @@ function onFinalConditionOccured(gameboard, player, maximizingPlayer) {
 
 export class MinMaxPlayer extends AiAlgorithm {
 
-    constructor(mustUseAlphaBetaPrunning) {
+    constructor(mustUseAlphaBetaPrunning, depth) {
         super();
 
         this.bestMove = null;
         this.gameBoard = null;
-        this.depth = 3;
+        this.depth = depth;
         this.mustUseAlphaBetaPrunning = mustUseAlphaBetaPrunning;
     }
 
@@ -353,12 +353,12 @@ export class MinMaxPlayer extends AiAlgorithm {
 
 export class NegaMaxPlayer extends AiAlgorithm {
 
-    constructor(mustUseAlphaBetaPrunning) {
+    constructor(mustUseAlphaBetaPrunning, depth) {
         super();
 
         this.bestMove = null;
         this.gameBoard = null;
-        this.depth = 3;
+        this.depth = depth;
         this.mustUseAlphaBetaPrunning = mustUseAlphaBetaPrunning;
     }
 
