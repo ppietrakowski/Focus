@@ -1,4 +1,4 @@
-import { Ai, MinMaxPlayer, MonteCarloSearch, NegaMaxPlayer, RandomPlayer } from "./ai.js";
+import { Ai, MinMaxPlayer, MonteCarloSearch, MonteCarloTreeSearch, NegaMaxPlayer, RandomPlayer } from "./ai.js";
 import { makeGameboardFromJson, PLAYER_GREEN, PLAYER_RED, PLAYER_TYPE_AI, setPlayerType, switchToNextPlayer } from "./gameboard.js";
 import { GAMELOOP_EVENTS, initializeGameLoop } from "./gameloop.js";
 import { cleanupGui, GUI_EVENTS, initializeGuiForBoard } from "./gui.js";
@@ -33,6 +33,8 @@ function getAlgorithmForPlayer(option, player) {
         ai = new Ai(new NegaMaxPlayer(true), player, board);
     } else if (option === 'monteCarloSearch') {
         ai = new Ai(new MonteCarloSearch(), player, board);
+    } else if (option == 'monteCarloTreeSearch') {
+        ai = new Ai(new MonteCarloTreeSearch(), player, board);
     }
 
     return ai;

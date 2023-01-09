@@ -18,8 +18,17 @@ export const WINNER_PLAYER_INDEX = 11;
 export const FIELD_OVERGROWN_CALLBACK_INDEX = 12;
 export const CURRENT_PLAYER_INDEX = 13;
 export const EVENTS_INDEX = 14;
+export const STATISTICS_INDEX = 15;
 
 const playersReserve = [{}, {}, { player: PLAYER_RED, index: RED_PLAYER_RESERVE_INDEX }, { player: PLAYER_GREEN, index: GREEN_PLAYER_RESERVE_INDEX }];
+
+export function Statistics(winrate, visits, children, parent) {
+    this.winrate = winrate;
+    this.visits = visits;
+    this.children = children;
+    this.parent = parent;
+    this.moves = [];
+}
 
 export function makeGameboardFromJson() {
     const board = [[new Field(0, 0, 0)]];
@@ -41,8 +50,17 @@ export function makeGameboardFromJson() {
     board[GREEN_PLAYER_RESERVE_INDEX] = 0;
     board[WINNER_PLAYER_INDEX] = null;
     board[CURRENT_PLAYER_INDEX] = PLAYER_RED;
-
+    board[STATISTICS_INDEX] = new Statistics(0, 0, [], {});
     return board;
+}
+
+/**
+ * 
+ * @param {*} board 
+ * @returns {Statistics}
+ */
+export function getBoardStatistics(board) {
+    return board[STATISTICS_INDEX];
 }
 
 export function isCurrentPlayerControlledByPlayer(board) {
@@ -147,7 +165,7 @@ export function cloneGameBoard(board) {
     tempBoard[GREEN_PLAYER_RESERVE_INDEX] = board[GREEN_PLAYER_RESERVE_INDEX];
     tempBoard[WINNER_PLAYER_INDEX] = null;
     tempBoard[CURRENT_PLAYER_INDEX] = board[CURRENT_PLAYER_INDEX];
-
+    tempBoard[STATISTICS_INDEX] = new Statistics(0, 0, [], {});
     return tempBoard;
 }
 

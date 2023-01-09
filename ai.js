@@ -1,5 +1,5 @@
 import { cloneField, Field, FIELD_STATE_EMPTY } from "./field.js";
-import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
+import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getBoardStatistics, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
 import { setAvailableForMove } from "./gameloop.js";
 import { board } from "./index.js";
 
@@ -566,7 +566,7 @@ export class MonteCarloSearch extends AiAlgorithm {
     }
 }
 
-export class MonteCarloSearch extends AiAlgorithm {
+export class MonteCarloTreeSearch extends AiAlgorithm {
     supplyBestMove(board, player) {
         this.gameBoard = cloneGameBoard(board);
         this.maximizingPlayer = player;
@@ -574,12 +574,14 @@ export class MonteCarloSearch extends AiAlgorithm {
         return this.monteCarloTreeSearch();
     }
 
+    // NODE=gameboard
+
     monteCarloTreeSearch() {
-        this.availableMoves = getAvailableMovesForPlayer(this.gameBoard, this.maximizingPlayer);
-        let current = this.availableMoves[0];
+        let current = this.gameBoard;
+        getBoardStatistics(current).moves = getAvailableMovesForPlayer(this.gameBoard, this.maximizingPlayer);
         this.startTime = Date.now();
 
-        const maxLimit = 100;
+        const maxLimit = 1000;
 
         while (Date.now() < this.startTime + maxLimit) {
             current = this.treePolicy(current);
@@ -590,18 +592,74 @@ export class MonteCarloSearch extends AiAlgorithm {
     }
 
     treePolicy(current) {
-        while (!checkForVictoryCondition(this.gameBoard)) {
-            if (current)
+        while (!checkForVictoryCondition(current)) {
+            if (getBoardStatistics(current).moves.length > 0) {
+                current = this.expandBoard(current);
+            } else {
+                current = this.getBestChild(current);
+            }
         }
 
         return current;
     }
 
-    defaultPolicy(current) {
+    expandBoard(current) {
+        const move = getBoardStatistics(current).moves.pop();
+        
+        const board = cloneGameBoard(current);
 
+        if (move.shouldPlaceSomething) {
+            placeAtGameBoard(board, move.x, move.y, board[CURRENT_PLAYER_INDEX]);
+        } else {
+            moveInGameboard(board, move.x, move.y, move.outX, move.outY,  board[CURRENT_PLAYER_INDEX]);
+        }
+        
+        board[CURRENT_PLAYER_INDEX] = getNextPlayer(board,  board[CURRENT_PLAYER_INDEX]);
+        getBoardStatistics(board).moves = getAvailableMovesForPlayer(board, board[CURRENT_PLAYER_INDEX]);
+        getBoardStatistics(current).children.push(board);
+        getBoardStatistics(board).parent = current;
+
+        return board;
+    }
+
+    defaultPolicy(current) {
+        while (!checkForVictoryCondition(current))
+        {
+            const move = getBoardStatistics(current).moves.pop();
+        
+            if (move.shouldPlaceSomething) {
+                placeAtGameBoard(current, move.x, move.y, current[CURRENT_PLAYER_INDEX]);
+            } else {
+                moveInGameboard(current, move.x, move.y, move.outX, move.outY,  current[CURRENT_PLAYER_INDEX]);
+            }
+
+            
+            current[CURRENT_PLAYER_INDEX] = getNextPlayer(current,  current[CURRENT_PLAYER_INDEX]);
+        }
+
+        return !!current[WINNER_PLAYER_INDEX] && current[CURRENT_PLAYER_INDEX] == this.maximizingPlayer;
     }
 
     backup(current, reward) {
+        while (!!current) {
+            getBoardStatistics(current).visits += 1;
+            getBoardStatistics(current).winrate += reward;
+            current = getBoardStatistics(current).parent; 
+        }
+    }
 
+    getBestChild(current) {
+        let value = -Infinity;
+        let bestChild = null;
+
+        for (let child of getBoardStatistics(current).children) {
+            const stats = getBoardStatistics(child);
+            let childValue = stats.winrate / stats.visits + 2 * Math.sqrt(Math.log(!!stats.parent ? getBoardStatistics(stats.parent).visits : 1) / stats.visits);
+            if (childValue > value) {
+                bestChild = cloneGameBoard(child);
+                value = childValue;
+            }
+        }
+        return bestChild;
     }
 }
