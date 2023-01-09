@@ -15,6 +15,8 @@ export const board = makeGameboardFromJson();
 
 const playerRedSelect = document.getElementById('player1')
 const playerGreenSelect = document.getElementById('player2')
+const playerRedDepth = document.getElementById('depthPlayer1');
+const playerGreenDepth = document.getElementById('depthPlayer2');
 
 const beginPlay = document.getElementById('BeginPlayButton')
 
@@ -39,6 +41,32 @@ function getAlgorithmForPlayer(option, player) {
 
     return ai;
 }
+
+playerRedSelect.addEventListener('click', () => {
+    if (playerRedSelect.options[playerRedSelect.selectedIndex].value == 'human' ||
+        playerRedSelect.options[playerRedSelect.selectedIndex].value == 'random' ||
+        playerRedSelect.options[playerRedSelect.selectedIndex].value == 'monteCarloSearch' ||
+        playerRedSelect.options[playerRedSelect.selectedIndex].value == 'monteCarloTreeSearch') {
+            document.getElementById('depthPlayer1').style.display = 'none';
+        }
+    else {
+        document.getElementById('depthPlayer1').style.display = 'inline';
+    }
+    console.log(playerRedSelect.options[playerRedSelect.selectedIndex].value);
+})
+
+playerGreenSelect.addEventListener('click', () => {
+    if (playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'human' ||
+        playerGreenSelect.options[playerRedSelect.selectedIndex].value == 'random' ||
+        playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'monteCarloSearch' ||
+        playerGreenSelect.options[playerGreenSelect.selectedIndex].value == 'monteCarloTreeSearch') {
+            document.getElementById('depthPlayer2').style.display = 'none';
+        }
+    else {
+        document.getElementById('depthPlayer2').style.display = 'inline';
+    }
+    console.log(playerRedSelect.options[playerRedSelect.selectedIndex].value);
+})
 
 beginPlay.addEventListener('click', () => {
     initializeGuiForBoard(board);

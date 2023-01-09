@@ -126,7 +126,7 @@ function getAllPlaceMoves(board, player) {
     let moves = [];
 
     if (getPlayerReserve(board, player) > 0) {
-        const enemyFields = filterGameboard(board, f => f.fieldState !== player);
+        const enemyFields = filterGameboard(board, f => f.fieldState !== player && f.fieldState !== FIELD_STATE_UNPLAYABLE);
 
         for (let i = 0; i < enemyFields.length; i++) {
             moves.push(new AiMove(board, enemyFields[i].posX, enemyFields[i].posY, 0, 0, true));
@@ -165,8 +165,8 @@ function evaluateMove(board, player) {
     if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0.0
 
-    const yourFields = filterGameboard(board, f => f.fieldState === player)
-    const enemyFields = filterGameboard(board, f => f.fieldState !== player)
+    const yourFields = filterGameboard(board, f => f.fieldState === player && f.fieldState !== FIELD_STATE_EMPTY && f.fieldState !== FIELD_STATE_UNPLAYABLE);
+    const enemyFields = filterGameboard(board, f => f.fieldState !== player && f.fieldState !== FIELD_STATE_EMPTY && f.fieldState !== FIELD_STATE_UNPLAYABLE)
 
     controlledByYou = yourFields.length
     controlledByEnemy = enemyFields.length
