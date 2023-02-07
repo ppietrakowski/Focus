@@ -1,6 +1,5 @@
-
-import { cloneField, Field, FIELD_STATE_EMPTY, FIELD_STATE_UNPLAYABLE } from "./field.js";
-import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
+import { cloneField, Field, FIELD_STATE_EMPTY } from "./field.js";
+import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getBoardStatistics, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
 import { setAvailableForMove } from "./gameloop.js";
 import { board } from "./index.js";
 
@@ -461,7 +460,7 @@ export class MonteCarloSearch extends AiAlgorithm {
         this.firstMoveBoard = null;
         this.tempBoard = null;
         this.moves = null;
-        this.maxSimulationCount = 1;
+        this.maxSimulationCount = 3;
         this.probability = 0;
         this.beforeMovingGameBoard = null;
     }
@@ -484,13 +483,13 @@ export class MonteCarloSearch extends AiAlgorithm {
             children: []
         };
 
+
         for (const move of this.moves) {
             this.r = 0;
 
-            var startTime = Date.now();
             let numberOfSimulations = 0;
 
-            while (Date.now() < startTime + 10 / this.moves.length) {
+            while (numberOfSimulations < this.maxSimulationCount) {
                 numberOfSimulations++
                 this.currentPlayer = this.maximizingPlayer;
 
@@ -505,10 +504,10 @@ export class MonteCarloSearch extends AiAlgorithm {
                 this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
                 switchToNextPlayer(this.gameBoard);
 
-                let counter = 1;
+                let counter = 0;
+                let testMove = null;
 
-
-                while (countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) < 10 + countPlayerFields(this.gameBoard, this.currentPlayer)) {
+                while (checkForVictoryCondition(this.gameBoard)) {
                     if (countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) === 0 && getPlayerReserve(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) > 0) {
                         const movesDuringPlace = getAllPlaceMoves(this.gameBoard, this.currentPlayer);
 
@@ -535,20 +534,45 @@ export class MonteCarloSearch extends AiAlgorithm {
 
                     counter++;
 
+                    if (counter >= 10000) {
+
+                        const randomIndex = getAvailableMovesForPlayer(this.gameBoard, this.currentPlayer).sort((a, b) => b.outX - a.outX + b.outY - a.outY);
+                        testMove = randomMoves[randomIndex];
+                        break;
+                    }
+
                     this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
                     switchToNextPlayer(this.gameBoard);
                 }
 
                 checkForVictoryCondition(this.gameBoard);
 
+                if (testMove) {
+                    const score = evaluateMove(this.gameBoard, this.maximizingPlayer);
+                    if (testMove.shouldPlaceSomething) {
+                        placeAtGameBoard(this.gameBoard, testMove.x, testMove.y, player);
+                    } else {
+                        backupField2 = cloneField(this.gameBoard[testMove.outY][testMove.outX]);
+
+                        moveInGameboard(this.gameBoard, testMove.x, testMove.y, testMove.outX, testMove.outY, player);
+                    }
+
+                    const score2 = evaluateMove(this.gameBoard, this.maximizingPlayer);
+
+                    if (score2 > score)
+                    {
+                        this.r++;
+                        continue;
+                    }
+                }
 
                 if (countPlayerFields(this.gameBoard, this.maximizingPlayer) > countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.maximizingPlayer))) {
                     this.r++;
                 }
-                console.log(this.r);
             }
 
             this.probability = this.r / this.maxSimulationCount;
+            console.log(this.probability)
             if (this.isBetterMoveThanPrevious()) {
                 this.updateToNewMove(move);
             }
@@ -575,12 +599,14 @@ export class MonteCarloTreeSearch extends AiAlgorithm {
         return this.monteCarloTreeSearch();
     }
 
+    // NODE=gameboard
+
     monteCarloTreeSearch() {
-        this.availableMoves = getAvailableMovesForPlayer(this.gameBoard, this.maximizingPlayer);
-        let current = this.availableMoves[0];
+        let current = this.gameBoard;
+        getBoardStatistics(current).moves = getAvailableMovesForPlayer(this.gameBoard, this.maximizingPlayer);
         this.startTime = Date.now();
 
-        const maxLimit = 100;
+        const maxLimit = 1000;
 
         while (Date.now() < this.startTime + maxLimit) {
             current = this.treePolicy(current);
@@ -591,18 +617,88 @@ export class MonteCarloTreeSearch extends AiAlgorithm {
     }
 
     treePolicy(current) {
-        while (!checkForVictoryCondition(this.gameBoard)) {
-            if (current) {}
+        let counter = 0;
+
+        while (!checkForVictoryCondition(current)) {
+            if (getBoardStatistics(current).moves.length > 0) {
+                current = this.expandBoard(current);
+            } else {
+                current = this.getBestChild(current);
+            }
+
+            counter++;
+
+            if (counter > 1000) {
+                return current;
+            }
         }
 
         return current;
     }
 
-    defaultPolicy(current) {
+    expandBoard(current) {
+        const move = getBoardStatistics(current).moves.pop();
 
+        const board = cloneGameBoard(current);
+
+        if (move.shouldPlaceSomething) {
+            placeAtGameBoard(board, move.x, move.y, board[CURRENT_PLAYER_INDEX]);
+        } else {
+            moveInGameboard(board, move.x, move.y, move.outX, move.outY, board[CURRENT_PLAYER_INDEX]);
+        }
+
+        board[CURRENT_PLAYER_INDEX] = getNextPlayer(board, board[CURRENT_PLAYER_INDEX]);
+        getBoardStatistics(board).moves = getAvailableMovesForPlayer(board, board[CURRENT_PLAYER_INDEX]);
+        getBoardStatistics(current).children.push(board);
+        getBoardStatistics(board).parent = current;
+
+        return board;
+    }
+
+    defaultPolicy(current) {
+        let counter = 0;
+
+        while (!checkForVictoryCondition(current)) {
+            const move = getBoardStatistics(current).moves.pop();
+
+            if (move.shouldPlaceSomething) {
+                placeAtGameBoard(current, move.x, move.y, current[CURRENT_PLAYER_INDEX]);
+            } else {
+                moveInGameboard(current, move.x, move.y, move.outX, move.outY, current[CURRENT_PLAYER_INDEX]);
+            }
+
+            counter++;
+
+            if (counter > 1000) {
+                break;
+            }
+
+            current[CURRENT_PLAYER_INDEX] = getNextPlayer(current, current[CURRENT_PLAYER_INDEX]);
+        }
+
+        return !!current[WINNER_PLAYER_INDEX] && current[CURRENT_PLAYER_INDEX] == this.maximizingPlayer;
     }
 
     backup(current, reward) {
+        while (!!current) {
+            getBoardStatistics(current).visits += 1;
+            getBoardStatistics(current).winrate += reward;
+            current = getBoardStatistics(current).parent;
+        }
+    }
 
+    getBestChild(current) {
+        let value = -Infinity;
+        let bestChild = null;
+
+        for (let child of getBoardStatistics(current).children) {
+            const stats = getBoardStatistics(child);
+            let childValue = stats.winrate / stats.visits + 2 * Math.sqrt(Math.log(!!stats.parent ? getBoardStatistics(stats.parent).visits : 1) / stats.visits);
+            if (childValue > value) {
+                bestChild = cloneGameBoard(child);
+                value = childValue;
+            }
+        }
+        return bestChild;
     }
 }
