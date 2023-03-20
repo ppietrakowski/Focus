@@ -1,9 +1,9 @@
 import { Ai, MinMaxPlayer, MonteCarloSearch, MonteCarloTreeSearch, NegaMaxPlayer, RandomPlayer } from "./ai.js";
-import { makeGameboardFromJson, PLAYER_GREEN, PLAYER_RED, PLAYER_TYPE_AI, setPlayerType, switchToNextPlayer } from "./gameboard.js";
-import { GAMELOOP_EVENTS, initializeGameLoop } from "./gameloop.js";
-import { cleanupGui, GUI_EVENTS, initializeGuiForBoard } from "./gui.js";
+import { GameBoard, PLAYER_GREEN, PLAYER_RED, PLAYER_TYPE_AI } from "./gameboard.js";
+import { initializeGameLoop } from "./gameloop.js";
+import { initializeGuiForBoard } from "./gui.js";
 
-export const board = makeGameboardFromJson();
+export const board = GameBoard.fromJSON();
 
 // initializeGuiForBoard(board);
 
@@ -81,7 +81,7 @@ beginPlay.addEventListener('click', () => {
         console.log(redAiDepth);
 
         redAi = getAlgorithmForPlayer(option, PLAYER_RED, redAiDepth);
-        setPlayerType('red', PLAYER_TYPE_AI);
+        GameBoard.setPlayerType('red', PLAYER_TYPE_AI);
     }
 
     if (playerGreenSelect.options[playerGreenSelect.selectedIndex].value !== 'human') {
@@ -89,7 +89,7 @@ beginPlay.addEventListener('click', () => {
         const greenAiDepth = playerGreenDepth.options[playerGreenDepth.selectedIndex].value;
         console.log(greenAiDepth);
         greenAi = getAlgorithmForPlayer(option, PLAYER_GREEN, greenAiDepth);
-        setPlayerType('green', PLAYER_TYPE_AI);
+        GameBoard.setPlayerType('green', PLAYER_TYPE_AI);
     }
 
     const parent = beginPlay.parentElement;

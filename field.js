@@ -1,8 +1,8 @@
 
-export const FIELD_STATE_UNPLAYABLE = 0
-export const FIELD_STATE_EMPTY = 1
-export const FIELD_STATE_RED = 2
-export const FIELD_STATE_GREEN = 3
+export const FIELD_STATE_UNPLAYABLE = 0;
+export const FIELD_STATE_EMPTY = 1;
+export const FIELD_STATE_RED = 2;
+export const FIELD_STATE_GREEN = 3;
 
 
 export function Field(state, x, y) {

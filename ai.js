@@ -1,17 +1,7 @@
-import { cloneField, Field, FIELD_STATE_EMPTY } from "./field.js";
-import { checkForVictoryCondition, cloneGameBoard, countPlayerFields, CURRENT_PLAYER_INDEX, filterGameboard, getBoardStatistics, getMovesFromField, getNextPlayer, getPlayerReserve, moveInGameboard, placeAtGameBoard, switchToNextPlayer, WINNER_PLAYER_INDEX } from "./gameboard.js";
+import { cloneField, FIELD_STATE_EMPTY, FIELD_STATE_UNPLAYABLE } from "./field.js";
+import { GameBoard } from "./gameboard.js";
 import { setAvailableForMove } from "./gameloop.js";
-import { board } from "./index.js";
 
-/**
- * 
- * @param {Field[][]} board 
- * @param {number} x 
- * @param {number} y 
- * @param {number} outX 
- * @param {number} outY 
- * @param {boolean} shouldPlaceSomething 
- */
 export function AiMove(board, x, y, outX, outY, shouldPlaceSomething) {
     this.x = x;
     this.y = y;
@@ -42,7 +32,7 @@ export class Ai {
      * 
      * @param {AiAlgorithm} algorithm 
      * @param {*} ownedPlayer 
-     * @param {Field[][]} gameBoard 
+     * @param {GameBoard} gameBoard 
      */
     constructor(algorithm, ownedPlayer, gameBoard) {
         this.algorithm = algorithm;
@@ -54,9 +44,9 @@ export class Ai {
         const move = this.algorithm.supplyBestMove(this.gameBoard, this.ownedPlayer);
 
         if (move.shouldPlaceSomething) {
-            placeAtGameBoard(this.gameBoard, move.x, move.y, this.ownedPlayer);
+            this.gameBoard.placeAtGameBoard(move.x, move.y, this.ownedPlayer);
         } else {
-            moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, this.ownedPlayer);
+            this.gameBoard.moveInGameboard(move.x, move.y, move.outX, move.outY, this.ownedPlayer);
         }
 
         chartConfig.nodeStructure = this.algorithm.rootNode;
@@ -73,32 +63,32 @@ export class Ai {
         const p = getAllPlaceMoves(this.gameBoard, this.ownedPlayer);
 
         p.sort((a, b) => {
-            const aGameBoard = cloneGameBoard(this.gameBoard);
-            const bGameBoard = cloneGameBoard(this.gameBoard);
-            placeAtGameBoard(aGameBoard, a.x, a.y, this.ownedPlayer);
-            placeAtGameBoard(bGameBoard, b.x, b.y, this.ownedPlayer);
+            const aGameBoard = this.gameBoard.clone();
+            const bGameBoard = this.gameBoard.clone();
+            aGameBoard.placeAtGameBoard(a.x, a.y, this.ownedPlayer);
+            bGameBoard.placeAtGameBoard(b.x, b.y, this.ownedPlayer);
 
             return evaluateMove(bGameBoard, this.ownedPlayer) - evaluateMove(aGameBoard, this.ownedPlayer);
         });
 
         const move = p[0];
 
-        placeAtGameBoard(this.gameBoard, move.x, move.y, this.ownedPlayer);
+        this.gameBoard.placeAtGameBoard(move.x, move.y, this.ownedPlayer);
         setAvailableForMove();
     }
 }
 
 /**
  * 
- * @param {Field[][]} board 
+ * @param {GameBoard} board 
  * @param {number} player
  * @returns {AiMove[]} 
  */
 function getAvailableMovesForPlayer(board, player) {
-    const yourFields = filterGameboard(board, f => f.fieldState === player);
+    const yourFields = board.filterGameboardFields(f => f.fieldState === player);
 
     const fieldsWithMoves = yourFields.flatMap(f => {
-        return { x: f.posX, y: f.posY, moves: getMovesFromField(board, f.posX, f.posY) };
+        return { x: f.posX, y: f.posY, moves: board.getMovesFromField(f.posX, f.posY) };
     });
 
     let moves = [];
@@ -111,8 +101,8 @@ function getAvailableMovesForPlayer(board, player) {
         }
     }
 
-    if (getPlayerReserve(board, player) > 0) {
-        const enemyFields = filterGameboard(board, f => f.fieldState !== player);
+    if (board.reserve[player] > 0) {
+        const enemyFields = board.filterGameboardFields(f => f.fieldState !== player);
 
         for (let i = 0; i < enemyFields.length; i++) {
             moves.push(new AiMove(board, enemyFields[i].posX, enemyFields[i].posY, 0, 0, true));
@@ -125,8 +115,8 @@ function getAvailableMovesForPlayer(board, player) {
 function getAllPlaceMoves(board, player) {
     let moves = [];
 
-    if (getPlayerReserve(board, player) > 0) {
-        const enemyFields = filterGameboard(board, f => f.fieldState !== player && f.fieldState !== FIELD_STATE_UNPLAYABLE);
+    if (board.getPlayerReserve(player) > 0) {
+        const enemyFields = board.filterGameboardFields(f => f.fieldState !== player && f.fieldState !== FIELD_STATE_UNPLAYABLE);
 
         for (let i = 0; i < enemyFields.length; i++) {
             moves.push(new AiMove(board, enemyFields[i].posX, enemyFields[i].posY, 0, 0, true));
@@ -150,6 +140,12 @@ export class RandomPlayer extends AiAlgorithm {
     }
 }
 
+/**
+ * 
+ * @param {GameBoard} board 
+ * @param {*} player 
+ * @returns 
+ */
 function evaluateMove(board, player) {
     let controlledByYou = 0
 
@@ -158,15 +154,15 @@ function evaluateMove(board, player) {
     let controlledInReserveByYou = 0
     let controlledInReserveByEnemy = 0
 
-    controlledInReserveByYou = getPlayerReserve(board, player);
-    controlledInReserveByEnemy = getPlayerReserve(board, getNextPlayer(board, player));
+    controlledInReserveByYou = board.getPlayerReserve(player);
+    controlledInReserveByEnemy = board.getPlayerReserve(board.getNextPlayer(player));
 
     let ratioInReserve = controlledInReserveByYou - controlledInReserveByEnemy
     if (Number.isNaN(ratioInReserve))
         ratioInReserve = 0.0
 
-    const yourFields = filterGameboard(board, f => f.fieldState === player && f.fieldState !== FIELD_STATE_EMPTY && f.fieldState !== FIELD_STATE_UNPLAYABLE);
-    const enemyFields = filterGameboard(board, f => f.fieldState !== player && f.fieldState !== FIELD_STATE_EMPTY && f.fieldState !== FIELD_STATE_UNPLAYABLE)
+    const yourFields = board.filterGameboardFields(f => f.fieldState === player && f.fieldState !== FIELD_STATE_EMPTY && f.fieldState !== FIELD_STATE_UNPLAYABLE);
+    const enemyFields = board.filterGameboardFields(f => f.fieldState !== player && f.fieldState !== FIELD_STATE_EMPTY && f.fieldState !== FIELD_STATE_UNPLAYABLE)
 
     controlledByYou = yourFields.length
     controlledByEnemy = enemyFields.length
@@ -181,11 +177,11 @@ function evaluateMove(board, player) {
 }
 
 function hasMeetFinalCondition(gameboard, depth) {
-    return checkForVictoryCondition(gameboard) || depth === 0;
+    return gameboard.checkForVictoryCondition() || depth === 0;
 }
 
 function onFinalConditionOccured(gameboard, player, maximizingPlayer) {
-    if (gameboard[WINNER_PLAYER_INDEX] !== maximizingPlayer) {
+    if (gameboard.winner !== maximizingPlayer) {
         // owned player wins
         const result = -evaluateMove(gameboard, player);
         return result;
@@ -207,7 +203,7 @@ export class MinMaxPlayer extends AiAlgorithm {
     }
 
     supplyBestMove(board, player) {
-        this.gameBoard = cloneGameBoard(board);
+        this.gameBoard = board.clone();
         this.maximizingPlayer = player;
 
         this.rootNode = {
@@ -218,7 +214,6 @@ export class MinMaxPlayer extends AiAlgorithm {
         const bestScore = this.minMax(this.depth, player, this.rootNode);
         this.rootNode.text = bestScore;
         chartConfig.nodeStructure = this.rootNode;
-        console.log(bestScore);
 
         return this.bestMove;
     }
@@ -240,7 +235,7 @@ export class MinMaxPlayer extends AiAlgorithm {
 
         let nodeSize = 0;
 
-        if (this.maximizingPlayer === this.gameBoard[CURRENT_PLAYER_INDEX]) {
+        if (this.maximizingPlayer === this.gameBoard.currentPlayer) {
             let bestScore = -Infinity;
 
             for (let move of moves) {
@@ -249,31 +244,31 @@ export class MinMaxPlayer extends AiAlgorithm {
                     children: []
                 };
 
-                const backupField = cloneField(this.gameBoard[move.y][move.x]);
+                const backupField = cloneField(this.gameBoard.fields[move.y][move.x]);
                 let backupField2 = null;
 
                 if (move.shouldPlaceSomething) {
-                    placeAtGameBoard(this.gameBoard, move.x, move.y, player);
+                    this.gameBoard.placeAtGameBoard(move.x, move.y, player);
                 } else {
-                    backupField2 = cloneField(this.gameBoard[move.outY][move.outX]);
+                    backupField2 = cloneField(this.gameBoard.fields[move.outY][move.outX]);
 
-                    moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
+                    this.gameBoard.moveInGameboard(move.x, move.y, move.outX, move.outY, player);
                 }
 
-                player = getNextPlayer(this.gameBoard, player);
-                switchToNextPlayer(this.gameBoard);
+                player = this.gameBoard.getNextPlayer(player);
+                this.gameBoard.switchToNextPlayer();
 
                 let score = this.minMax(depth - 1, player, childDrawnNode, alpha, beta);
-                this.gameBoard[move.y][move.x] = backupField;
+                this.gameBoard.fields[move.y][move.x] = backupField;
 
                 childDrawnNode.text = score.toString();
 
 
-                player = getNextPlayer(this.gameBoard, player);
-                switchToNextPlayer(this.gameBoard);
+                player = this.gameBoard.getNextPlayer(player);
+                this.gameBoard.switchToNextPlayer();
 
                 if (!!backupField2) {
-                    this.gameBoard[move.outY][move.outX] = backupField2;
+                    this.gameBoard.fields[move.outY][move.outX] = backupField2;
                 }
 
                 if (score > bestScore) {
@@ -305,28 +300,28 @@ export class MinMaxPlayer extends AiAlgorithm {
                     children: []
                 };
 
-                const backupField = cloneField(this.gameBoard[move.y][move.x]);
+                const backupField = cloneField(this.gameBoard.fields[move.y][move.x]);
                 let backupField2 = null;
 
                 if (move.shouldPlaceSomething) {
-                    placeAtGameBoard(this.gameBoard, move.x, move.y, player);
+                    this.gameBoard.placeAtGameBoard(move.x, move.y, player);
                 } else {
-                    backupField2 = cloneField(this.gameBoard[move.outY][move.outX]);
+                    backupField2 = cloneField(this.gameBoard.fields[move.outY][move.outX]);
 
-                    moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
+                    this.gameBoard.moveInGameboard(move.x, move.y, move.outX, move.outY, player);
                 }
 
-                player = getNextPlayer(this.gameBoard, player);
-                switchToNextPlayer(this.gameBoard);
+                player = this.gameBoard.getNextPlayer(player);
+                this.gameBoard.switchToNextPlayer();
 
                 let score = this.minMax(depth - 1, player, childDrawnNode, alpha, beta);
-                this.gameBoard[move.y][move.x] = backupField;
+                this.gameBoard.fields[move.y][move.x] = backupField;
 
-                player = getNextPlayer(this.gameBoard, player);
-                switchToNextPlayer(this.gameBoard);
+                player = this.gameBoard.getNextPlayer(player);
+                this.gameBoard.switchToNextPlayer();
 
                 if (!!backupField2) {
-                    this.gameBoard[move.outY][move.outX] = backupField2;
+                    this.gameBoard.fields[move.outY][move.outX] = backupField2;
                 }
 
                 if (score < bestScore) {
@@ -362,7 +357,8 @@ export class NegaMaxPlayer extends AiAlgorithm {
     }
 
     supplyBestMove(board, player) {
-        this.gameBoard = cloneGameBoard(board);
+        this.gameBoard = board.clone();
+
         this.maximizingPlayer = player;
 
         this.rootNode = {
@@ -405,29 +401,29 @@ export class NegaMaxPlayer extends AiAlgorithm {
                 children: []
             };
 
-            const backupField = cloneField(this.gameBoard[move.y][move.x]);
+            const backupField = cloneField(this.gameBoard.fields[move.y][move.x]);
             let backupField2 = null;
 
             if (move.shouldPlaceSomething) {
-                placeAtGameBoard(this.gameBoard, move.x, move.y, player);
+                this.gameBoard.placeAtGameBoard(move.x, move.y, player);
             } else {
-                backupField2 = cloneField(this.gameBoard[move.outY][move.outX]);
+                backupField2 = cloneField(this.gameBoard.fields[move.outY][move.outX]);
 
-                moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY, player);
+                this.gameBoard.moveInGameboard(move.x, move.y, move.outX, move.outY, player);
             }
 
-            player = getNextPlayer(this.gameBoard, player);
-            switchToNextPlayer(this.gameBoard);
+            player = this.gameBoard.getNextPlayer(player);
+            this.gameBoard.switchToNextPlayer();
 
             let score = -this.negamax(depth - 1, player, childDrawnNode, -beta, -alpha, -sign);
 
-            player = getNextPlayer(this.gameBoard, player);
-            switchToNextPlayer(this.gameBoard);
+            player = this.gameBoard.getNextPlayer(player);
+            this.gameBoard.switchToNextPlayer();
 
-            this.gameBoard[move.y][move.x] = backupField;
+            this.gameBoard.fields[move.y][move.x] = backupField;
 
             if (!!backupField2) {
-                this.gameBoard[move.outY][move.outX] = backupField2;
+                this.gameBoard.fields[move.outY][move.outX] = backupField2;
             }
 
             if (score > bestScore) {
@@ -493,30 +489,30 @@ export class MonteCarloSearch extends AiAlgorithm {
                 numberOfSimulations++
                 this.currentPlayer = this.maximizingPlayer;
 
-                this.gameBoard = cloneGameBoard(this.beforeMovingGameBoard);
+                this.gameBoard = this.beforeMovingGameBoard.clone();
 
                 if (!move.shouldPlaceSomething) {
-                    moveInGameboard(this.gameBoard, move.x, move.y, move.outX, move.outY);
+                    this.gameBoard.moveInGameboard(move.x, move.y, move.outX, move.outY);
                 } else {
-                    placeAtGameBoard(this.gameBoard, move.x, move.y, this.currentPlayer);
+                    this.gameBoard.placeAtGameBoard(move.x, move.y, this.currentPlayer);
                 }
 
-                this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
-                switchToNextPlayer(this.gameBoard);
+                this.currentPlayer = this.gameBoard.getNextPlayer(this.currentPlayer);
+                this.gameBoard.switchToNextPlayer();
 
                 let counter = 0;
                 let testMove = null;
 
-                while (checkForVictoryCondition(this.gameBoard)) {
-                    if (countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) === 0 && getPlayerReserve(this.gameBoard, getNextPlayer(this.gameBoard, this.currentPlayer)) > 0) {
+                while (this.gameBoard.checkForVictoryCondition()) {
+                    if (this.gameBoard.countPlayerFields(this.gameBoard.getNextPlayer(this.currentPlayer)) === 0 && this.gameBoard.getPlayerReserve(this.gameBoard.getNextPlayer(this.currentPlayer)) > 0) {
                         const movesDuringPlace = getAllPlaceMoves(this.gameBoard, this.currentPlayer);
 
                         const randomIndex = Math.floor(Math.random() * movesDuringPlace.length);
                         const randomMove = movesDuringPlace[randomIndex];
 
-                        placeAtGameBoard(this.gameBoard, randomMove.x, randomMove.y, this.currentPlayer);
-                        this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
-                        switchToNextPlayer(this.gameBoard);
+                        this.gameBoard.placeAtGameBoard(randomMove.x, randomMove.y, this.currentPlayer);
+                        this.currentPlayer = this.gameBoard.getNextPlayer(this.currentPlayer);
+                        this.gameBoard.switchToNextPlayer();
                         console.log('should place')
                         break;
                     }
@@ -527,9 +523,9 @@ export class MonteCarloSearch extends AiAlgorithm {
                     let randomMove = randomMoves[randomIndex];
 
                     if (!randomMove.shouldPlaceSomething) {
-                        moveInGameboard(this.gameBoard, randomMove.x, randomMove.y, randomMove.outX, randomMove.outY);
+                        this.gameBoard.moveInGameboard(randomMove.x, randomMove.y, randomMove.outX, randomMove.outY);
                     } else {
-                        placeAtGameBoard(this.gameBoard, randomMove.x, randomMove.y, this.currentPlayer);
+                        this.gameBoard.placeAtGameBoard(randomMove.x, randomMove.y, this.currentPlayer);
                     }
 
                     counter++;
@@ -541,32 +537,31 @@ export class MonteCarloSearch extends AiAlgorithm {
                         break;
                     }
 
-                    this.currentPlayer = getNextPlayer(this.gameBoard, this.currentPlayer);
-                    switchToNextPlayer(this.gameBoard);
+                    this.currentPlayer = this.gameBoard.getNextPlayer(this.currentPlayer);
+                    this.gameBoard.switchToNextPlayer();
                 }
 
-                checkForVictoryCondition(this.gameBoard);
+                this.gameBoard.checkForVictoryCondition();
 
                 if (testMove) {
                     const score = evaluateMove(this.gameBoard, this.maximizingPlayer);
                     if (testMove.shouldPlaceSomething) {
-                        placeAtGameBoard(this.gameBoard, testMove.x, testMove.y, player);
+                        this.gameBoard.placeAtGameBoard(testMove.x, testMove.y, player);
                     } else {
-                        backupField2 = cloneField(this.gameBoard[testMove.outY][testMove.outX]);
+                        backupField2 = cloneField(this.gameBoard.fields[testMove.outY][testMove.outX]);
 
-                        moveInGameboard(this.gameBoard, testMove.x, testMove.y, testMove.outX, testMove.outY, player);
+                        this.gameBoard.moveInGameboard(testMove.x, testMove.y, testMove.outX, testMove.outY, player);
                     }
 
                     const score2 = evaluateMove(this.gameBoard, this.maximizingPlayer);
 
-                    if (score2 > score)
-                    {
+                    if (score2 > score) {
                         this.r++;
                         continue;
                     }
                 }
 
-                if (countPlayerFields(this.gameBoard, this.maximizingPlayer) > countPlayerFields(this.gameBoard, getNextPlayer(this.gameBoard, this.maximizingPlayer))) {
+                if (this.gameBoard.countPlayerFields(this.maximizingPlayer) > this.gameBoard.countPlayerFields(this.gameBoard.getNextPlayer(this.maximizingPlayer))) {
                     this.r++;
                 }
             }
@@ -593,7 +588,7 @@ export class MonteCarloSearch extends AiAlgorithm {
 
 export class MonteCarloTreeSearch extends AiAlgorithm {
     supplyBestMove(board, player) {
-        this.gameBoard = cloneGameBoard(board);
+        this.gameBoard = board.clone();
         this.maximizingPlayer = player;
 
         return this.monteCarloTreeSearch();
@@ -603,7 +598,7 @@ export class MonteCarloTreeSearch extends AiAlgorithm {
 
     monteCarloTreeSearch() {
         let current = this.gameBoard;
-        getBoardStatistics(current).moves = getAvailableMovesForPlayer(this.gameBoard, this.maximizingPlayer);
+        current.isBetterMoveThanPrevious.moves = getAvailableMovesForPlayer(this.gameBoard, this.maximizingPlayer);
         this.startTime = Date.now();
 
         const maxLimit = 1000;
@@ -619,8 +614,8 @@ export class MonteCarloTreeSearch extends AiAlgorithm {
     treePolicy(current) {
         let counter = 0;
 
-        while (!checkForVictoryCondition(current)) {
-            if (getBoardStatistics(current).moves.length > 0) {
+        while (!current.checkForVictoryCondition()) {
+            if (current.stats.moves.length > 0) {
                 current = this.expandBoard(current);
             } else {
                 current = this.getBestChild(current);
@@ -637,20 +632,20 @@ export class MonteCarloTreeSearch extends AiAlgorithm {
     }
 
     expandBoard(current) {
-        const move = getBoardStatistics(current).moves.pop();
+        const move = current.stats.moves.pop();
 
-        const board = cloneGameBoard(current);
+        const board = current.clone();
 
         if (move.shouldPlaceSomething) {
-            placeAtGameBoard(board, move.x, move.y, board[CURRENT_PLAYER_INDEX]);
+            board.placeAtGameBoard(move.x, move.y, board.current);
         } else {
-            moveInGameboard(board, move.x, move.y, move.outX, move.outY, board[CURRENT_PLAYER_INDEX]);
+            board.moveInGameboard(move.x, move.y, move.outX, move.outY, board.currentPlayer);
         }
 
-        board[CURRENT_PLAYER_INDEX] = getNextPlayer(board, board[CURRENT_PLAYER_INDEX]);
-        getBoardStatistics(board).moves = getAvailableMovesForPlayer(board, board[CURRENT_PLAYER_INDEX]);
-        getBoardStatistics(current).children.push(board);
-        getBoardStatistics(board).parent = current;
+        board.switchToNextPlayer();
+        board.stats.moves = getAvailableMovesForPlayer(board, board.currentPlayer);
+        current.stats.children.push(board);
+        board.stats.parent = current;
 
         return board;
     }
@@ -658,13 +653,13 @@ export class MonteCarloTreeSearch extends AiAlgorithm {
     defaultPolicy(current) {
         let counter = 0;
 
-        while (!checkForVictoryCondition(current)) {
-            const move = getBoardStatistics(current).moves.pop();
+        while (!current.checkForVictoryCondition()) {
+            const move = current.stats.moves.pop();
 
             if (move.shouldPlaceSomething) {
-                placeAtGameBoard(current, move.x, move.y, current[CURRENT_PLAYER_INDEX]);
+                current.placeAtGameBoard(move.x, move.y, current.currentPlayer);
             } else {
-                moveInGameboard(current, move.x, move.y, move.outX, move.outY, current[CURRENT_PLAYER_INDEX]);
+                current.moveInGameboard(move.x, move.y, move.outX, move.outY, current.currentPlayer);
             }
 
             counter++;
@@ -673,17 +668,17 @@ export class MonteCarloTreeSearch extends AiAlgorithm {
                 break;
             }
 
-            current[CURRENT_PLAYER_INDEX] = getNextPlayer(current, current[CURRENT_PLAYER_INDEX]);
+            current.switchToNextPlayer();
         }
 
-        return !!current[WINNER_PLAYER_INDEX] && current[CURRENT_PLAYER_INDEX] == this.maximizingPlayer;
+        return current.doesAnyoneWin() && current.winner == this.maximizingPlayer;
     }
 
     backup(current, reward) {
         while (!!current) {
-            getBoardStatistics(current).visits += 1;
-            getBoardStatistics(current).winrate += reward;
-            current = getBoardStatistics(current).parent;
+            current.stats.visits += 1;
+            current.stats.winrate += reward;
+            current = current.stats.parent;
         }
     }
 
@@ -691,11 +686,11 @@ export class MonteCarloTreeSearch extends AiAlgorithm {
         let value = -Infinity;
         let bestChild = null;
 
-        for (let child of getBoardStatistics(current).children) {
-            const stats = getBoardStatistics(child);
-            let childValue = stats.winrate / stats.visits + 2 * Math.sqrt(Math.log(!!stats.parent ? getBoardStatistics(stats.parent).visits : 1) / stats.visits);
+        for (let child of child.stats.children) {
+            const stats = child.stats;
+            let childValue = stats.winrate / stats.visits + 2 * Math.sqrt(Math.log(!!stats.parent ? stats.parent.stats.visits : 1) / stats.visits);
             if (childValue > value) {
-                bestChild = cloneGameBoard(child);
+                bestChild = child.clone();
                 value = childValue;
             }
         }

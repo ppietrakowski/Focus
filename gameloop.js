@@ -1,14 +1,11 @@
 
-import { Ai, RandomPlayer } from './ai.js';
 import { EventEmitterObj } from './eventemmiter3.js'
-import { checkForVictoryCondition, countPlayerFields, CURRENT_PLAYER_INDEX, isCurrentPlayerControlledByPlayer, PLAYER_GREEN, PLAYER_RED, switchToNextPlayer, WINNER_PLAYER_INDEX } from './gameboard.js';
-import { clearAllBoard, GUI_EVENTS, playerMustPlace, updateReserve } from './gui.js';
-import { board } from './index.js';
+import { GameBoard, PLAYER_GREEN, PLAYER_RED } from './gameboard.js';
+import { clearAllBoard, updateReserve } from './gui.js';
 
 export let isAvailableForMove = false;
 let _ais = [null, null];
-let _board = null;
-
+let _board = new GameBoard();
 
 export function setAvailableForMove() {
     isAvailableForMove = true;
@@ -22,7 +19,7 @@ export function initializeGameLoop(board, ai0, ai1) {
     clearAllBoard();
     updateReserve();
 
-    if (!isCurrentPlayerControlledByPlayer(_board)) {
+    if (!_board.isCurrentPlayerControlledByPlayer()) {
         isAvailableForMove = true;
     }
 
@@ -39,20 +36,20 @@ function animationRequestHack(time) {
     }
 
     if (isAvailableForMove) {
-        if (!isCurrentPlayerControlledByPlayer(_board)) {
-            _ais[_board[CURRENT_PLAYER_INDEX]].move();
+        if (!_board.isCurrentPlayerControlledByPlayer()) {
+            _ais[_board.currentPlayer].move();
             clearAllBoard();
             updateReserve();
-            switchToNextPlayer(_board);
+            _board.switchToNextPlayer();
 
-            if (checkForVictoryCondition(_board)) {
-                alert(`Winner is ${_board[WINNER_PLAYER_INDEX]}`);
+            if (_board.checkForVictoryCondition()) {
+                alert(`Winner is ${_board.winner}`);
                 gameEnded = true;
                 document.location.reload(true);
                 return;
             }
 
-            if (!isCurrentPlayerControlledByPlayer(_board)) {
+            if (!_board.isCurrentPlayerControlledByPlayer()) {
                 isAvailableForMove = true;
                 return;
             }
@@ -60,9 +57,9 @@ function animationRequestHack(time) {
 
             return;
         } else {
-            switchToNextPlayer(_board);
+            _board.switchToNextPlayer();
 
-            if (!isCurrentPlayerControlledByPlayer(_board)) {
+            if (!_board.isCurrentPlayerControlledByPlayer()) {
                 isAvailableForMove = true;
                 return;
             }
@@ -71,8 +68,8 @@ function animationRequestHack(time) {
         isAvailableForMove = false;
     }
 
-    if (checkForVictoryCondition(_board)) {
-        alert(`Winner is ${_board[WINNER_PLAYER_INDEX]}`);
+    if (_board.checkForVictoryCondition()) {
+        alert(`Winner is ${_board.winner}`);
         gameEnded = true;
         document.location.reload(true);
     }

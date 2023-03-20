@@ -1,12 +1,12 @@
 import { EventEmitterObj } from "./eventemmiter3.js";
 import { Field, FIELD_STATE_EMPTY, FIELD_STATE_GREEN, FIELD_STATE_RED, FIELD_STATE_UNPLAYABLE } from "./field.js";
-import { CURRENT_PLAYER_INDEX, getMovesFromField, GREEN_PLAYER_RESERVE_INDEX, isCurrentPlayerControlledByPlayer, moveInGameboard, placeAtGameBoard, PLAYER_GREEN, PLAYER_RED, RED_PLAYER_RESERVE_INDEX, switchToNextPlayer } from "./gameboard.js";
+import { GameBoard, PLAYER_GREEN, PLAYER_RED } from "./gameboard.js";
 import { isAvailableForMove, setAvailableForMove } from "./gameloop.js";
 
 
 let fields = [[document.querySelector('div')]];
 
-let attachedBoard = [[new Field()]];
+let attachedBoard = new GameBoard();;
 
 let htmlGameboard = document.querySelector('#virtualBoard');
 
@@ -31,10 +31,7 @@ const SelectedFields = [
 const redReservePanel = document.querySelector('.reserveRed');
 const greenReservePanel = document.querySelector('.reserveGreen');
 
-/**
- * 
- * @param {Field[][]} board 
- */
+
 export function initializeGuiForBoard(board) {
     if (initialized) {
         throw Error('double initialization detected');
@@ -58,7 +55,7 @@ export function initializeGuiForBoard(board) {
             htmlGameboard.appendChild(fields[y][x]);
 
             const element = document.createElement('div');
-            element.className = UnSelectedFields.find(v => v.state === board[y][x].fieldState).className;
+            element.className = UnSelectedFields.find(v => v.state === attachedBoard.getFieldAt(x, y).fieldState).className;
             fields[y][x].appendChild(element);
 
             for (let i = 1; i < 5; i++) {
@@ -93,7 +90,7 @@ function onPlayerReserveClick(attachedPlayer) {
         return;
     }
 
-    if (attachedBoard[CURRENT_PLAYER_INDEX] === attachedPlayer && isCurrentPlayerControlledByPlayer(attachedBoard)) {
+    if (attachedBoard.currentPlayer === attachedPlayer && attachedBoard.isCurrentPlayerControlledByPlayer()) {
         for (let y = 0; y < 8; y++) {
             for (let x = 0; x < 8; x++) {
                 fields[y][x].onclick = placeAtField;
@@ -103,19 +100,8 @@ function onPlayerReserveClick(attachedPlayer) {
     }
 }
 
-
-export function playerMustPlace(board, player) {
-    board[CURRENT_PLAYER_INDEX] = player;
-
-    for (let y = 0; y < 8; y++) {
-        for (let x = 0; x < 8; x++) {
-            fields[y][x].onclick = placeAtField;
-        }
-    }
-}
-
 function placeAtField() {
-    if (attachedBoard[this.y][this.x].fieldState !== FIELD_STATE_UNPLAYABLE) {
+    if (attachedBoard.fields[this.y][this.x].fieldState !== FIELD_STATE_UNPLAYABLE) {
         placeAtGameBoard(attachedBoard, this.x, this.y, attachedBoard[CURRENT_PLAYER_INDEX]);
         updateReserve();
         clearAllBoard();
@@ -133,10 +119,9 @@ function placeAtField() {
 }
 
 let selectedField = null;
-let currentAvailableMoves = [];
 
 export function onFieldClick(e) {
-    if (!isCurrentPlayerControlledByPlayer(attachedBoard) && isAvailableForMove) {
+    if (!attachedBoard.isCurrentPlayerControlledByPlayer() && isAvailableForMove) {
         console.warn('You cheaty bastard !');
         return;
     }
@@ -147,14 +132,14 @@ export function onFieldClick(e) {
         return;
     }
 
-    if (!selectedField && attachedBoard[this.y][this.x].fieldState !== attachedBoard[CURRENT_PLAYER_INDEX]) {
+    if (!selectedField && attachedBoard.fields[this.y][this.x].fieldState !== attachedBoard.fields[CURRENT_PLAYER_INDEX]) {
         console.log('trying to click not own field')
         return;
     }
 
     if (selectedField === null) {
-        if (attachedBoard[this.y][this.x].fieldState === attachedBoard[CURRENT_PLAYER_INDEX]) {
-            selectedField = attachedBoard[this.y][this.x];
+        if (attachedBoard.fields[this.y][this.x].fieldState === attachedBoard.currentPlayer) {
+            selectedField = attachedBoard.fields[this.y][this.x];
             renderMovesFromField(this);
         } else {
             console.log('trying to click not own field')
@@ -175,7 +160,7 @@ export function onFieldClick(e) {
                 return;
             }
 
-            if (!moveInGameboard(attachedBoard, selectedField.posX, selectedField.posY, this.x, this.y, attachedBoard[CURRENT_PLAYER_INDEX])) {
+            if (!attachedBoard.moveInGameboard(selectedField.posX, selectedField.posY, this.x, this.y, attachedBoard[CURRENT_PLAYER_INDEX])) {
                 clearSelection();
                 throw Error(`Maybe illegal move ? from (${selectedField.posX}, ${selectedField.posY}) to (${this.x}, ${this.y})`);
             }
@@ -196,7 +181,7 @@ export function updateReserve() {
         children[i].className = 'reserveEmptyPawn';
     }
 
-    let reserveCount = attachedBoard[RED_PLAYER_RESERVE_INDEX];
+    let reserveCount = attachedBoard.reserve[PLAYER_RED];
     for (let i = 0; i < reserveCount; i++) {
         children[i].className = 'reserveRedPawn';
     }
@@ -207,7 +192,7 @@ export function updateReserve() {
         children[i].className = 'reserveEmptyPawn';
     }
 
-    reserveCount = attachedBoard[GREEN_PLAYER_RESERVE_INDEX];
+    reserveCount = attachedBoard.reserve[PLAYER_GREEN];
     for (let i = 0; i < reserveCount; i++) {
         children[i].className = 'reserveGreenPawn';
     }
@@ -234,7 +219,7 @@ function visualizeElements(htmlElement) {
     }
 
     let scale = 1.0
-    const field = attachedBoard[htmlElement.y][htmlElement.x];
+    const field = attachedBoard.getFieldAt(htmlElement.x, htmlElement.y);
 
     const { tower } = field;
 
@@ -247,12 +232,12 @@ function visualizeElements(htmlElement) {
 }
 
 function renderMovesFromField(htmlElement) {
-    const moves = getMovesFromField(attachedBoard, htmlElement.x, htmlElement.y);
+    const moves = attachedBoard.getMovesFromField(htmlElement.x, htmlElement.y);
 
     for (let move of moves) {
         let fieldX = htmlElement.x + move.x;
         let fieldY = htmlElement.y + move.y;
-        const field = attachedBoard[fieldY][fieldX];
+        const field = attachedBoard.getFieldAt(fieldX, fieldY);
 
         const { children } = fields[fieldY][fieldX];
         let scale = 1.0
